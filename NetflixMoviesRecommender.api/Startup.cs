@@ -20,6 +20,8 @@ namespace NetflixMoviesRecommender.api
             services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("Dev"));
 
             services.AddScoped<IWatchListFileParserService, WatchListFileParserService>();
+
+            services.AddHttpClient();
             
             services.AddCors(options =>
             {
