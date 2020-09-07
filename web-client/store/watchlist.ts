@@ -15,5 +15,8 @@ export const mutations: MutationTree<watchlist> = {
 };
 
 export const actions: ActionTree<watchlist, RootState> = {
-
+  async uploadWatchLists({dispatch}, {form}){
+    const res = await this.$axios.$post('/api/watchlist', form);
+    console.log(res);
+  }
 };

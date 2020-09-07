@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetflixMoviesRecommender.api", "NetflixMoviesRecommender.api\NetflixMoviesRecommender.api.csproj", "{73B57EB8-B72F-456E-961C-748C3F4C638E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetflixMovieRecommander.Data", "NetflixMovieRecommander.Data\NetflixMovieRecommander.Data.csproj", "{CCAA9D40-F2C0-42D3-9D9D-A3D41245ECDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetflixMovieRecommander.Models", "NetflixMovieRecommander.Models\NetflixMovieRecommander.Models.csproj", "{484198D6-07A0-4AA4-80EF-7CA73E573E85}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{73B57EB8-B72F-456E-961C-748C3F4C638E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73B57EB8-B72F-456E-961C-748C3F4C638E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73B57EB8-B72F-456E-961C-748C3F4C638E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCAA9D40-F2C0-42D3-9D9D-A3D41245ECDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCAA9D40-F2C0-42D3-9D9D-A3D41245ECDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCAA9D40-F2C0-42D3-9D9D-A3D41245ECDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCAA9D40-F2C0-42D3-9D9D-A3D41245ECDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{484198D6-07A0-4AA4-80EF-7CA73E573E85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{484198D6-07A0-4AA4-80EF-7CA73E573E85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{484198D6-07A0-4AA4-80EF-7CA73E573E85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{484198D6-07A0-4AA4-80EF-7CA73E573E85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

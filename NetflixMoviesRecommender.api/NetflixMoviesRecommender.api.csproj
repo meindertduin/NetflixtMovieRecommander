@@ -4,4 +4,19 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="BackgroundServices\WatchListUpload" />
+      <Folder Include="wwwroot" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Data\Data.csproj" />
+      <ProjectReference Include="..\NetflixMovieRecommander.Data\NetflixMovieRecommander.Data.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.7" />
+    </ItemGroup>
+
 </Project>
