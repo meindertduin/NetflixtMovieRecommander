@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace NetflixMoviesRecommender.api.Services
 {
     public interface IWatchListFileParserService
     {
-        void StoreUserWatchlistItems(List<string> watchListFilePaths);
+        Task StoreUserWatchlistItems(List<string> watchListFilePaths);
     }
 }

@@ -49,7 +49,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             }
             
             
-            _watchListFileParserService.StoreUserWatchlistItems(new List<string>{ savePath });
+            await _watchListFileParserService.StoreUserWatchlistItems(new List<string>{ savePath });
 
             return Ok(fileName);
 

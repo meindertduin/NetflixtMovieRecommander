@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 
@@ -16,7 +18,7 @@ namespace NetflixMoviesRecommender.api.Services
             _ctx = ctx;
         }
         
-        public void StoreUserWatchlistItems(List<string> watchListFilePaths)
+        public async Task StoreUserWatchlistItems(List<string> watchListFilePaths)
         {
             foreach(var watchlistFilePath in watchListFilePaths)
             {
@@ -24,6 +26,8 @@ namespace NetflixMoviesRecommender.api.Services
                 {
                     List<string> titles = new List<string>();
                     List<DateTime> dates = new List<DateTime>();
+                    List<WatchItem> watchItems = new List<WatchItem>();
+                    
                     string type;
                     
                     while (!reader.EndOfStream)
@@ -55,20 +59,23 @@ namespace NetflixMoviesRecommender.api.Services
                         
                             var date = new DateTime(year, month, days);
 
-                            _ctx.Add(new WatchItem
+                            await _ctx.WatchItems.AddAsync(new WatchItem
                             {
                                 Title = title,
                                 Type = type,
                                 DateWatched = date,
                             });
+                            
+                            await _ctx.SaveChangesAsync();
+
                             dates.Add(date);
                             titles.Add(title);
                         }
-                    }
 
-                    _ctx.SaveChangesAsync();
-                    
+                    }
                     titles.RemoveAt(0);
+
+                    
                 }
             }
         }
