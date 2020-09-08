@@ -33,6 +33,7 @@ namespace NetflixMoviesRecommender.api
                 options.UseSqlServer(conn, b => b.MigrationsAssembly("NetflixMoviesRecommender.api")));
 
             services.AddScoped<IWatchListFileParserService, WatchListFileParserService>();
+            services.AddScoped<IRecommendedDatabaseParser, RecommendedDatabaseParser>();
 
             services.AddHttpClient();
             

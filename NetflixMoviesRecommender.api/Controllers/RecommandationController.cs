@@ -1,10 +1,12 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
+using NetflixMoviesRecommender.api.Services;
 using Newtonsoft.Json;
 
 namespace NetflixMoviesRecommender.api.Controllers
@@ -15,12 +17,14 @@ namespace NetflixMoviesRecommender.api.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly AppDbContext _ctx;
+        private readonly IRecommendedDatabaseParser _recommendedDatabaseParser;
         private readonly HttpClient _client;
 
-        public RecommandationController(IConfiguration configuration, IHttpClientFactory clientFactory, AppDbContext ctx)
+        public RecommandationController(IConfiguration configuration, IHttpClientFactory clientFactory, AppDbContext ctx, IRecommendedDatabaseParser recommendedDatabaseParser)
         {
             _configuration = configuration;
             _ctx = ctx;
+            _recommendedDatabaseParser = recommendedDatabaseParser;
             _client = clientFactory.CreateClient();
         }
         
@@ -29,15 +33,26 @@ namespace NetflixMoviesRecommender.api.Controllers
         {
             string key = _configuration.GetValue<string>("OMDB_KEY");
 
-            var res = await _client.GetAsync($"http://www.omdbapi.com/" +
-                                       $"?apikey={_configuration.GetValue<string>("OMDB_KEY")}" +
-                                       $"&t={title}");
+            try
+            {
+                var res = await _client.GetAsync($"http://www.omdbapi.com/" +
+                                                 $"?apikey={_configuration.GetValue<string>("OMDB_KEY")}" +
+                                                 $"&t={title}");
 
-            var resJsonString = await res.Content.ReadAsStringAsync();
-            var recommended = JsonConvert.DeserializeObject<Recommended>(resJsonString);
+                var resJsonString = await res.Content.ReadAsStringAsync();
+                var recommended = JsonConvert.DeserializeObject<Recommended>(resJsonString);
 
-            _ctx.Recommendations.Add(recommended);
-            await _ctx.SaveChangesAsync();
+                if (string.IsNullOrEmpty(recommended.Title))
+                {
+                    return StatusCode(400);
+                }
+            
+                await _recommendedDatabaseParser.StoreRecommendedToDatabase(recommended);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
             
             return Ok();
         }

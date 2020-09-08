@@ -6,6 +6,7 @@
 .idea
 bin/
 obj/
+wwwroot/
 
 # User-specific stuff
 .idea/**/workspace.xml
