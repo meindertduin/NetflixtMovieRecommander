@@ -17,7 +17,7 @@ namespace NetflixMoviesRecommender.api.Services
         public async Task StoreRecommendedToDatabase(Recommended recommended)
         {
             var existingEntity = _ctx.NetflixRecommendations
-                .First(x => x.Title == recommended.Title);
+                .FirstOrDefault(x => x.Title == recommended.Title);
 
             if (existingEntity == null)
             {

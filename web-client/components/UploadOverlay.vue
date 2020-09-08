@@ -88,8 +88,6 @@
         <v-card-actions>
           <v-btn @click="TOGGLE_OVERLAY">Close</v-btn>
         </v-card-actions>
-
-
       </v-card>
     </v-flex>
   </v-layout>
@@ -98,6 +96,7 @@
 <script lang="ts">
   import { Vue, Component } from 'nuxt-property-decorator'
   import {mapMutations} from "vuex";
+  import {watchlist} from "~/store/watchlist";
 
   @Component({
     methods: {
@@ -108,6 +107,10 @@
     private uploadShowHelp = false;
     private watchLists = {};
     private step = 1;
+
+    private get uploadedItemsBeenVerified(){
+      return (this.$store.state as watchlist).watchedItemsLoaded;
+    }
 
     private toggleUploadShowHelp(){
       this.uploadShowHelp = ! this.uploadShowHelp;

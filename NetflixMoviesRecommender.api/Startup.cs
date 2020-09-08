@@ -42,6 +42,8 @@ namespace NetflixMoviesRecommender.api
                 options.AddPolicy(name: "AllowClientOrigin", builder =>
                 {
                     builder.WithOrigins("http://localhost:3000");
+                    builder.AllowAnyHeader();
+                    builder.AllowAnyHeader();
                 });
             });
             

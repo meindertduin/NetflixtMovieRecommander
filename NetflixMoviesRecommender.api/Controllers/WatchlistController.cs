@@ -48,10 +48,22 @@ namespace NetflixMoviesRecommender.api.Controllers
                 await watchList.CopyToAsync(fileStream);
             }
             
-            
-            await _watchListFileParserService.StoreUserWatchlistItems(new List<string>{ savePath });
+            var fileReader = new CsvReader();
+            var pairs = fileReader.ReadCsvAsKeyValues(savePath);
 
-            return Ok(fileName);
+            var titles = pairs.Item1;
+            List<string> refinedTitles = new List<string>();
+            
+            for (int i = 0; i < titles.Count; i++)
+            {
+                var shortTitle = titles[i].Split(':');
+                if (string.IsNullOrEmpty(shortTitle[0]) == false)
+                {
+                    refinedTitles.Add(shortTitle[0]);
+                }
+            }
+
+            return Ok(refinedTitles.Distinct().ToList());
 
 
 
