@@ -6,5 +6,6 @@ namespace NetflixMoviesRecommender.api.Forms
     {
         public List<string> WatchedItems { get; set; }
         public List<string> Genres { get; set; }
+        public string Type { get; set; }
     }
 }

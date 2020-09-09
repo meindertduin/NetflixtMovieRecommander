@@ -23,7 +23,7 @@ namespace NetflixMoviesRecommender.api.Services
             {
                 NetflixRecommended netflixRecommended = new NetflixRecommended
                 {
-                    Title = recommended.Title,
+                    Title = recommended.Title.Split(':')[0],
                     Plot = recommended.Plot,
                     Poster = recommended.Poster,
                     Type = recommended.Type,

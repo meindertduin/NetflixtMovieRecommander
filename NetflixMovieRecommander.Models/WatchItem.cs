@@ -8,7 +8,6 @@ namespace NetflixMovieRecommander.Models
     {
         [Key]
         public int Id { get; set; }
-        
         [MaxLength(200)]
         public string Title { get; set; }
         [MaxLength(10)]

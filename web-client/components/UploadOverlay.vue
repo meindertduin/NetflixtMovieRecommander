@@ -53,40 +53,61 @@
 
             <v-divider></v-divider>
 
-            <v-stepper-step step="2">Completion</v-stepper-step>
+            <v-stepper-step :complete="step > 2" step="2">Options</v-stepper-step>
+
+            <v-divider></v-divider>
+
+            <v-stepper-step step="3">Results</v-stepper-step>
           </v-stepper-header>
 
 
           <v-stepper-items>
             <v-stepper-content step="1">
-              <v-card>
-                <v-card-title>
-                  Upload here your watchlist.csv
-                </v-card-title>
-                <v-card-text>
-                  Fill in here your watchlist.csv file. <a @click="toggleUploadShowHelp">Click here</a> to see how to obtain.
-                </v-card-text>
-                <v-card-actions>
-                  <v-file-input accept=".csv" label="File input" multiple v-model="watchLists" prepend-icon="mdi-paperclip"></v-file-input>
-                  <v-btn @click="handleFileUpload">Upload</v-btn>
-                </v-card-actions>
-              </v-card>
+              <div>
+                <div>Fill in here your watchlist.csv file. <a @click="toggleUploadShowHelp">Click here</a> to see how to obtain.</div>
+
+
+                <v-file-input accept=".csv" label="File input" multiple v-model="watchLists" prepend-icon="mdi-paperclip"></v-file-input>
+                <v-btn @click="handleFileUpload">Upload</v-btn>
+                <v-btn @click="step++">Dev Skip</v-btn>
+              </div>
             </v-stepper-content>
 
             <v-stepper-content step="2">
-              <v-card>
-                <v-card-title>
-                  Your uploading is complete
-                </v-card-title>
-              </v-card>
+              <div>
+                <div>
+                  Fill in extra options
+                </div>
+                <v-select :items="genres" v-model="selectedGenres" label="Select Genres" multiple chips deletable-chips></v-select>
+                <v-select :items="types" v-model="selectedType" label="Select type"></v-select>
+                <div>
+                  <v-btn @click="getRecommendations">Confirm</v-btn>
+                  <v-btn @click="step++">Dev Skip</v-btn>
+                </div>
+              </div>
             </v-stepper-content>
 
+            <v-stepper-content step="3">
+              <div v-for="x in recommendations">
+                <div>{{x.title}}</div>
+                <div>{{x.type}}</div>
+                <div>
+                  <v-img :src="x.poster" contain height="200"></v-img>
+                </div>
+                <div>
+                  {{x.plot}}
+                </div>
+              </div>
+              <div>
+                <v-btn>Next Recommendation</v-btn>
+              </div>
+            </v-stepper-content>
 
           </v-stepper-items>
         </v-stepper>
 
         <v-card-actions>
-          <v-btn @click="TOGGLE_OVERLAY">Close</v-btn>
+          <v-btn @click="TOGGLE_OVERLAY">Cancel</v-btn>
         </v-card-actions>
       </v-card>
     </v-flex>
@@ -94,9 +115,10 @@
 </template>
 
 <script lang="ts">
-  import { Vue, Component } from 'nuxt-property-decorator'
+  import {Vue, Component, Watch} from 'nuxt-property-decorator'
   import {mapMutations} from "vuex";
   import {watchlist} from "~/store/watchlist";
+  import {recommendation} from "~/store/recommendation";
 
   @Component({
     methods: {
@@ -108,8 +130,17 @@
     private watchLists = {};
     private step = 1;
 
-    private get uploadedItemsBeenVerified(){
-      return (this.$store.state as watchlist).watchedItemsLoaded;
+    private genres = [
+      "Animation", "Action", "Documentary", "Drama", "War", "Crime",  "Mystery", "Sci-Fi", "Thriller",
+    ];
+    private selectedGenres = [];
+
+    private types = ["series", "movie", "both"];
+    private selectedType = "both";
+
+
+    get recommendations(){
+      return (this.$store.state.recommendation as recommendation).recommendations;
     }
 
     private toggleUploadShowHelp(){
@@ -124,6 +155,12 @@
 
       form.append("watchlist", this.watchLists[0]);
       await this.$store.dispatch('watchlist/uploadWatchLists', {form});
+      this.step++;
+    }
+
+    private async getRecommendations(){
+      const watchedItems = this.$store.getters['watchlist/getWatchedItems'];
+      await this.$store.dispatch('recommendation/GetRecommendations', {watchedItems})
       this.step++;
     }
   }
