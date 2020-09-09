@@ -25,6 +25,7 @@ export const mutations: MutationTree<watchlist> = {
   SET_WATCHED_ITEMS: (state, watchedItems) => {
     state.watchedItems = watchedItems;
   },
+  ADD_TO_WATCHED_ITEMS: (state, extraItems) => state.watchedItems.concat(extraItems),
   SET_UPLOAD_PROMISE: (state, promise) => state.uploadPromise = promise,
 };
 
@@ -43,6 +44,5 @@ export const actions: ActionTree<watchlist, RootState> = {
       .catch(err => {
         console.log(err);
       });
-
   },
 };

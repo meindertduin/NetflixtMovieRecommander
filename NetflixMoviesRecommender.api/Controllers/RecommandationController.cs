@@ -57,7 +57,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                     .Search(x => x.Genres).Containing(genres.ToArray())
                     .OrderBy(x => x.Id)
                     .Skip(skip)
-                    .Take(5);
+                    .Take(25);
             }
             else
             {
@@ -66,7 +66,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                     .Where(x => watchedItems.All(p => x.Title != p))
                     .OrderBy(x => x.Id)
                     .Skip(skip)
-                    .Take(5);
+                    .Take(25);
             }
             
             recommendations.AddRange(randomRecommendations);

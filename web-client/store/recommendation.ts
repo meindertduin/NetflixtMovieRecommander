@@ -25,5 +25,6 @@ export const actions: ActionTree<recommendation, RootState> = {
         type: type
       });
     commit('SET_RECOMMENDATIONS', res)
-  }
+    return res;
+  },
 }
