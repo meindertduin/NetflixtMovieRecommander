@@ -52,7 +52,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             if (watchedInfo.Genres.Count > 0)
             {
                 randomRecommendations = _ctx.NetflixRecommendations
-                    .Where(x => watchedInfo.Type == null || x.Type == watchedInfo.Type)
+                    .Where(x => watchedInfo.Type == "both" || x.Type == watchedInfo.Type)
                     .Where(x => watchedItems.All(p => x.Title != p))
                     .Search(x => x.Genres).Containing(genres.ToArray())
                     .OrderBy(x => x.Id)
@@ -62,7 +62,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             else
             {
                 randomRecommendations = _ctx.NetflixRecommendations
-                    .Where(x => watchedInfo.Type == null || x.Type == watchedInfo.Type)
+                    .Where(x => watchedInfo.Type == "both" || x.Type == watchedInfo.Type)
                     .Where(x => watchedItems.All(p => x.Title != p))
                     .OrderBy(x => x.Id)
                     .Skip(skip)
@@ -97,7 +97,6 @@ namespace NetflixMoviesRecommender.api.Controllers
             }
             catch (Exception e)
             {
-                throw;
                 return StatusCode(500);
             }
             

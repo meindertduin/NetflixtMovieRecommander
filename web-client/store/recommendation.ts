@@ -4,8 +4,6 @@
 import { RootState } from "~/store";
 
 const initState = () => ({
-  selectedGenres: [],
-  selectedType: null,
   recommendations: [],
 });
 
@@ -19,16 +17,13 @@ export const mutations: MutationTree<recommendation> = {
 };
 
 export const actions: ActionTree<recommendation, RootState> = {
-  async GetRecommendations({dispatch, state, commit}, {watchedItems}){
-    console.log(watchedItems)
-    console.log({watchedItems, Genres: state.selectedGenres})
+  async GetRecommendations({dispatch, state, commit}, {watchedItems, genres, type}){
     const res = await this.$axios.$post('/api/recommendation/watchlist',
       {
         watchedItems,
-        Genres: state.selectedGenres,
-        type: state.selectedType
+        genres: genres,
+        type: type
       });
-    console.log(res);
     commit('SET_RECOMMENDATIONS', res)
   }
 }

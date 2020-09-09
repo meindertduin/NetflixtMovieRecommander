@@ -35,38 +35,46 @@ namespace NetflixMoviesRecommender.api.Controllers
             return _ctx.WatchItems.ToList();
         }
         [HttpPost]
-        public async Task<IActionResult> Upload(IFormFile watchList)
+        public async Task<IActionResult> Upload(List<IFormFile> watchLists)
         {
-            //long size = watchLists.Sum(f => f.Length);
-
-            var mime = watchList.FileName.Split('.').Last();
-            var fileName = string.Concat(Path.GetRandomFileName(), ".", mime);
-            var savePath = Path.Combine(_env.WebRootPath, fileName);
+            // uploads all the watchlists
+            List<string> savePaths = new List<string>();
             
-            await using (var fileStream = new FileStream(savePath, FileMode.Create, FileAccess.Write))
+            for (int i = 0; i < watchLists.Count; i++)
             {
-                await watchList.CopyToAsync(fileStream);
-            }
+                var watchList = watchLists[i];
+                
+                var mime = watchList.FileName.Split('.').Last();
+                var fileName = string.Concat(Path.GetRandomFileName(), ".", mime);
+                var savePath = Path.Combine(_env.WebRootPath, fileName);
+                
+                savePaths.Add(savePath);
             
-            var fileReader = new CsvReader();
-            var pairs = fileReader.ReadCsvAsKeyValues(savePath);
-
-            var titles = pairs.Item1;
-            List<string> refinedTitles = new List<string>();
-            
-            for (int i = 0; i < titles.Count; i++)
-            {
-                var shortTitle = titles[i].Split(':');
-                if (string.IsNullOrEmpty(shortTitle[0]) == false)
+                await using (var fileStream = new FileStream(savePath, FileMode.Create, FileAccess.Write))
                 {
-                    refinedTitles.Add(shortTitle[0]);
+                    await watchList.CopyToAsync(fileStream);
                 }
             }
 
+            List<string> refinedTitles = new List<string>();
+            
+            foreach (var savePath in savePaths)
+            {
+                var fileReader = new CsvReader();
+                var pairs = fileReader.ReadCsvAsKeyValues(savePath);
+                var titles = pairs.Item1;
+                
+                for (int i = 0; i < titles.Count; i++)
+                {
+                    var shortTitle = titles[i].Split(':');
+                    if (string.IsNullOrEmpty(shortTitle[0]) == false)
+                    {
+                        refinedTitles.Add(shortTitle[0]);
+                    }
+                }
+            }
+            
             return Ok(refinedTitles.Distinct().ToList());
-
-
-
         }
     }
 }

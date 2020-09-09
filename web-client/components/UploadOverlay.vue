@@ -88,27 +88,29 @@
             </v-stepper-content>
 
             <v-stepper-content step="3">
-              <div v-for="x in recommendations">
-                <div>{{x.title}}</div>
-                <div>{{x.type}}</div>
-                <div>
-                  <v-img :src="x.poster" contain height="200"></v-img>
-                </div>
-                <div>
-                  {{x.plot}}
-                </div>
-              </div>
-              <div>
-                <v-btn>Next Recommendation</v-btn>
-              </div>
+              <v-row>
+                <v-btn width="80">Previous</v-btn>
+                <v-divider></v-divider>
+                <v-btn width="80">Next</v-btn>
+              </v-row>
+              <v-row>
+                <v-col v-for="x in recommendations">
+                  <RecommendationDisplay :key="x.id" :_title="x.title" :plot="x.plot" :url="x.poster" :genres="x.genres" :type="x.type" />
+                </v-col>
+              </v-row>
+              <v-row justify="center">
+                <div>Want to save your watchhistory? Be sure to make an account <a>Here</a></div>
+              </v-row>
             </v-stepper-content>
 
           </v-stepper-items>
         </v-stepper>
 
-        <v-card-actions>
-          <v-btn @click="TOGGLE_OVERLAY">Cancel</v-btn>
-        </v-card-actions>
+        <v-row justify="center">
+          <v-card-actions>
+            <v-btn @click="TOGGLE_OVERLAY">Cancel</v-btn>
+          </v-card-actions>
+        </v-row>
       </v-card>
     </v-flex>
   </v-layout>
@@ -119,10 +121,14 @@
   import {mapMutations} from "vuex";
   import {watchlist} from "~/store/watchlist";
   import {recommendation} from "~/store/recommendation";
+  import RecommendationDisplay from "~/components/RecommendationDisplay.vue";
 
   @Component({
     methods: {
       ...mapMutations('watchlist', ['TOGGLE_OVERLAY']),
+    },
+    components: {
+      RecommendationDisplay
     }
   })
   export default class UploadOverlay extends Vue {
@@ -149,18 +155,22 @@
 
     private async handleFileUpload(){
 
-      if(!this.watchLists) return;
+      if(Object.keys(this.watchLists).length === 0 && this.watchLists.constructor === Object) return;
 
       const form = new FormData();
+      let count = 0;
+      for (const file in this.watchLists){
+        form.append('file' + count, file)
+        count++
+      }
 
-      form.append("watchlist", this.watchLists[0]);
-      await this.$store.dispatch('watchlist/uploadWatchLists', {form});
+      await this.$store.dispatch('watchlist/uploadWatchLists', {watchLists: form});
       this.step++;
     }
 
     private async getRecommendations(){
       const watchedItems = this.$store.getters['watchlist/getWatchedItems'];
-      await this.$store.dispatch('recommendation/GetRecommendations', {watchedItems})
+      await this.$store.dispatch('recommendation/GetRecommendations', {watchedItems, genres: this.selectedGenres, type: this.selectedType })
       this.step++;
     }
   }
