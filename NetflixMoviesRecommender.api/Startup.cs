@@ -29,11 +29,10 @@ namespace NetflixMoviesRecommender.api
             
             
             services.AddDbContext<AppDbContext>(options =>
-                //options.UseInMemoryDatabase("Dev"));
                 options.UseSqlServer(conn, b => b.MigrationsAssembly("NetflixMoviesRecommender.api")));
 
-            services.AddScoped<IWatchListFileParserService, WatchListFileParserService>();
-            services.AddScoped<IRecommendedDatabaseParser, RecommendedDatabaseParser>();
+            services.AddTransient<IWatchListFileParserService, WatchListFileParserService>();
+            services.AddTransient<IRecommendedDatabaseParser, RecommendedDatabaseParser>();
 
             services.AddHttpClient();
             

@@ -30,6 +30,8 @@ export const actions: ActionTree<watchlist, RootState> = {
   },
   async GetRecommendations({dispatch, state}, {watchedItems}){
     console.log(watchedItems)
-    const res = await this.$axios.$post('/api/recommendation/watchlist', {watchedItems, Genres: state.selectedGenres})
+    console.log({watchedItems, Genres: state.selectedGenres})
+    const res = await this.$axios.$post('/api/recommendation/watchlist', {watchedItems, Genres: ["War"]})
+    console.log(res);
   }
 };

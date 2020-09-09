@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +11,7 @@ using NetflixMovieRecommander.Models;
 using NetflixMoviesRecommender.api.Forms;
 using NetflixMoviesRecommender.api.Services;
 using Newtonsoft.Json;
+using NinjaNye.SearchExtensions;
 
 namespace NetflixMoviesRecommender.api.Controllers
 {
@@ -31,7 +35,41 @@ namespace NetflixMoviesRecommender.api.Controllers
         [HttpPost("watchlist")]
         public IActionResult Recommendation([FromBody] WatchedInfoForm watchedInfo)
         {
-            return Ok();
+            if (ModelState.IsValid == false)
+            {
+                return BadRequest();
+            }
+
+            List<string> watchedItems = watchedInfo.WatchedItems;
+            List<string> genres = watchedInfo.Genres;
+            List<NetflixRecommended> recommendations = new List<NetflixRecommended>();
+            
+            Random rand = new Random();
+
+            var skip = (int) (rand.NextDouble()) * _ctx.NetflixRecommendations.Count();
+            IQueryable<NetflixRecommended> randomRecommendations;
+
+            if (watchedInfo.Genres.Count > 0)
+            {
+                randomRecommendations = _ctx.NetflixRecommendations
+                    .Where(x => watchedItems.All(p => x.Title != p))
+                    .Search(x => x.Genres).Containing(genres.ToArray())
+                    .OrderBy(x => x.Id)
+                    .Skip(skip)
+                    .Take(5);
+            }
+            else
+            {
+                randomRecommendations = _ctx.NetflixRecommendations
+                    .Where(x => watchedItems.All(p => x.Title != p))
+                    .OrderBy(x => x.Id)
+                    .Skip(skip)
+                    .Take(5);
+            }
+            
+            recommendations.AddRange(randomRecommendations);
+
+            return Ok(recommendations);
         }
         
         [HttpPost]
