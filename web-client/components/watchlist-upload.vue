@@ -3,6 +3,9 @@
     <v-card-title>
       Watch History Upload
     </v-card-title>
+    <v-card-subtitle v-if="errorMessage.length > 0">
+      {{errorMessage}}
+    </v-card-subtitle>
     <v-card-text>
       Fill in here your watchlist.csv file. <a @click="toggleUploadGuide">Click here</a> to see how to obtain it.
     </v-card-text>
@@ -16,8 +19,10 @@
 <script lang="ts">
   import {Component, Vue} from "nuxt-property-decorator";
 
-    @Component
+    @Component({})
     export default class WatchlistUpload extends Vue{
+
+      private watchLists = {};
 
       private toggleOverlay(){
         this.$store.commit('watchlist/TOGGLE_OVERLAY');
@@ -27,20 +32,24 @@
         this.$store.commit('watchlist/TOGGLE_GUIDE');
       }
 
+      private errorMessage = "";
+
+
       private async handleFileUpload(){
         if(Object.keys(this.watchLists).length === 0 && this.watchLists.constructor === Object) return;
+        console.log(this.watchLists)
+        let form = new FormData();
 
-        const form = new FormData();
         let count = 0;
-        for (const file in this.watchLists){
-          form.append('file' + count, file)
-          count++
+        for (let files in this.watchLists){
+          form.append('watchlists', this.watchLists[count]);
+          count++;
         }
 
-        await this.$store.dispatch('watchlist/uploadWatchLists', {watchLists: form});
+        await this.$store.dispatch('watchlist/uploadWatchLists', {form});
         this.toggleOverlay();
       }
-      private watchLists = {};
+
     }
 </script>
 

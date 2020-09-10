@@ -31,7 +31,6 @@
   import {recommendation} from "~/store/recommendation";
   import RecommendedDisplay from "~/components/recommended-display.vue";
   import UploadGuide from "~/components/upload-guide.vue";
-  import UploadGuide from "~/components/upload-guide.vue";
 
     @Component({
       name: "recommended",

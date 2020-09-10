@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
+using NetflixMoviesRecommender.api.Domain.Attributes;
 using NetflixMoviesRecommender.api.Services;
 
 namespace NetflixMoviesRecommender.api.Controllers
@@ -17,15 +18,12 @@ namespace NetflixMoviesRecommender.api.Controllers
     public class WatchlistController : ControllerBase
     {
         private IWebHostEnvironment _env;
-        private readonly IWatchListFileParserService _watchListFileParserService;
         private readonly AppDbContext _ctx;
 
         public WatchlistController(IWebHostEnvironment env, 
-            IWatchListFileParserService watchListFileParserService,
             AppDbContext ctx)
         {
             _env = env;
-            _watchListFileParserService = watchListFileParserService;
             _ctx = ctx;
         }
 
@@ -37,12 +35,26 @@ namespace NetflixMoviesRecommender.api.Controllers
         [HttpPost]
         public async Task<IActionResult> Upload(List<IFormFile> watchLists)
         {
+            if (watchLists.Count == 0)
+            {
+                return StatusCode(403);
+            }
+            
+            
             // uploads all the watchlists
             List<string> savePaths = new List<string>();
+            string[] allowedFileExtensions = new string[] {".csv"};
             
             for (int i = 0; i < watchLists.Count; i++)
             {
                 var watchList = watchLists[i];
+                
+                // checks to see if the file is of the correct type
+                var extension = Path.GetExtension(watchList.FileName);
+                if (allowedFileExtensions.Contains(extension.ToLower()) == false)
+                {
+                    return StatusCode(412);
+                }
                 
                 var mime = watchList.FileName.Split('.').Last();
                 var fileName = string.Concat(Path.GetRandomFileName(), ".", mime);
@@ -55,7 +67,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                     await watchList.CopyToAsync(fileStream);
                 }
             }
-
+            
             List<string> refinedTitles = new List<string>();
             
             foreach (var savePath in savePaths)

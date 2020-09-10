@@ -31,19 +31,20 @@ export const mutations: MutationTree<watchlist> = {
 };
 
 export const actions: ActionTree<watchlist, RootState> = {
-  async uploadWatchLists({dispatch, commit}, {watchLists}) {
-    await this.$axios.post('/api/watchlist', watchLists,
-      {
-        headers:
-          {
-            contentType: "multipart/form-data"
-          }
+  async uploadWatchLists({dispatch, commit}, {form}) {
+    try{
+      console.log("this happens")
+      const res = await this.$axios.post('/api/watchlist', form, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
       })
-      .then(({data}) => {
-        commit('SET_WATCHED_ITEMS', data);
-      })
-      .catch(err => {
-        console.log(err);
-      });
+      console.log(res)
+      commit('SET_WATCHED_ITEMS', res.data);
+      console.log(res)
+    } catch(err){
+      console.log(err)
+    }
+
   },
 };
