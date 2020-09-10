@@ -25,6 +25,14 @@ export const getters: GetterTree<recommendation, RootState> = {
 }
 
 export const mutations: MutationTree<recommendation> = {
+  RESET: (state) => {
+    state.currentLoadedRecommendations = [];
+    state.recommendations = [];
+    state.currentRecIndex = 0;
+    state.selectedGenres = [];
+    state.selectedType = "";
+  },
+
   SET_RECOMMENDATIONS: (state, recommendations) =>
     state.recommendations.length < 1?
       state.recommendations = recommendations:

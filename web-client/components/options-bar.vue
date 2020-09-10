@@ -2,7 +2,7 @@
   <div>
     <v-row justify="start" al>
       <v-col cols="3">
-        <v-select height="30" :items="genres" v-model="selectedGenres" label="Select Genres" deletable-chips chips></v-select>
+        <v-select height="30" :items="genres" v-model="selectedGenres" label="Select Genres" multiple deletable-chips chips></v-select>
       </v-col>
       <v-col cols="3">
         <v-select height="30" :items="types" v-model="selectedType" label="Select Type"></v-select>
@@ -28,6 +28,8 @@
     private selectedType:string = "both";
 
     private async getRecommendations(){
+      this.$store.commit('recommendation/RESET');
+
       const watchedItems = this.$store.getters['watchlist/getWatchedItems'];
       await this.$store.dispatch('recommendation/GetRecommendations', {watchedItems, genres: this.selectedGenres, type: this.selectedType })
 

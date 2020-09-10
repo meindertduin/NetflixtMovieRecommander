@@ -46,7 +46,6 @@ namespace NetflixMoviesRecommender.api.Controllers
             
             Random rand = new Random();
 
-            var skip = (int) (rand.NextDouble()) * _ctx.NetflixRecommendations.Count();
             IQueryable<NetflixRecommended> randomRecommendations;
 
             if (watchedInfo.Genres.Count > 0)
@@ -55,8 +54,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                     .Where(x => watchedInfo.Type == "both" || x.Type == watchedInfo.Type)
                     .Where(x => watchedItems.All(p => x.Title != p))
                     .Search(x => x.Genres).Containing(genres.ToArray())
-                    .OrderBy(x => x.Id)
-                    .Skip(skip)
+                    .OrderBy(x => rand.Next())
                     .Take(25);
             }
             else
@@ -64,8 +62,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                 randomRecommendations = _ctx.NetflixRecommendations
                     .Where(x => watchedInfo.Type == "both" || x.Type == watchedInfo.Type)
                     .Where(x => watchedItems.All(p => x.Title != p))
-                    .OrderBy(x => x.Id)
-                    .Skip(skip)
+                    .OrderBy(x => Guid.NewGuid())
                     .Take(25);
             }
             
