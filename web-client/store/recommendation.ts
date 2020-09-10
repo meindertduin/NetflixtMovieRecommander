@@ -1,19 +1,44 @@
 ﻿import {watchlist} from "~/store/watchlist";
 
-﻿import {ActionTree, MutationTree} from 'vuex';
+﻿import {ActionTree, GetterTree, MutationTree} from 'vuex';
 import { RootState } from "~/store";
 
 const initState = () => ({
   recommendations: [],
+  currentLoadedRecommendations: [],
+  currentRecIndex: 0,
+  selectedGenres: [],
+  selectedType: ""
 });
 
 export const state = initState;
 
 export type recommendation = ReturnType<typeof state>
 
+export const getters: GetterTree<recommendation, RootState> = {
+  getSelectedGenres(state){
+    return state.selectedGenres;
+  },
+  getSelectedType(state){
+    return state.selectedType;
+  }
+}
+
 export const mutations: MutationTree<recommendation> = {
-  RESET: (state) => Object.assign(state, initState),
-  SET_RECOMMENDATIONS: (state, recommendations) => state.recommendations = recommendations,
+  SET_RECOMMENDATIONS: (state, recommendations) =>
+    state.recommendations.length < 1?
+      state.recommendations = recommendations:
+      state.recommendations.concat(recommendations),
+
+  SET_INITIAL_CURRENT_LOADED: (state) => state.currentLoadedRecommendations = state.recommendations.slice(0, 5),
+
+  INC_CURR_REC_INDEX: (state, amount) => state.currentRecIndex += amount,
+
+  SET_CURR_RECOMMENDATIONS: (state, {from, to}) => state.currentLoadedRecommendations = state.recommendations.slice(from, to),
+
+  SET_TYPE: (state, type) => state.selectedType = type,
+
+  SET_GENRES: (state, genres) => state.selectedGenres = genres,
 };
 
 export const actions: ActionTree<recommendation, RootState> = {
@@ -24,7 +49,7 @@ export const actions: ActionTree<recommendation, RootState> = {
         genres: genres,
         type: type
       });
+    console.log(res);
     commit('SET_RECOMMENDATIONS', res)
-    return res;
   },
 }

@@ -3,7 +3,7 @@
 import { RootState } from "~/store";
 
 const initState = () => ({
-  overlayActive: false,
+  overlayActive: true,
   watchedItems: [],
   selectedGenres: [],
   selectedType: null,
@@ -26,7 +26,6 @@ export const mutations: MutationTree<watchlist> = {
     state.watchedItems = watchedItems;
   },
   ADD_TO_WATCHED_ITEMS: (state, extraItems) => state.watchedItems.concat(extraItems),
-  SET_UPLOAD_PROMISE: (state, promise) => state.uploadPromise = promise,
 };
 
 export const actions: ActionTree<watchlist, RootState> = {
