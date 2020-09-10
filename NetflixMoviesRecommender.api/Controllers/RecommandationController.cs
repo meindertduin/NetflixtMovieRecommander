@@ -54,7 +54,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                     .Where(x => watchedInfo.Type == "both" || x.Type == watchedInfo.Type)
                     .Where(x => watchedItems.All(p => x.Title != p))
                     .Search(x => x.Genres).Containing(genres.ToArray())
-                    .OrderBy(x => rand.Next())
+                    .OrderBy(x => Guid.NewGuid())
                     .Take(25);
             }
             else

@@ -16,7 +16,8 @@
       </v-row>
     </v-container>
     <v-overlay v-if="overlayActive">
-      <WatchlistUpload />
+      <UploadGuide v-if="uploadGuideActive" />
+      <WatchlistUpload v-else />
     </v-overlay>
   </div>
 
@@ -29,10 +30,13 @@
   import WatchlistUpload from "~/components/watchlist-upload.vue";
   import {recommendation} from "~/store/recommendation";
   import RecommendedDisplay from "~/components/recommended-display.vue";
+  import UploadGuide from "~/components/upload-guide.vue";
+  import UploadGuide from "~/components/upload-guide.vue";
 
     @Component({
       name: "recommended",
       components: {
+        UploadGuide,
         OptionsBar,
         RecommendedDisplay,
         WatchlistUpload,
@@ -41,6 +45,11 @@
     export default class Recommended extends Vue{
       get overlayActive(){
         return (this.$store.state.watchlist as watchlist).overlayActive
+      }
+
+      get uploadGuideActive(){
+        //return true;
+        return (this.$store.state.watchlist as watchlist).showGuide;
       }
 
       get currentRecommendationsDisplay(){

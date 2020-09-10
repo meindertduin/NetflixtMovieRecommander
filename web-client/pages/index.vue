@@ -21,18 +21,13 @@
 </template>
 
 <script lang="ts">
-import {mapState, mapMutations} from 'vuex';
 import {Component, Vue} from "nuxt-property-decorator";
 
 
-@Component({
-  components: {
-    UploadOverlay,
-  },
-})
+@Component({})
 export default class index extends Vue{
   private redirectToRecommendations(){
-    this.$router.push('/Recommendations')
+    this.$router.push('/recommended')
   }
 
 }

@@ -4,6 +4,7 @@ import { RootState } from "~/store";
 
 const initState = () => ({
   overlayActive: true,
+  showGuide: false,
   watchedItems: [],
   selectedGenres: [],
   selectedType: null,
@@ -21,7 +22,8 @@ export const getters: GetterTree<watchlist, RootState> = {
 }
 
 export const mutations: MutationTree<watchlist> = {
-  TOGGLE_OVERLAY: (state) => state.overlayActive = !state.overlayActive,
+  TOGGLE_OVERLAY: (state) => state.overlayActive = ! state.overlayActive,
+  TOGGLE_GUIDE: (state) => state.showGuide = ! state.showGuide,
   SET_WATCHED_ITEMS: (state, watchedItems) => {
     state.watchedItems = watchedItems;
   },

@@ -1,7 +1,7 @@
 ﻿﻿<template>
   <div>
     <v-row justify="start" al>
-      <v-col cols="3">
+      <v-col cols="7">
         <v-select height="30" :items="genres" v-model="selectedGenres" label="Select Genres" multiple deletable-chips chips></v-select>
       </v-col>
       <v-col cols="3">

@@ -4,7 +4,7 @@
       Watch History Upload
     </v-card-title>
     <v-card-text>
-      Fill in here your watchlist.csv file. <a @click="">Click here</a> to see how to obtain it.
+      Fill in here your watchlist.csv file. <a @click="toggleUploadGuide">Click here</a> to see how to obtain it.
     </v-card-text>
     <v-card-actions>
       <v-file-input accept=".csv" label="File input" multiple v-model="watchLists" prepend-icon="mdi-paperclip"></v-file-input>
@@ -21,6 +21,10 @@
 
       private toggleOverlay(){
         this.$store.commit('watchlist/TOGGLE_OVERLAY');
+      }
+
+      private toggleUploadGuide(){
+        this.$store.commit('watchlist/TOGGLE_GUIDE');
       }
 
       private async handleFileUpload(){
