@@ -54,6 +54,8 @@ namespace NetflixMoviesRecommender.api
             });
             
             services.AddControllers();
+
+            services.AddRazorPages();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -77,6 +79,7 @@ namespace NetflixMoviesRecommender.api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
+                endpoints.MapRazorPages();
             });
         }
 
