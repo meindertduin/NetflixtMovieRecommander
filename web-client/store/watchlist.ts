@@ -25,6 +25,7 @@ export const mutations: MutationTree<watchlist> = {
   TOGGLE_OVERLAY: (state) => state.overlayActive = ! state.overlayActive,
   TOGGLE_GUIDE: (state) => state.showGuide = ! state.showGuide,
   SET_WATCHED_ITEMS: (state, watchedItems) => {
+    console.log(watchedItems);
     state.watchedItems = watchedItems;
   },
   ADD_TO_WATCHED_ITEMS: (state, extraItems) => state.watchedItems.concat(extraItems),
@@ -33,17 +34,15 @@ export const mutations: MutationTree<watchlist> = {
 export const actions: ActionTree<watchlist, RootState> = {
   async uploadWatchLists({dispatch, commit}, {form}) {
     try{
-      console.log("this happens")
       const res = await this.$axios.post('/api/watchlist', form, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
       })
-      console.log(res)
       commit('SET_WATCHED_ITEMS', res.data);
-      console.log(res)
+      return res.status;
     } catch(err){
-      console.log(err)
+      return err.response.status;
     }
 
   },

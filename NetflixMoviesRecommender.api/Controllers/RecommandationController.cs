@@ -53,6 +53,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                 randomRecommendations = _ctx.NetflixRecommendations
                     .Where(x => watchedInfo.Type == "both" || x.Type == watchedInfo.Type)
                     .Where(x => watchedItems.All(p => x.Title != p))
+                    .Where(x => x.Deleted == false)
                     .Search(x => x.Genres).Containing(genres.ToArray())
                     .OrderBy(x => Guid.NewGuid())
                     .Take(25);
@@ -62,6 +63,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                 randomRecommendations = _ctx.NetflixRecommendations
                     .Where(x => watchedInfo.Type == "both" || x.Type == watchedInfo.Type)
                     .Where(x => watchedItems.All(p => x.Title != p))
+                    .Where(x => x.Deleted == false)
                     .OrderBy(x => Guid.NewGuid())
                     .Take(25);
             }

@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
-using NetflixMoviesRecommender.api.Domain.Attributes;
 using NetflixMoviesRecommender.api.Services;
 
 namespace NetflixMoviesRecommender.api.Controllers
@@ -84,6 +83,8 @@ namespace NetflixMoviesRecommender.api.Controllers
                         refinedTitles.Add(shortTitle[0]);
                     }
                 }
+                
+                System.IO.File.Delete(savePath);
             }
             
             return Ok(refinedTitles.Distinct().ToList());

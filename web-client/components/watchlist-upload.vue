@@ -46,7 +46,12 @@
           count++;
         }
 
-        await this.$store.dispatch('watchlist/uploadWatchLists', {form});
+        const res = await this.$store.dispatch('watchlist/uploadWatchLists', {form});
+        if(res != 200 && res < 500){
+          this.errorMessage = "something went wrong while processing your watchlist, did you upload the right file?";
+          this.watchLists = {};
+          return;
+        }
         this.toggleOverlay();
       }
 
