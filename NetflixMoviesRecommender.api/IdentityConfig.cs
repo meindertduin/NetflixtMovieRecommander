@@ -35,18 +35,17 @@ namespace NetflixMoviesRecommender.api
             {
                 new Client()
                 {
-                    ClientId = "web_client",
+                    ClientId = "web-client",
                     AllowedGrantTypes = GrantTypes.Code,
                     RequirePkce = true,
                     RequireClientSecret = false,
                     
                     RedirectUris =
                     {
-                        "https://localhost:3000/oidc/sign-in-callback.html",
-                        "https://localhost:3000/oidc/sign-in-silent-callback.html"
+                        "http://localhost:3000/test"
                     },
                     
-                    PostLogoutRedirectUris = new[] {"https://localhost:3000"},
+                    PostLogoutRedirectUris = new[] {"https://localhost:3000/"},
                     AllowedCorsOrigins = new [] { "https://localhost:3000" },
                     
                     AllowedScopes = new []

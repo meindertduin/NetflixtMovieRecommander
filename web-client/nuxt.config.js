@@ -37,6 +37,7 @@ export default {
   ** https://nuxtjs.org/guide/plugins
   */
   plugins: [
+    {src: '~/plugins/client-init.ts', mode: 'client'}
   ],
   /*
   ** Auto import components
