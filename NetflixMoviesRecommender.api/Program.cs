@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,8 +24,17 @@ namespace NetflixMoviesRecommender.api
 
             using (var scope = host.Services.CreateScope())
             {
-                scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+                
+                var testUser = new IdentityUser("test"){ Email = "test@test.com"};
+                userManager.CreateAsync(testUser, "password").GetAwaiter().GetResult();
 
+                var mod = new IdentityUser("mod"){ Email = "mod@mod.com"};
+                userManager.CreateAsync(mod, "password").GetAwaiter().GetResult();
+                userManager.AddClaimAsync(mod, new Claim("role", "Mod")).GetAwaiter().GetResult();
+                
+                scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
+                
                 var context = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
                 context.Database.Migrate();
                 
