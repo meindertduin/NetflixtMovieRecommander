@@ -42,7 +42,7 @@ namespace NetflixMoviesRecommender.api
                     
                     RedirectUris =
                     {
-                        "http://localhost:3000/test"
+                        "http://localhost:3000/auth/sign-in-callback",
                     },
                     
                     PostLogoutRedirectUris = new[] {"https://localhost:3000/"},

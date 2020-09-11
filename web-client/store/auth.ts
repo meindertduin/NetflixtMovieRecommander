@@ -9,14 +9,16 @@ const ROLES = {
 
 interface StateLayout {
   user: User | null,
+  profile: any | null
 }
 const initState: StateLayout = {
   user: null,
+  profile: null,
 }
 
-const state = () => ({
-  initState,
-})
+const state = () => (
+  initState
+)
 
 export type auth = ReturnType<typeof state>
 
@@ -25,7 +27,8 @@ export const getters: GetterTree<auth, RootState> = {
 }
 
 export const mutations: MutationTree<auth> = {
-
+  SET_USER: (state, user:User) => state.user = user,
+  SET_PROFILE: (state, profile) => state.profile = profile,
 }
 
 export const actions: ActionTree<auth, RootState> = {
