@@ -1,19 +1,16 @@
 ﻿
 ﻿import {UserManager, WebStorageStateStore} from "oidc-client";
 
-import Vue from 'vue'
-import Store from 'vuex';
-
 
 const userManger: UserManager = new UserManager({
-  authority: "http://localhost:5000",
+  authority: "https://localhost:5001",
   client_id: "web-client",
-  redirect_uri: "http://localhost:3000/auth/sign-in-callback",
+  redirect_uri: "https://localhost:3000/oidc/sign-in-callback.html",
   response_type: "code",
-  scope: "openid profile IdentityServerApi role",
-  post_logout_redirect_uri: "http://localhost:3000/",
-  //silent_redirect_uri: "https://localhost:3000/",
+  scope: "openid profile IdentityServerApi Role",
+  post_logout_redirect_uri: "https://localhost:3000",
   userStore: new WebStorageStateStore({store: window.localStorage}),
+  //silent_redirect_uri: "http://localhost:3000/auth/silent-sign-in-callback",
 });
 
 declare module 'vuex/types/index' {
@@ -28,8 +25,12 @@ declare module 'vue/types/vue' {
   }
 }
 
-const plugin: Plugin = (context, inject) => {
+const plugin: Plugin = ({app, store}, inject) => {
   inject('auth', userManger)
+
+  app.fetch = () => {
+    return store.dispatch('nuxtClientInit');
+  }
 }
 
 export default plugin;

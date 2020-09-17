@@ -7,6 +7,12 @@
 bin/
 obj/
 wwwroot/
+vue-client/
+tempkey.jwk
+
+server.key
+server.cert
+
 
 # User-specific stuff
 .idea/**/workspace.xml

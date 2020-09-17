@@ -17,4 +17,7 @@ export const actions: ActionTree<RootState, RootState> = {
   async nuxtServerInit ({ commit, dispatch}) {
 
   },
+  nuxtClientInit({dispatch}, context){
+    //return dispatch('auth/init');
+  }
 }

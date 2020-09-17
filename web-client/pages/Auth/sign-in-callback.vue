@@ -1,6 +1,5 @@
 ﻿<template>
   <div>
-    Hell world
   </div>
 </template>
 
@@ -10,17 +9,20 @@
 
     @Component({})
     export default class SignInCallback extends Vue{
-      async created() {
-        const {code, scope, session_state, state} = this.$route.query;
-
-        if (code && scope && session_state && state) {
-          await this.$auth.signinRedirectCallback()
-            .then((user: User) => {
-              console.log(user);
-              this.$store.commit('auth/SET_USER', user);
-              this.$store.commit('auth/SET_PROFILE', user.profile);
-              this.$router.push('/');
-            })
+      created() {
+        if(!process.server){
+          const {code, scope, session_state, state} = this.$route.query;
+          if (code && scope && session_state && state) {
+            this.$auth.signinRedirectCallback()
+              .then((user) => {
+                console.log(user);
+                this.$store.dispatch('auth/setBearer', user.access_token);
+                this.$router.push('/')
+              }).catch((err) => {
+                console.log(err);
+                // todo: add a page for handling authorization errors
+              })
+          }
         }
       }
     }

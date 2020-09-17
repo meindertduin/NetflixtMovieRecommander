@@ -25,7 +25,7 @@ namespace NetflixMoviesRecommender.api
 
                 var mod = new IdentityUser("mod"){ Email = "mod@mod.com"};
                 userManager.CreateAsync(mod, "password").GetAwaiter().GetResult();
-                userManager.AddClaimAsync(mod, new Claim("role", "Mod")).GetAwaiter().GetResult();
+                userManager.AddClaimAsync(mod, new Claim(ApiConstants.Claims.Role, ApiConstants.Roles.Mod)).GetAwaiter().GetResult();
                 
                 scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
                 

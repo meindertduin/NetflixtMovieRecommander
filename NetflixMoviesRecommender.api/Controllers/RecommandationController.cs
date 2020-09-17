@@ -44,8 +44,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             List<string> genres = watchedInfo.Genres;
             List<NetflixRecommended> recommendations = new List<NetflixRecommended>();
             
-            Random rand = new Random();
-
+            
             IQueryable<NetflixRecommended> randomRecommendations;
 
             if (watchedInfo.Genres.Count > 0)
@@ -76,8 +75,6 @@ namespace NetflixMoviesRecommender.api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(string title)
         {
-            string key = _configuration.GetValue<string>("OMDB_KEY");
-
             try
             {
                 var res = await _client.GetAsync($"http://www.omdbapi.com/" +
@@ -94,7 +91,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                 
                 await _recommendedDatabaseParser.StoreRecommendedToDatabase(recommended);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return StatusCode(500);
             }

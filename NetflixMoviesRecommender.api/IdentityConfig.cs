@@ -14,18 +14,19 @@ namespace NetflixMoviesRecommender.api
             {
                 new IdentityResources.OpenId(), 
                 new IdentityResources.Profile(), 
-                new IdentityResource(name: "role", userClaims: new []{ "role"}, displayName: "role"),
+                new IdentityResource(name: ApiConstants.Claims.Role, userClaims: new []{ ApiConstants.Claims.Role }, displayName: "role"),
             };
         }
 
         public static IEnumerable<ApiScope> GetApiScopes()
         {
+            
             return new List<ApiScope>
             {
                 new ApiScope(IdentityServerConstants.LocalApi.ScopeName, new[]
                 {
                     JwtClaimTypes.PreferredUserName,
-                    "role",
+                    ApiConstants.Claims.Role,
                 })
             };
         }
@@ -42,10 +43,12 @@ namespace NetflixMoviesRecommender.api
                     
                     RedirectUris =
                     {
-                        "http://localhost:3000/auth/sign-in-callback",
+                        "https://localhost:3000/oidc/sign-in-callback.html",
+                        //"https://localhost:3000/auth/silent-sign-in-callback",
+                        
                     },
-                    
-                    PostLogoutRedirectUris = new[] {"https://localhost:3000/"},
+
+                    PostLogoutRedirectUris = new[] {"https://localhost:3000"},
                     AllowedCorsOrigins = new [] { "https://localhost:3000" },
                     
                     AllowedScopes = new []
@@ -53,7 +56,7 @@ namespace NetflixMoviesRecommender.api
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.LocalApi.ScopeName,
-                        "role",
+                        ApiConstants.Claims.Role,
                     },
                     
                     AllowAccessTokensViaBrowser = true,

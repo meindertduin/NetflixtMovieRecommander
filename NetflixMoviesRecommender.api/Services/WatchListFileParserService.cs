@@ -33,10 +33,7 @@ namespace NetflixMoviesRecommender.api.Services
         {
             List<string> titles = new List<string>();
             List<DateTime> dates = new List<DateTime>();
-            List<WatchItem> watchItems = new List<WatchItem>();
-
-            string type;
-
+            
             while (!reader.EndOfStream)
             {
                 await ParseLineToDatabase(reader, dates, titles);

@@ -1,4 +1,6 @@
 import colors from 'vuetify/es5/util/colors'
+import path from 'path'
+import fs from 'fs'
 
 export default {
   /*
@@ -15,6 +17,27 @@ export default {
   ** Headers of the page
   ** See https://nuxtjs.org/api/configuration-head
   */
+  publicRuntimeConfig: {
+    axios: {
+      baseURL: "https://localhost:5001",
+      https: true,
+    },
+  },
+  privateRuntimeConfig: {
+    axios: {
+      baseURL: "http://localhost:5000",
+      https: false,
+    },
+  },
+
+
+  server:{
+    https: {
+      key: fs.readFileSync(path.relative(__dirname, 'server.key')),
+      cert: fs.readFileSync(path.relative(__dirname, 'server.cert'))
+    }
+  },
+
   head: {
     titleTemplate: '%s - ' + process.env.npm_package_name,
     title: process.env.npm_package_name || '',
@@ -62,9 +85,8 @@ export default {
   ** Axios module configuration
   ** See https://axios.nuxtjs.org/options
   */
-  axios: {
-    baseURL: "http://localhost:5000",
-  },
+
+
   /*
   ** vuetify module configuration
   ** https://github.com/nuxt-community/vuetify-module

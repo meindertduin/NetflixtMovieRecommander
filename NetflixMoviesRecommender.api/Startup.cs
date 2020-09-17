@@ -47,7 +47,7 @@ namespace NetflixMoviesRecommender.api
             {
                 options.AddPolicy(name: "AllowClientOrigin", builder =>
                 {
-                    builder.WithOrigins("http://localhost:3000");
+                    builder.AllowAnyOrigin();
                     builder.AllowAnyHeader();
                     builder.AllowAnyHeader();
                 });
@@ -111,6 +111,12 @@ namespace NetflixMoviesRecommender.api
                 .AddEntityFrameworkStores<AppIdentityDbContext>()
                 .AddDefaultTokenProviders();
 
+                services.ConfigureApplicationCookie(config =>
+                {
+                    config.LoginPath = "/account/login";
+                    config.LogoutPath = "/api/auth/logout";
+                });
+                
             var identityServiceBuilder = services.AddIdentityServer();
 
             identityServiceBuilder.AddAspNetIdentity<IdentityUser>();
@@ -141,13 +147,37 @@ namespace NetflixMoviesRecommender.api
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("Mod", policy =>
+                options.AddPolicy(IdentityServerConstants.LocalApi.PolicyName, policy =>
+                {
+                    policy.AddAuthenticationSchemes(IdentityServerConstants.LocalApi.AuthenticationScheme);
+                    policy.RequireAuthenticatedUser();
+                });
+                
+                options.AddPolicy(ApiConstants.Policies.Mod, policy =>
                 {
                     var isPolicy = options.GetPolicy(IdentityServerConstants.LocalApi.PolicyName);
                     policy.Combine(isPolicy);
-                    policy.RequireClaim("role", "Mod");
+                    policy.RequireClaim(ApiConstants.Claims.Role, ApiConstants.Roles.Mod);
                 });
             });
+        }
+    }
+
+    public struct ApiConstants
+    {
+        public struct Policies
+        {
+            public const string Mod = nameof(Mod);
+        }
+        
+        public struct Claims
+        {
+            public const string Role = nameof(Role);
+        }
+        
+        public struct Roles
+        {
+            public const string Mod = nameof(Mod);
         }
     }
 }
