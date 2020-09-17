@@ -10,8 +10,8 @@
         <v-btn width="80" @click="nextRecommendations">Next</v-btn>
       </v-row>
       <v-row justify="center">
-        <v-col v-for="x in currentRecommendationsDisplay">
-          <RecommendedDisplay :title="x.title" :plot="x.plot" :type="x.type" :genres="x.genres" :poster="x.poster" :key="x.id" />
+        <v-col v-for="x in currentRecommendationsDisplay" :key="x.id">
+          <RecommendedDisplay :title="x.title" :plot="x.plot" :type="x.type" :genres="x.genres" :poster="x.poster"  />
         </v-col>
       </v-row>
     </v-container>

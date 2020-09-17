@@ -30,7 +30,7 @@
     private async getRecommendations(){
       this.$store.commit('recommendation/RESET');
 
-      const watchedItems = this.$store.getters['watchlist/getWatchedItems'];
+      const watchedItems:Array<string> | null = this.$store.getters['watchlist/getWatchedItems'];
       console.log(watchedItems);
       await this.$store.dispatch('recommendation/GetRecommendations', {watchedItems, genres: this.selectedGenres, type: this.selectedType })
 

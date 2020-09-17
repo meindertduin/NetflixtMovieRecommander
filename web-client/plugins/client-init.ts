@@ -25,7 +25,7 @@ declare module 'vue/types/vue' {
   }
 }
 
-const plugin: Plugin = ({app, store}, inject) => {
+const plugin: ({app, store}: { app: any; store: any }, inject:any) => void = ({app, store}, inject) => {
   inject('auth', userManger)
 
   app.fetch = () => {

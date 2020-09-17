@@ -22,31 +22,32 @@
     @Component({})
     export default class WatchlistUpload extends Vue{
 
-      private watchLists = {};
+      private watchLists:any = {};
 
-      private toggleOverlay(){
+      private toggleOverlay():void{
         this.$store.commit('watchlist/TOGGLE_OVERLAY');
       }
 
-      private toggleUploadGuide(){
+      private toggleUploadGuide():void{
         this.$store.commit('watchlist/TOGGLE_GUIDE');
       }
 
-      private errorMessage = "";
+      private errorMessage:string = "";
 
 
-      private async handleFileUpload(){
+      private async handleFileUpload():Promise<void>{
         if(Object.keys(this.watchLists).length === 0 && this.watchLists.constructor === Object) return;
         console.log(this.watchLists)
-        let form = new FormData();
+        let form:FormData = new FormData();
 
-        let count = 0;
+        let count:number = 0;
         for (let files in this.watchLists){
           form.append('watchlists', this.watchLists[count]);
           count++;
         }
 
-        const res = await this.$store.dispatch('watchlist/uploadWatchLists', {form});
+        const res:number = await this.$store.dispatch('watchlist/uploadWatchLists', {form});
+
         if(res != 200 && res < 500){
           this.errorMessage = "something went wrong while processing your watchlist, did you upload the right file?";
           this.watchLists = {};
