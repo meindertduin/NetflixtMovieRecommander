@@ -132,17 +132,15 @@
         const form = new FormData;
 
         console.log(this.watchList)
-        form.append('watchList', this.watchList);
+        form.append('WatchList', this.watchList);
+        form.append('WatchGroupId', this.createdWatchGroupId);
         this.watchList = {};
-
 
         const res = this.$axios({
           method: 'post',
           url: 'api/watchgroup/watchlist-upload',
-          data: {
-            watchList: form,
-            watchGroupId: this.createdWatchGroupId,
-          },
+          data: form,
+          headers: {'Content-Type': `multipart/form-data` }
         })
 
         console.log(res);

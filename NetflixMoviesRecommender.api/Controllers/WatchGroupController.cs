@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Internal;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMoviesRecommender.api.Forms;
@@ -44,16 +45,20 @@ namespace NetflixMoviesRecommender.api.Controllers
         }
 
         [HttpPost("watchlist-upload")]
-        public async Task<IActionResult> UploadWatchList([FromForm] IFormFile watchList,[FromForm] string watchGroupId)
+        public async Task<IActionResult> UploadWatchList([FromForm] WatchGroupWatchListForm watchGroupWatchListForm)
         {
+            var watchList = watchGroupWatchListForm.WatchList;
+            var watchGroupId = watchGroupWatchListForm.watchGroupId;
+            
             var watchGroup = await _ctx.WatchGroups.FindAsync(watchGroupId);
 
-            if (watchGroup == null)
+
+            if (watchGroup == null || watchList == null)
             {
-                return StatusCode(500);
+                return StatusCode(413);
             }
-            
-            var savePath = _fileHandlerService.SaveFile(watchList, new[] {"csv"}).Result;
+
+            var savePath = await _fileHandlerService.SaveFile(watchList, new[] {".csv"});
             
             if (savePath == null)
             {
@@ -65,18 +70,26 @@ namespace NetflixMoviesRecommender.api.Controllers
             
             // processes the pairs and ads them to the watchgroup.watchitems
             var titles = pairs.Item1;
+            
+            var watchItems = new List<WatchItem>();
             for (int i = 0; i < titles.Count; i++)
             {
                 var shortTitle = titles[i].Split(':');
                 if (string.IsNullOrEmpty(shortTitle[0]) == false)
                 {
-                    watchGroup.WatchItems.Add(new WatchItem
+                    var watchItem = new WatchItem
                     {
                         Title = shortTitle[0],
-                    });
+                        WatchGroupId = watchGroup.Id,
+                    };
+                    
+                    watchItems.Add(watchItem);
                 }
             }
 
+            
+
+            await _ctx.WatchItems.AddRangeAsync(watchItems.Distinct());
             await _ctx.SaveChangesAsync();
             System.IO.File.Delete(savePath);
 
