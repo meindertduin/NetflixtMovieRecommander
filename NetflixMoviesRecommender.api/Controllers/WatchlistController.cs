@@ -25,12 +25,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             _env = env;
             _ctx = ctx;
         }
-
-        [HttpGet]
-        public IEnumerable<WatchItem> Get()
-        {
-            return _ctx.WatchItems.ToList();
-        }
+        
         [HttpPost]
         public async Task<IActionResult> Upload(List<IFormFile> watchLists)
         {

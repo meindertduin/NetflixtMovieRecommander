@@ -7,14 +7,14 @@
 
     <v-card-subtitle>Een beschrijving</v-card-subtitle>
     <v-card-text>
-      <subtitle-1>Shared with</subtitle-1>
+      <p>Shared with</p>
       <v-list-group
         active-class="deep-purple accent-4 white--text"
         column
       >
-        <v-list-item v-for="x in sharedWith">
+        <v-list-item v-for="(x, index) in sharedWith" :key="index">
           <v-list-item-avatar color="blue">
-            <img v-if="x.picture.length != 0" :src="x.picture" alt="">
+            <img v-if="x.picture.length !== 0" :src="x.picture" alt="">
             <span v-else class="white--text headline">{{x.userName[0].toUpperCase()}}</span>
           </v-list-item-avatar>
           <v-list-item-title>

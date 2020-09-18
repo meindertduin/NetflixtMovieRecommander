@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NetflixMovieRecommander.Data;
+using NetflixMovieRecommander.Models;
 using NetflixMoviesRecommender.api.Services;
 
 namespace NetflixMoviesRecommender.api
@@ -29,7 +30,7 @@ namespace NetflixMoviesRecommender.api
         }
         public void ConfigureServices(IServiceCollection services)
         {
-            string conn = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=NetflixMovieRecommender;Integrated Security=True; MultipleActiveResultSets=True";
+            string conn = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=WatchTuner;Integrated Security=True; MultipleActiveResultSets=True";
 
             AddIdentity(services);
             
@@ -38,7 +39,6 @@ namespace NetflixMoviesRecommender.api
 
 
 
-            services.AddTransient<IWatchListFileParserService, WatchListFileParserService>();
             services.AddTransient<IRecommendedDatabaseParser, RecommendedDatabaseParser>();
 
             services.AddHttpClient();
@@ -85,14 +85,9 @@ namespace NetflixMoviesRecommender.api
 
         private void AddIdentity(IServiceCollection services)
         {
-            string conn = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=NetflixMovieRecommender;Integrated Security=True; MultipleActiveResultSets=True";
-
-
-            services.AddDbContext<AppIdentityDbContext>(config =>
-                //config.UseInMemoryDatabase("Dev");
-                config.UseSqlServer(conn, b => b.MigrationsAssembly("NetflixMoviesRecommender.api")));
-
-                services.AddIdentity<IdentityUser, IdentityRole>(options =>
+            string conn = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=WatchTuner;Integrated Security=True; MultipleActiveResultSets=True";
+            
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                 {
                     options.User.RequireUniqueEmail = true;
                     if (_env.IsDevelopment())
@@ -108,8 +103,9 @@ namespace NetflixMoviesRecommender.api
                         // add in configs for production
                     }
                 })
-                .AddEntityFrameworkStores<AppIdentityDbContext>()
+                .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
+
 
                 services.ConfigureApplicationCookie(config =>
                 {
@@ -119,7 +115,7 @@ namespace NetflixMoviesRecommender.api
                 
             var identityServiceBuilder = services.AddIdentityServer();
 
-            identityServiceBuilder.AddAspNetIdentity<IdentityUser>();
+            identityServiceBuilder.AddAspNetIdentity<ApplicationUser>();
             
             var assembly = typeof(Startup).Assembly.GetName().Name;
 

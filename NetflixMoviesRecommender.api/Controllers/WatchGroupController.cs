@@ -1,7 +1,23 @@
-﻿namespace NetflixMoviesRecommender.api.Controllers
+﻿using Microsoft.AspNetCore.Mvc;
+using NetflixMoviesRecommender.api.Forms;
+
+namespace NetflixMoviesRecommender.api.Controllers
 {
-    public class WatchGroupController
+    [ApiController]
+    [Route("/api/watchgroup")]
+    public class WatchGroupController : ControllerBase
     {
+        [HttpGet("create")]
+        public IActionResult Get()
+        {
+            return Ok();
+        }
         
+        [HttpPost("create")]
+        public IActionResult CreateGroup([FromBody] WatchGroupForm watchGroupForm)
+        {
+            
+            return Ok();
+        }
     }
 }
