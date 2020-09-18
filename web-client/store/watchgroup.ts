@@ -1,13 +1,10 @@
 ﻿﻿import {ActionTree, GetterTree, MutationTree} from 'vuex';
 import { RootState } from "~/store";
 
-interface initalStateModel {
-  creationOverlayActive: boolean
-}
 
-const initState: initalStateModel = {
-  creationOverlayActive: false,
-}
+const initState = () => ({
+  creationOverlayActive: false as boolean,
+});
 
 export const state:any = initState;
 

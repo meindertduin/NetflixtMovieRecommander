@@ -8,21 +8,15 @@ const ROLES = {
 }
 
 
-interface StateLayout {
-  user: User | null,
-  profile: any | null,
-  authenticated: boolean,
-}
-const initState: StateLayout = {
-  user: null,
-  profile: null,
-  authenticated: false,
-}
 
-const state = () => (
-  initState
-)
+const initState = () => ({
+  user: null as User | null,
+  profile: null as any,
+  authenticated: false as boolean,
+});
 
+
+export const state:any = initState;
 
 
 export type auth = ReturnType<typeof state>

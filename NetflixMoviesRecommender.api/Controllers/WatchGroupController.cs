@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMoviesRecommender.api.Forms;
+using NetflixMoviesRecommender.api.Services;
 
 namespace NetflixMoviesRecommender.api.Controllers
 {
@@ -21,16 +22,64 @@ namespace NetflixMoviesRecommender.api.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AppDbContext _ctx;
+        private readonly IFileHandlerService _fileHandlerService;
 
-        public WatchGroupController(UserManager<ApplicationUser> userManager, AppDbContext ctx)
+        public WatchGroupController(UserManager<ApplicationUser> userManager
+            , AppDbContext ctx, IFileHandlerService fileHandlerService)
         {
             _userManager = userManager;
             _ctx = ctx;
+            _fileHandlerService = fileHandlerService;
         }
-        
-        [HttpGet("create")]
-        public IActionResult Get()
+
+        [HttpGet]
+        [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
+        public async Task<IActionResult> GetUserWatchGroups()
         {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var watchGroups =  _ctx.WatchGroups.Where(x => x.OwnerId == user.Id).ToList();
+            
+            return Ok(watchGroups);
+
+        }
+
+        [HttpPost("watchlist-upload")]
+        public async Task<IActionResult> UploadWatchList([FromForm] IFormFile watchList,[FromForm] string watchGroupId)
+        {
+            var watchGroup = await _ctx.WatchGroups.FindAsync(watchGroupId);
+
+            if (watchGroup == null)
+            {
+                return StatusCode(500);
+            }
+            
+            var savePath = _fileHandlerService.SaveFile(watchList, new[] {"csv"}).Result;
+            
+            if (savePath == null)
+            {
+                return StatusCode(500);
+            }
+            
+            var fileReader = new CsvReader();
+            var pairs = fileReader.ReadCsvAsKeyValues(savePath);
+            
+            // processes the pairs and ads them to the watchgroup.watchitems
+            var titles = pairs.Item1;
+            for (int i = 0; i < titles.Count; i++)
+            {
+                var shortTitle = titles[i].Split(':');
+                if (string.IsNullOrEmpty(shortTitle[0]) == false)
+                {
+                    watchGroup.WatchItems.Add(new WatchItem
+                    {
+                        Title = shortTitle[0],
+                    });
+                }
+            }
+
+            await _ctx.SaveChangesAsync();
+            System.IO.File.Delete(savePath);
+
             return Ok();
         }
         
@@ -38,9 +87,11 @@ namespace NetflixMoviesRecommender.api.Controllers
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
         public async Task<IActionResult> CreateGroup([FromBody] WatchGroupForm watchGroupForm)
         {
-            // get the user and userprofile
             var user = _userManager.GetUserAsync(HttpContext.User);
             UserProfile userProfile = await _ctx.UserProfiles.FindAsync(user.Result.Id);
+
+            
+            // check if title already exists
 
             if (userProfile != null)
             {
@@ -57,7 +108,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                 await _ctx.WatchGroups.AddAsync(watchGroup);
                 await _ctx.SaveChangesAsync();
                 
-                return Ok();
+                return Ok(watchGroup.Id);
             }
 
             return StatusCode(500);

@@ -122,19 +122,30 @@
 
       private addedUsers: Array<string> = [];
       private displayNameList: Array<string> = [];
-      private usersForm:FormData | null = null;
+
+      private createdWatchGroupId = "";
 
 
       private addWatchlist(){
         if(Object.keys(this.watchList).length === 0 && this.watchList.constructor === Object) return;
 
-        console.log("watchlist gets added")
-        if(this.usersForm === null){
-          this.usersForm = new FormData();
-        }
-        this.usersForm.append('watchLists', this.watchList[0]);
-        this.watchListsCount++;
+        const form = new FormData;
+
+        console.log(this.watchList)
+        form.append('watchList', this.watchList);
         this.watchList = {};
+
+
+        const res = this.$axios({
+          method: 'post',
+          url: 'api/watchgroup/watchlist-upload',
+          data: {
+            watchList: form,
+            watchGroupId: this.createdWatchGroupId,
+          },
+        })
+
+        console.log(res);
       }
 
       private addUser(){
@@ -161,6 +172,8 @@
           existingUsers: this.existingUsers,
           addedUsers: this.addedUsers,
         });
+
+        this.createdWatchGroupId = res.data;
 
         this.step++;
       }
