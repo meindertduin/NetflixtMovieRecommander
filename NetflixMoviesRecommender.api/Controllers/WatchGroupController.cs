@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityServer4;
-using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Internal;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMoviesRecommender.api.Forms;
@@ -70,26 +66,34 @@ namespace NetflixMoviesRecommender.api.Controllers
             
             // processes the pairs and ads them to the watchgroup.watchitems
             var titles = pairs.Item1;
+            List<string> shortTitles = new List<string>();
             
-            var watchItems = new List<WatchItem>();
+            // deprecading titles in shorter titles and removing duplicates
             for (int i = 0; i < titles.Count; i++)
             {
                 var shortTitle = titles[i].Split(':');
                 if (string.IsNullOrEmpty(shortTitle[0]) == false)
                 {
-                    var watchItem = new WatchItem
-                    {
-                        Title = shortTitle[0],
-                        WatchGroupId = watchGroup.Id,
-                    };
-                    
-                    watchItems.Add(watchItem);
+                    shortTitles.Add(shortTitle[0]);
                 }
             }
 
+            shortTitles = shortTitles.Distinct().ToList();
             
+            // convert titles to watch items that use the watchgroup id as foreign key
+            var watchItems = new List<WatchItem>();
+            
+            for (int i = 0; i < shortTitles.Count; i++)
+            {
+                var watchItem = new WatchItem
+                {
+                    Title = shortTitles[i],
+                    WatchGroupId = watchGroup.Id,
+                };
+                watchItems.Add(watchItem);
+            }
 
-            await _ctx.WatchItems.AddRangeAsync(watchItems.Distinct());
+            await _ctx.WatchItems.AddRangeAsync(watchItems);
             await _ctx.SaveChangesAsync();
             System.IO.File.Delete(savePath);
 
