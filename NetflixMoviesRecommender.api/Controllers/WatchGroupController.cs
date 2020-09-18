@@ -6,6 +6,7 @@ using IdentityServer4;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMoviesRecommender.api.Forms;
@@ -34,7 +35,11 @@ namespace NetflixMoviesRecommender.api.Controllers
         public async Task<IActionResult> GetUserWatchGroups()
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            var watchGroups =  _ctx.WatchGroups.Where(x => x.OwnerId == user.Id).ToList();
+            var watchGroups =  _ctx.WatchGroups.Where(x => x.OwnerId == user.Id)
+                .Include(x => x.Members)
+                .ToList();
+            
+            // todo: map the watchgroup model in a viewmodel
             
             return Ok(watchGroups);
 

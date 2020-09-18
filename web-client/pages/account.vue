@@ -41,6 +41,14 @@
     picture: string,
   }
 
+  interface WatchList {
+    addedNames: Array<string>,
+    description: string,
+    id: string,
+
+    title: string,
+  }
+
 
   @Component({
     name: "account",
@@ -51,7 +59,6 @@
   })
   export default class Account extends Vue{
     private title:string = "title";
-
 
     private person: Person = {
       userName: "john",
@@ -65,19 +72,26 @@
       return (this.$store.state.watchgroup as watchgroup).creationOverlayActive;
     }
 
-    created(){
+    async created() {
       // test purpose only eventually this will be automated
-      if(!process.server){
-        this.$auth.getUser()
+      if (!process.server) {
+        await this.$auth.getUser()
           .then(user => {
-            if(user){
+            if (user) {
               console.log("user from storage");
               this.$axios.setToken(`Bearer ${user.access_token}`);
+
             }
           });
+        await this.getData();
       }
+      this.sharedWith = [this.person, this.person, this.person, this.person, this.person, this.person, this.person]
 
-      this.sharedWith = [this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person]
+    }
+
+    async getData(){
+      const {data} = await this.$axios.get('api/watchgroup');
+
     }
 
     private toggleCreationOverlay():void{
