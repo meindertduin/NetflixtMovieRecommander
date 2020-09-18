@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using NetflixMovieRecommander.Models;
 
 namespace NetflixMoviesRecommender.api.Pages.Account
 {
@@ -16,7 +17,7 @@ namespace NetflixMoviesRecommender.api.Pages.Account
             Form = new LoginForm() {ReturnUrl = returnUrl};
         }
 
-        public async Task<IActionResult> OnPost([FromServices] SignInManager<IdentityUser> signInManager)
+        public async Task<IActionResult> OnPost([FromServices] SignInManager<ApplicationUser> signInManager)
         {
             if (ModelState.IsValid == false)
             {

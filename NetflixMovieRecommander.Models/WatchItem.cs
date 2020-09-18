@@ -6,7 +6,8 @@ namespace NetflixMovieRecommander.Models
 {
     public class WatchItem
     {
-        [Key] public int Id { get; set; }
+        [Key]
+        public int Id { get; set; }
         
         public string Title { get; set; }
 

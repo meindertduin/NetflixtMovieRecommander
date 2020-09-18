@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
@@ -6,6 +7,8 @@ namespace NetflixMovieRecommander.Models
 {
     public class WatchGroup
     {
+        [Key]
+        [MaxLength(40)]
         public string Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }

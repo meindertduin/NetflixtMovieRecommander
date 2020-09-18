@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using NetflixMovieRecommander.Models;
 
 namespace NetflixMoviesRecommender.api.Pages.Account
 {
@@ -16,15 +17,15 @@ namespace NetflixMoviesRecommender.api.Pages.Account
         }
 
         public async Task<IActionResult> OnPost(
-            [FromServices] UserManager<IdentityUser> userManager,
-            [FromServices] SignInManager<IdentityUser> signInManager)
+            [FromServices] UserManager<ApplicationUser> userManager,
+            [FromServices] SignInManager<ApplicationUser> signInManager)
         {
             if (ModelState.IsValid == false)
             {
                 return Page();
             }
             
-            var user = new IdentityUser(Form.Username) { Email = Form.Email };
+            var user = new ApplicationUser(Form.Username) { Email = Form.Email };
             var creationResult = await userManager.CreateAsync(user, Form.Password);
 
             if (creationResult.Succeeded)

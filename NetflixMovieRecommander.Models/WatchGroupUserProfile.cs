@@ -1,4 +1,6 @@
-﻿namespace NetflixMovieRecommander.Models
+﻿using System;
+
+namespace NetflixMovieRecommander.Models
 {
     public class WatchGroupUserProfile
     {

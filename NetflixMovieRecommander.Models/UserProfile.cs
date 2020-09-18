@@ -8,6 +8,7 @@ namespace NetflixMovieRecommander.Models
     {
         [Key]
         public string Id { get; set; }
+
         public ApplicationUser ApplicationUser { get; set; }
         public ICollection<WatchGroup> OwnedWatchGroups { get; set; }
         

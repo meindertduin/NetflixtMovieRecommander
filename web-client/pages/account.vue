@@ -66,6 +66,17 @@
     }
 
     created(){
+      // test purpose only eventually this will be automated
+      if(!process.server){
+        this.$auth.getUser()
+          .then(user => {
+            if(user){
+              console.log("user from storage");
+              this.$axios.setToken(`Bearer ${user.access_token}`);
+            }
+          });
+      }
+
       this.sharedWith = [this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person, this.person]
     }
 
