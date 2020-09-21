@@ -13,3 +13,10 @@ export interface WatchGroupModel {
   owner: UserProfile,
   members: Array<UserProfile>,
 }
+
+export interface UpdateWatchGroupModel {
+  id: string,
+  addedNames: Array<string>,
+  title: string,
+  description: string,
+}

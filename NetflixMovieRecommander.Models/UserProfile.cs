@@ -23,7 +23,9 @@ namespace NetflixMovieRecommander.Models
         [IgnoreDataMember] 
         public IList<WatchGroupUserProfile> MemberWatchGroups { get; set; }
         
+        [MaxLength(30)]
         public string UserName { get; set; }
+        [MaxLength(200)]
         public string AvatarUrl { get; set; }
     }
 }

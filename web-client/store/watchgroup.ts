@@ -1,4 +1,4 @@
-﻿import {WatchGroupModel} from "~/assets/interface-models";
+﻿import {UpdateWatchGroupModel, WatchGroupModel} from "~/assets/interface-models";
 
 ﻿import {ActionTree, GetterTree, MutationTree} from 'vuex';
 import { RootState } from "~/store";
@@ -47,13 +47,7 @@ interface editAddedNamesModel{
 }
 
 export const actions: ActionTree<watchgroup, RootState> = {
-  editGroupTitle({dispatch}, payload:editTitleModel) {
-
-  },
-  editGroupDescription({dispatch}, payload:editDescriptionModel){
-
-  },
-  editGroupAddedNames({dispatch}, payload:editAddedNamesModel){
-    console.log(payload);
-  },
+  editGroup({dispatch}, payload:UpdateWatchGroupModel){
+    const res = this.$axios.put('/api/watchgroup/edit', payload);
+  }
 };

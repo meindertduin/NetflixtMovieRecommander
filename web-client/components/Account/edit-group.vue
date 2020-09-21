@@ -1,5 +1,5 @@
 ﻿<template>
-  <v-card>
+  <v-card min-width="400">
     <v-card-title>
       Edit Group
     </v-card-title>
@@ -16,23 +16,33 @@
       </v-row>
       <v-btn @click="save" color="green">Save Changes</v-btn>
       <v-btn @click="initFields" >Cancel</v-btn>
-      <hr>
+
+      <hr class="my-3">
 
       <!-- Todo Add functionality for inviting people -->
       <v-row class="justify-start align-center mx-2">
         <v-text-field label="Invite User"></v-text-field><v-btn color="green" text>Invite</v-btn>
       </v-row>
 
+
+      <h3 class="mb-3">Add Watchlist: </h3>
       <v-row>
         <AddWatchlist  :group-id="currentWatchGroup.id"/>
       </v-row>
     </v-card-text>
+    <v-card-actions>
+      <v-row>
+        <v-btn @click="closeEditOverlay" >
+          Close
+        </v-btn>
+      </v-row>
+    </v-card-actions>
   </v-card>
 </template>
 
 <script lang="ts">
   import {Component, Vue} from "nuxt-property-decorator";
-  import {WatchGroupModel} from "~/assets/interface-models";
+  import {UpdateWatchGroupModel, WatchGroupModel} from "~/assets/interface-models";
   import {watchgroup} from "~/store/watchgroup";
   import AddWatchlist from "~/components/Account/add-watchlist.vue";
 
@@ -64,24 +74,16 @@
     }
 
     private save():void{
-      if(this.editedTitle !== this.currentWatchGroup.title){
-        this.$store.dispatch('watchgroup/editGroupTitle', {title: this.editedTitle, id: this.currentWatchGroup.id})
+      let payload: UpdateWatchGroupModel = {
+        id: this.currentWatchGroup.id,
+        title: this.editedTitle,
+        description: this.editedDescription,
+        addedNames: this.editedAddedNames,
       }
-      if(this.editedDescription !== this.currentWatchGroup.description){
-        this.$store.dispatch('watchgroup/editGroupDescription', {description: this.editedDescription, id: this.currentWatchGroup.id})
-      }
-      if(this.editedAddedNames.length !== this.currentWatchGroup.addedNames.length){
-        let addedNamesUnchanged = true;
-        for (let i = 0; i < this.editedAddedNames.length; i++){
-          if(this.currentWatchGroup.addedNames.includes(this.editedAddedNames[i]) == false){
-            addedNamesUnchanged = false;
-            break;
-          }
-        }
-        if(addedNamesUnchanged === false){
-          this.$store.dispatch('watchgroup/editGroupAddedNames', {addedNames: this.editedAddedNames, id: this.currentWatchGroup.id});
-        }
-      }
+
+      console.log(payload);
+
+      this.$store.dispatch('watchgroup/editGroup', payload);
     }
 
     private initFields():void{
@@ -90,8 +92,8 @@
       this.editedDescription = this.currentWatchGroup.description;
     }
 
-    private handleUpload():void{
-
+    private closeEditOverlay(){
+      this.$store.commit('watchgroup/CLOSE_EDIT_OVERLAY');
     }
 
     created(){

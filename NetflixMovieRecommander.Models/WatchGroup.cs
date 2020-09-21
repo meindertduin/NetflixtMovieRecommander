@@ -10,18 +10,22 @@ namespace NetflixMovieRecommander.Models
         [Key]
         [MaxLength(40)]
         public string Id { get; set; }
+        [MaxLength(50)]
         public string Title { get; set; }
+        [MaxLength(200)]
         public string Description { get; set; }
 
+        
         public UserProfile Owner { get; set; }
+        [MaxLength(40)]
         public string OwnerId { get; set; }
         
         
         public IList<WatchGroupUserProfile> Members { get; set; }
         
         public ICollection<WatchItem> WatchItems { get; set; }
-        
-        
         public string[] AddedNames { get; set; }
+
+        public bool Deleted { get; set; } = false;
     }
 }

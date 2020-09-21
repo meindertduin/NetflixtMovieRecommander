@@ -61,6 +61,7 @@ namespace NetflixMoviesRecommender.api.Controllers
         }
 
         [HttpPost("watchlist-upload")]
+        [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
         public async Task<IActionResult> UploadWatchList([FromForm] WatchGroupWatchListForm watchGroupWatchListForm)
         {
             var watchList = watchGroupWatchListForm.WatchList;
@@ -149,6 +150,73 @@ namespace NetflixMoviesRecommender.api.Controllers
             }
 
             return StatusCode(500);
+        }
+
+        [HttpPut("edit")]
+        [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
+        public async Task<IActionResult> EditGroupTitle([FromBody] UpdateWatchGroupForm watchGroupForm)
+        {
+            var watchGroup = await _ctx.WatchGroups.FindAsync(watchGroupForm.Id);
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+
+            if (watchGroup.OwnerId != user.Id)
+            {
+                return StatusCode(401);
+            }
+
+            watchGroup.Title = watchGroupForm.Title;
+            watchGroup.AddedNames = watchGroupForm.AddedNames;
+            watchGroup.Description = watchGroupForm.Description;
+            
+            await _ctx.SaveChangesAsync();
+
+            return Ok();
+        }
+        
+        [HttpPost("watch-item")]
+        [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
+        public async Task<IActionResult> AddWatchItem(string id, string title)
+        {
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(title))
+            {
+                return BadRequest();
+            }
+            
+            var watchGroup = await _ctx.WatchGroups.FindAsync(id);
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+
+            if (watchGroup.OwnerId != user.Id)
+            {
+                return StatusCode(401);
+            }
+
+            _ctx.WatchItems.Add(new WatchItem
+            {
+                WatchGroupId = id,
+                Title = title,
+            });
+
+            await _ctx.SaveChangesAsync();
+            
+            return Ok();
+        }
+
+        [HttpDelete]
+        [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
+        public async Task<IActionResult> DeleteGroup(string id)
+        {
+            var watchGroup = await _ctx.WatchGroups.FindAsync(id);
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            
+            if (watchGroup.OwnerId != user.Id)
+            {
+                return StatusCode(401);
+            }
+
+            watchGroup.Deleted = true;
+            await _ctx.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }

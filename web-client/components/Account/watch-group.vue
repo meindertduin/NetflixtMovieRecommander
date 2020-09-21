@@ -42,7 +42,7 @@
               <span class="white--text headline">{{x[0].toUpperCase()}}</span>
             </v-list-item-avatar>
             <v-list-item-title>
-              {{owner.userName}}
+              {{x}}
             </v-list-item-title>
           </v-list-item>
 

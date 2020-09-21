@@ -51,7 +51,7 @@ namespace NetflixMoviesRecommender.api
                 {
                     builder.AllowAnyOrigin();
                     builder.AllowAnyHeader();
-                    builder.AllowAnyHeader();
+                    builder.AllowAnyMethod();
                 });
             });
             
