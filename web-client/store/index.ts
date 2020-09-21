@@ -17,7 +17,16 @@ export const actions: ActionTree<RootState, RootState> = {
   async nuxtServerInit ({ commit, dispatch}) {
 
   },
-  nuxtClientInit({dispatch}, context){
-    //return dispatch('auth/init');
+  async clientInit({dispatch}, context){
+    await this.$auth.getUser()
+      .then(user => {
+        if(user){
+          console.log("user from storage");
+          this.$axios.setToken(`Bearer ${user.access_token}`);
+        }
+      })
+      .catch(err => {
+        console.log("login required");
+      })
   }
 }

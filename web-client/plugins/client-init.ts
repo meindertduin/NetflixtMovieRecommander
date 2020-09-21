@@ -25,12 +25,16 @@ declare module 'vue/types/vue' {
   }
 }
 
-const plugin: ({app, store}: { app: any; store: any }, inject:any) => void = ({app, store}, inject) => {
+const plugin: ({app, store}: { app: any; store: any }, inject:any) => void = async ({app, store}, inject) => {
   inject('auth', userManger)
 
-  app.fetch = () => {
-    return store.dispatch('nuxtClientInit');
-  }
+  await store.dispatch('clientInit');
+
+  //app.fetch = () => {
+    //return store.dispatch('nuxtClientInit');
+  //}
 }
 
 export default plugin;
+
+

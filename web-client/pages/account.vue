@@ -16,7 +16,7 @@
             </v-btn>
           </v-app-bar>
           <v-row class="m1">
-            <v-col :cols="12" v-for="(x, index) in 5" :key="index">
+            <v-col :cols="12" v-for="(x, index) in userWatchGroups" :key="index">
               <WatchGroup  :title="title" :shared-with="sharedWith"/>
             </v-col>
           </v-row>
@@ -41,12 +41,15 @@
     picture: string,
   }
 
-  interface WatchList {
+  interface WatchGroup {
+    id: string,
     addedNames: Array<string>,
     description: string,
-    id: string,
-
     title: string,
+
+    // todo change any to an interface
+    owner: any,
+    members: Array<any>,
   }
 
 
@@ -59,6 +62,7 @@
   })
   export default class Account extends Vue{
     private title:string = "title";
+    private userWatchGroups = [];
 
     private person: Person = {
       userName: "john",
@@ -73,25 +77,14 @@
     }
 
     async created() {
-      // test purpose only eventually this will be automated
-      if (!process.server) {
-        await this.$auth.getUser()
-          .then(user => {
-            if (user) {
-              console.log("user from storage");
-              this.$axios.setToken(`Bearer ${user.access_token}`);
-
-            }
-          });
-        await this.getData();
-      }
-      this.sharedWith = [this.person, this.person, this.person, this.person, this.person, this.person, this.person]
-
+    await this.getData();
+    this.sharedWith = [this.person, this.person, this.person, this.person, this.person, this.person, this.person];
     }
 
     async getData(){
-      const {data} = await this.$axios.get('api/watchgroup');
-
+      const {data}:watchgroup = await this.$axios.get('api/watchgroup');
+      this.userWatchGroups = data;
+      console.log(data);
     }
 
     private toggleCreationOverlay():void{

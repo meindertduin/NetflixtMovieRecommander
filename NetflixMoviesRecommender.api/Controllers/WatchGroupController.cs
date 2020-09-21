@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using IdentityServer4;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +13,8 @@ using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMoviesRecommender.api.Forms;
 using NetflixMoviesRecommender.api.Services;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace NetflixMoviesRecommender.api.Controllers
 {
@@ -35,13 +39,32 @@ namespace NetflixMoviesRecommender.api.Controllers
         public async Task<IActionResult> GetUserWatchGroups()
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            var watchGroups =  _ctx.WatchGroups.Where(x => x.OwnerId == user.Id)
-                .Include(x => x.Members)
+            var watchGroups =  _ctx.WatchGroups
+                .Where(x => x.OwnerId == user.Id)
+                .Include(x => x.Owner)
                 .ToList();
+
+            List<WatchGroupViewModel> watchGroupViewModels = new List<WatchGroupViewModel>();
+            
+            foreach (var watchGroup in watchGroups)
+            {
+                watchGroupViewModels.Add(new WatchGroupViewModel
+                {
+                    Id = watchGroup.Id,
+                    Title = watchGroup.Title,
+                    Description = watchGroup.Description,
+                    Members = watchGroup.Members,
+                    Owner = watchGroup.Owner,
+                    AddedNames = watchGroup.AddedNames
+                });
+            }
+
+
+            var json = JsonConvert.SerializeObject(watchGroupViewModels);
             
             // todo: map the watchgroup model in a viewmodel
             
-            return Ok(watchGroups);
+            return Ok(json);
 
         }
 

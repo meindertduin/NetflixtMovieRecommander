@@ -18,17 +18,6 @@
         private login(){
           return this.$auth.signinRedirect();
         };
-        created(){
-          if(!process.server){
-            this.$auth.getUser()
-            .then(user => {
-              if(user){
-                console.log("user from storage");
-                this.$axios.setToken(`Bearer ${user.access_token}`);
-              }
-            });
-          }
-        }
         private async test(){
           const res = await this.$axios.get('api/users/test');
           console.log(res.data);
