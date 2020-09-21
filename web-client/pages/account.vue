@@ -17,7 +17,7 @@
           </v-app-bar>
           <v-row class="m1">
             <v-col :cols="12" v-for="(x, index) in userWatchGroups" :key="index">
-              <WatchGroup  :title="x.title" :members="x.members" :added-names="x.addedNames" :owner="x.owner" :description="x.description"/>
+              <WatchGroup  :title="x.title" :members="x.members" :added-names="x.addedNames" :owner="x.owner" :description="x.description" :watch-group="x"/>
             </v-col>
           </v-row>
         </v-card>
@@ -25,6 +25,9 @@
     </v-row>
     <v-overlay v-if="creationOverlayActive">
       <CreateGroup />
+    </v-overlay>
+    <v-overlay v-if="editOverlayActive">
+      <EditGroup />
     </v-overlay>
   </v-container>
 </template>
@@ -34,12 +37,14 @@
   import WatchGroup from "~/components/Account/watch-group.vue";
   import CreateGroup from "~/components/Account/create-group.vue";
   import {watchgroup} from "~/store/watchgroup";
+  import EditGroup from "~/components/Account/edit-group.vue";
 
   @Component({
     name: "account",
     components: {
       WatchGroup,
       CreateGroup,
+      EditGroup,
     },
   })
   export default class Account extends Vue{
@@ -47,6 +52,10 @@
 
     get creationOverlayActive():boolean{
       return (this.$store.state.watchgroup as watchgroup).creationOverlayActive;
+    }
+
+    get editOverlayActive():boolean{
+      return (this.$store.state.watchgroup as watchgroup).editOverlayActive;
     }
 
     async created() {

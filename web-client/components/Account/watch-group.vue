@@ -51,7 +51,7 @@
     </v-card-text>
     <v-card-actions>
 
-      <v-btn text>Edit</v-btn>
+      <v-btn @click="toggleEditOverlay">Edit</v-btn>
       <v-btn text>Watch Now!</v-btn>
     </v-card-actions>
   </v-card>
@@ -60,7 +60,7 @@
 
 <script lang="ts">
   import {Component, Prop, Vue} from "nuxt-property-decorator";
-  import {UserProfile} from "~/assets/interface-models";
+  import {UserProfile, WatchGroupModel} from "~/assets/interface-models";
 
     @Component({})
     export default class WatchGroup extends Vue{
@@ -70,8 +70,14 @@
       @Prop({type: Object, required: true}) readonly owner!: UserProfile
       @Prop({type: String, required: true}) readonly description!: string
 
+      @Prop({type: Object, required: true}) watchGroup!: WatchGroupModel
+
       get sharedWithCount(){
         return this.members.length + this.addedNames.length;
+      }
+
+      private toggleEditOverlay():void{
+        this.$store.commit('watchgroup/OPEN_EDIT_OVERLAY', this.watchGroup);
       }
     }
 </script>

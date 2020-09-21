@@ -4,7 +4,7 @@
   Id: string,
 }
 
-export interface WatchGroup {
+export interface WatchGroupModel {
   id: string,
   addedNames: Array<string>,
   description: string,

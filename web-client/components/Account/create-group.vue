@@ -74,10 +74,7 @@
 
 
           <div v-if="watchListsCount > 0">{{watchListsCount}} Netflix watchlists added</div>
-          <v-file-input accept=".csv" label="User Netflix Watch History (optional)" v-model="watchList" prepend-icon="mdi-paperclip"></v-file-input>
-          <v-row class="ma-5">
-            <v-btn color="green" @click="addWatchlist" >Add Watchlist</v-btn>
-          </v-row>
+          <AddWatchlist :group-id="this.createdWatchGroupId"/>
 
           <v-btn @click="toggleCreationOverlay">Coninue</v-btn>
 
@@ -89,6 +86,7 @@
 
 <script lang="ts">
   import {Component, Vue, Watch} from "nuxt-property-decorator";
+  import AddWatchlist from "~/components/Account/add-watchlist.vue";
 
 
     interface existingUser{
@@ -104,7 +102,11 @@
       watchLists:FormData | null,
     }
 
-    @Component({})
+    @Component({
+      components: {
+        AddWatchlist,
+      }
+    })
     export default class CreateGroup extends Vue{
       private step:number = 1;
       private descriptionCount:number = 200;
@@ -125,26 +127,6 @@
 
       private createdWatchGroupId = "";
 
-
-      private addWatchlist(){
-        if(Object.keys(this.watchList).length === 0 && this.watchList.constructor === Object) return;
-
-        const form = new FormData;
-
-        console.log(this.watchList)
-        form.append('WatchList', this.watchList);
-        form.append('WatchGroupId', this.createdWatchGroupId);
-        this.watchList = {};
-
-        const res = this.$axios({
-          method: 'post',
-          url: 'api/watchgroup/watchlist-upload',
-          data: form,
-          headers: {'Content-Type': `multipart/form-data` }
-        })
-
-        console.log(res);
-      }
 
       private addUser(){
         if(this.addedUserFormName.length > 0){

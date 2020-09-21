@@ -92,8 +92,6 @@
         const type = this.$store.getters['recommendation/getSelectedType'];
         await this.$store.dispatch('recommendation/GetRecommendations', {watchedItems, genres: genres, type: type })
       }
-
-
     }
 </script>
 
