@@ -3,26 +3,51 @@
     color="#385F73"
     dark
   >
-    <v-card-title class="headline">{{title}}</v-card-title>
+    <v-card-title >
+      <v-row>
+        <v-col :cols="4" class="4">
+          {{title}}
+        </v-col>
+        <v-col :cols="8" class="caption">
+          created by:
+          <v-avatar color="blue">
+            <img v-if="owner.avatarUrl !== null" :src="owner.avatarUrl" alt="">
+            <span v-else class="white--text headline">{{owner.userName[0].toUpperCase()}}</span>
+          </v-avatar>
+          {{owner.userName}}
+        </v-col>
+      </v-row>
+    </v-card-title>
 
-    <v-card-subtitle>Een beschrijving</v-card-subtitle>
+    <v-card-subtitle>{{description}}</v-card-subtitle>
     <v-card-text>
-      <p>Shared with</p>
-      <v-list-group
-        active-class="deep-purple accent-4 white--text"
-        column
-      >
-        <v-list-item v-for="(x, index) in sharedWith" :key="index">
-          <v-list-item-avatar color="blue">
-            <img v-if="x.picture.length !== 0" :src="x.picture" alt="">
-            <span v-else class="white--text headline">{{x.userName[0].toUpperCase()}}</span>
-          </v-list-item-avatar>
-          <v-list-item-title>
-            {{x.userName}}
-          </v-list-item-title>
-        </v-list-item>
+      <div v-if="sharedWithCount > 0">
+        <p>Shared with: {{sharedWithCount}} {{sharedWithCount > 1? "others": "other"}}</p>
+        <v-list-group
+          active-class="deep-purple accent-4 white--text"
+          column
+        >
+          <v-list-item v-for="(x, index) in members" :key="index">
+            <v-list-item-avatar color="blue">
+              <img v-if="x.avatarUrl !== null" :src="x.avatarUrl" alt="">
+              <span v-else class="white--text headline">{{x.userName[0].toUpperCase()}}</span>
+            </v-list-item-avatar>
+            <v-list-item-title>
+              {{x.userName}}
+            </v-list-item-title>
+          </v-list-item>
 
-      </v-list-group>
+          <v-list-item v-for="(x, index) in addedNames" :key="index">
+            <v-list-item-avatar color="blue">
+              <span class="white--text headline">{{x[0].toUpperCase()}}</span>
+            </v-list-item-avatar>
+            <v-list-item-title>
+              {{owner.userName}}
+            </v-list-item-title>
+          </v-list-item>
+
+        </v-list-group>
+      </div>
     </v-card-text>
     <v-card-actions>
 
@@ -35,17 +60,19 @@
 
 <script lang="ts">
   import {Component, Prop, Vue} from "nuxt-property-decorator";
-
-  interface Person {
-    userName: string,
-    link: string | null,
-    picture: string,
-  }
+  import {UserProfile} from "~/assets/interface-models";
 
     @Component({})
     export default class WatchGroup extends Vue{
       @Prop({type: String, required: true}) readonly title!: string
-      @Prop({type: Array, required: true}) readonly sharedWith!: Array<Person>
+      @Prop({type: Array, required: true}) readonly members!: Array<UserProfile>
+      @Prop({type: Array, required: true}) readonly addedNames!: Array<string>
+      @Prop({type: Object, required: true}) readonly owner!: UserProfile
+      @Prop({type: String, required: true}) readonly description!: string
+
+      get sharedWithCount(){
+        return this.members.length + this.addedNames.length;
+      }
     }
 </script>
 

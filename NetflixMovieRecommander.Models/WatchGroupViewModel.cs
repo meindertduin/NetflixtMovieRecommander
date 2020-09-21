@@ -4,16 +4,19 @@ using System.Linq.Expressions;
 
 namespace NetflixMovieRecommander.Models
 {
-    public class WatchGroupViewModel
+    public static class WatchGroupViewModel
     {
-        public string Id { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
+        public static readonly Func<WatchGroup, object> Create = Projection.Compile();
 
-        public UserProfile Owner { get; set; }
-        
-        public IList<WatchGroupUserProfile> Members { get; set; }
-        
-        public string[] AddedNames { get; set; }
+        public static Expression<Func<WatchGroup, object>> Projection =>
+            group => new
+            {
+                group.Id,
+                group.Title,
+                group.Description,
+                group.Owner,
+                group.Members,
+                group.AddedNames
+            };
     }
 }

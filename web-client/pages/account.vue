@@ -17,7 +17,7 @@
           </v-app-bar>
           <v-row class="m1">
             <v-col :cols="12" v-for="(x, index) in userWatchGroups" :key="index">
-              <WatchGroup  :title="title" :shared-with="sharedWith"/>
+              <WatchGroup  :title="x.title" :members="x.members" :added-names="x.addedNames" :owner="x.owner" :description="x.description"/>
             </v-col>
           </v-row>
         </v-card>
@@ -35,24 +35,6 @@
   import CreateGroup from "~/components/Account/create-group.vue";
   import {watchgroup} from "~/store/watchgroup";
 
-  interface Person {
-    userName: string,
-    link: string | null,
-    picture: string,
-  }
-
-  interface WatchGroup {
-    id: string,
-    addedNames: Array<string>,
-    description: string,
-    title: string,
-
-    // todo change any to an interface
-    owner: any,
-    members: Array<any>,
-  }
-
-
   @Component({
     name: "account",
     components: {
@@ -61,16 +43,7 @@
     },
   })
   export default class Account extends Vue{
-    private title:string = "title";
-    private userWatchGroups = [];
-
-    private person: Person = {
-      userName: "john",
-      link: "https://localhost:3000",
-      picture: "https://m.media-amazon.com/images/M/MV5BMGE4YzY4NGEtOWYyYS00ZDk2LWExMmMtZDIyODhiMmNlMGE0XkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SX300.jpg",
-    }
-
-    private sharedWith: Array<Person> = [];
+    private userWatchGroups:Array<WatchGroup> = [];
 
     get creationOverlayActive():boolean{
       return (this.$store.state.watchgroup as watchgroup).creationOverlayActive;
@@ -78,13 +51,12 @@
 
     async created() {
     await this.getData();
-    this.sharedWith = [this.person, this.person, this.person, this.person, this.person, this.person, this.person];
     }
 
     async getData(){
       const {data}:watchgroup = await this.$axios.get('api/watchgroup');
       this.userWatchGroups = data;
-      console.log(data);
+      console.log(this.userWatchGroups);
     }
 
     private toggleCreationOverlay():void{
