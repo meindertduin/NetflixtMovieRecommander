@@ -31,12 +31,10 @@ namespace NetflixMoviesRecommender.api
         }
         public void ConfigureServices(IServiceCollection services)
         {
-            string conn = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=WatchTuner;Integrated Security=True; MultipleActiveResultSets=True";
-
             AddIdentity(services);
             
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(conn, b => b.MigrationsAssembly("NetflixMoviesRecommender.api")));
+                options.UseSqlServer(_configuration.GetConnectionString("AppDbContext"), b => b.MigrationsAssembly("NetflixMoviesRecommender.api")));
 
 
 
@@ -91,8 +89,6 @@ namespace NetflixMoviesRecommender.api
 
         private void AddIdentity(IServiceCollection services)
         {
-            string conn = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=WatchTuner;Integrated Security=True; MultipleActiveResultSets=True";
-            
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                 {
                     options.User.RequireUniqueEmail = true;
@@ -130,12 +126,12 @@ namespace NetflixMoviesRecommender.api
                 identityServiceBuilder
                     .AddConfigurationStore(options =>
                     {
-                        options.ConfigureDbContext = b => b.UseSqlServer(conn,
+                        options.ConfigureDbContext = b => b.UseSqlServer(_configuration.GetConnectionString("AppDbContext"),
                             sql => sql.MigrationsAssembly(assembly));
                     })
                     .AddOperationalStore(options =>
                     {
-                        options.ConfigureDbContext = b => b.UseSqlServer(conn,
+                        options.ConfigureDbContext = b => b.UseSqlServer(_configuration.GetConnectionString("AppDbContext"),
                             sql => sql.MigrationsAssembly(assembly));
                     })
                     .AddInMemoryIdentityResources(IdentityConfig.GetIdentityResources())

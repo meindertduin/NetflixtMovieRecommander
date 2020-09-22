@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 
 namespace NetflixMoviesRecommender.api
@@ -20,17 +21,36 @@ namespace NetflixMoviesRecommender.api
             using (var scope = host.Services.CreateScope())
             {
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 
                 var testUser = new ApplicationUser("test"){ Email = "test@test.com"};
                 userManager.CreateAsync(testUser, "password").GetAwaiter().GetResult();
+                
+                // var testProfile = new UserProfile
+                // {
+                //     ApplicationUser = testUser,
+                // };
+                //
+                // ctx.UserProfiles.AddAsync(testProfile).GetAwaiter().GetResult();
 
                 var mod = new ApplicationUser("mod"){ Email = "mod@mod.com"};
+
                 userManager.CreateAsync(mod, "password").GetAwaiter().GetResult();
                 userManager.AddClaimAsync(mod, new Claim(ApiConstants.Claims.Role, ApiConstants.Roles.Mod)).GetAwaiter().GetResult();
+                
+                // var modProfile = new UserProfile
+                // {
+                //     ApplicationUser = mod,
+                // };
+                //
+                // ctx.UserProfiles.AddAsync(modProfile).GetAwaiter().GetResult();
+
+                scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.EnsureCreated();
                 
                 scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
                 
                 var context = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+                context.Database.EnsureCreated();
                 context.Database.Migrate();
                 
                 if (!context.Clients.Any())

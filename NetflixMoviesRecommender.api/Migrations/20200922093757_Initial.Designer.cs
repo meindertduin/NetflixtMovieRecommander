@@ -10,8 +10,8 @@ using NetflixMovieRecommander.Data;
 namespace NetflixMoviesRecommender.api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20200918123042_Annotations")]
-    partial class Annotations
+    [Migration("20200922093757_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -380,10 +380,12 @@ namespace NetflixMoviesRecommender.api.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AvatarUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(200)")
+                        .HasMaxLength(200);
 
                     b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(30)")
+                        .HasMaxLength(30);
 
                     b.HasKey("Id");
 
@@ -393,20 +395,24 @@ namespace NetflixMoviesRecommender.api.Migrations
             modelBuilder.Entity("NetflixMovieRecommander.Models.WatchGroup", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(40)")
-                        .HasMaxLength(40);
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AddedNames")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(200)")
+                        .HasMaxLength(200);
 
                     b.Property<string>("OwnerId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
 
                     b.HasKey("Id");
 
@@ -421,7 +427,7 @@ namespace NetflixMoviesRecommender.api.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("WatchGroupId")
-                        .HasColumnType("nvarchar(40)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("UserProfileId", "WatchGroupId");
 
@@ -438,10 +444,11 @@ namespace NetflixMoviesRecommender.api.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(40)")
+                        .HasMaxLength(40);
 
                     b.Property<string>("WatchGroupId")
-                        .HasColumnType("nvarchar(40)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 

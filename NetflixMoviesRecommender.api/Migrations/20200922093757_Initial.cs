@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace NetflixMoviesRecommender.api.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -209,8 +209,8 @@ namespace NetflixMoviesRecommender.api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    UserName = table.Column<string>(nullable: true),
-                    AvatarUrl = table.Column<string>(nullable: true)
+                    UserName = table.Column<string>(maxLength: 30, nullable: true),
+                    AvatarUrl = table.Column<string>(maxLength: 200, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -249,10 +249,11 @@ namespace NetflixMoviesRecommender.api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    Title = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
+                    Title = table.Column<string>(maxLength: 50, nullable: true),
+                    Description = table.Column<string>(maxLength: 200, nullable: true),
                     OwnerId = table.Column<string>(nullable: true),
-                    AddedNames = table.Column<string>(nullable: true)
+                    AddedNames = table.Column<string>(nullable: true),
+                    Deleted = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -295,7 +296,7 @@ namespace NetflixMoviesRecommender.api.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(nullable: true),
+                    Title = table.Column<string>(maxLength: 40, nullable: true),
                     WatchGroupId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>

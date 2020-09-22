@@ -8,7 +8,6 @@ namespace NetflixMovieRecommander.Models
     public class WatchGroup
     {
         [Key]
-        [MaxLength(40)]
         public string Id { get; set; }
         [MaxLength(50)]
         public string Title { get; set; }
@@ -17,7 +16,7 @@ namespace NetflixMovieRecommander.Models
 
         
         public UserProfile Owner { get; set; }
-        [MaxLength(40)]
+        
         public string OwnerId { get; set; }
         
         
