@@ -99,7 +99,6 @@
       description: string | null,
       existingUsers: Array<existingUser> | null,
       addedUsers: Array<string> | null,
-      watchLists:FormData | null,
     }
 
     @Component({
@@ -142,7 +141,6 @@
           description: this.description,
           existingUsers: this.existingUsers,
           addedUsers: this.addedUsers,
-          watchLists: this.usersForm,
         }
 
         console.log(groupForm);

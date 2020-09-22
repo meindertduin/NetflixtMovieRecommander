@@ -42,7 +42,7 @@ namespace NetflixMoviesRecommender.api.Controllers
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
             var watchGroups =  _ctx.WatchGroups
-                .Where(x => x.OwnerId == user.Id)
+                .Where(x => x.OwnerId == user.Id && x.Deleted == false)
                 .Include(x => x.Owner)
                 .Include(x => x.Members)
                 .Select(WatchGroupViewModel.Projection)
@@ -125,9 +125,8 @@ namespace NetflixMoviesRecommender.api.Controllers
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
         public async Task<IActionResult> CreateGroup([FromBody] WatchGroupForm watchGroupForm)
         {
-            var user = _userManager.GetUserAsync(HttpContext.User);
-            UserProfile userProfile = await _ctx.UserProfiles.FindAsync(user.Result.Id);
-
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            UserProfile userProfile = await _ctx.UserProfiles.FindAsync(user.Id);
             
             // check if title already exists
 
