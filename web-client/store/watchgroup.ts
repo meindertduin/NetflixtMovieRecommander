@@ -1,4 +1,9 @@
-﻿import {UpdateWatchGroupModel, WatchGroupModel, WatchGroupRecommendationForm} from "~/assets/interface-models";
+﻿import {
+  Recommendation,
+  UpdateWatchGroupModel,
+  WatchGroupModel,
+  WatchGroupRecommendationForm
+} from "~/assets/interface-models";
 
 ﻿import {ActionTree, GetterTree, MutationTree} from 'vuex';
 import { RootState } from "~/store";
@@ -8,6 +13,12 @@ const initState = () => ({
   creationOverlayActive: false as boolean,
   editOverlayActive: false as boolean,
   currentSelectedWatchGroup: null as WatchGroupModel | null,
+  watchGroupRecommendations: null as null | Recommendation,
+
+  recommendationsIndex: 0 as number,
+  selectedGenres: [] as Array<string>,
+  selectedType: "both" as string,
+  seed: "" as string,
 });
 
 export const state:any = initState;
@@ -28,7 +39,22 @@ export const mutations: MutationTree<watchgroup> = {
   CLOSE_EDIT_OVERLAY: (state) => {
     state.currentSelectedWatchGroup = null;
     state.editOverlayActive = ! state.editOverlayActive;
-  }
+  },
+  SET_WATCH_GROUP_RECOMMENDATIONS: (STATE, recommendations:Array<Recommendation>) => {
+    if(state.watchGroupRecommendations.length < 1){
+      state.watchGroupRecommendations = recommendations;
+    }
+    else{
+      state.watchGroupRecommendations.concat(recommendations);
+    }
+  },
+
+  SET_RECOMMENDATIONS_INDEX: (state, index:number) => state.recommendationsIndex = index,
+  INC_RECOMMENDATIONS_INDEX: (state) => state.recommendationsIndex++,
+  SET_SELECTED_GENRES: (state, genres:Array<string>) => state.selectedGenres = genres,
+  SET_SELECTED_TYPE: (state, type:string) => state.selectedType = type,
+  SET_SEED: (state, seed:string) => state.seed = seed,
+
 };
 
 interface editTitleModel{
@@ -50,8 +76,23 @@ export const actions: ActionTree<watchgroup, RootState> = {
   editGroup({dispatch}, payload:UpdateWatchGroupModel){
     const res = this.$axios.put('/api/watchgroup/edit', payload);
   },
-  getRecomemendations({commit}, {payload, route}){
-    const res = this.$axios.post(`api/watchgroup/${route}`, payload);
-    console.log(res);
+  getRecomemendations({commit, state}, {route}):Promise<void>{
+    const payload: WatchGroupRecommendationForm = {
+      genres: state.selectedGenres,
+      index: state.index,
+      seed: state.seed,
+      type: state.selectedType,
+    }
+
+    return new Promise((resolve, reject) => {
+      this.$axios.post(`api/watchgroup/${route}`, payload)
+        .then(({data}) =>{
+          commit('SET_WATCH_GROUP_RECOMMENDATIONS', data);
+          resolve()
+        })
+        .catch(error => {
+          reject();
+        });
+    })
   }
 };

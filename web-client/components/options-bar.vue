@@ -16,15 +16,14 @@
 
 <script lang="ts">
   import {Component, Vue} from "nuxt-property-decorator";
+  import {genresOptions, typesOptions} from "~/assets/shared-variables";
 
   @Component({})
   export default class OptionsBar extends Vue{
-    private genres = [
-      "Animation", "Action", "Documentary", "Drama", "War", "Crime",  "Mystery", "Sci-Fi", "Thriller",
-    ];
-    private selectedGenres = [];
+    private genres = genresOptions
+    private selectedGenres:Array<string> = [];
 
-    private types:Array<string> = ["series", "movie", "both"];
+    private types:Array<string> = typesOptions
     private selectedType:string = "both";
 
     private async getRecommendations(){

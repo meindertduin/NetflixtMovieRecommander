@@ -20,7 +20,6 @@
       <WatchlistUpload v-else />
     </v-overlay>
   </div>
-
 </template>
 
 <script lang="ts">

@@ -1,4 +1,14 @@
-﻿export interface UserProfile {
+﻿export interface Recommendation {
+  id: number,
+  title: string,
+  deleted: boolean,
+  type: string,
+  genres: Array<string>,
+  poster: string,
+  plot: string,
+}
+
+export interface UserProfile {
   userName: string,
   avatarUrl: string | null,
   Id: string,

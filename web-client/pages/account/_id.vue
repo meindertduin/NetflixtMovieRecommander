@@ -1,36 +1,52 @@
 ﻿<template>
-    <div></div>
+  <div>
+    <v-container>
+      <v-row justify="center">
+        <WatchGroupRecommendationsOptions />
+      </v-row>
+      <v-row justify="center">
+<!--        <v-col v-for="x in currentRecommendationsDisplay" :key="x.id">-->
+<!--          <RecommendedDisplay :title="x.title" :plot="x.plot" :type="x.type" :genres="x.genres" :poster="x.poster"  />-->
+<!--        </v-col>-->
+        <v-col v-for="(x, index) in 25" :key="index">
+          <TestDisplay />
+        </v-col>
+      </v-row>
+      <v-row justify="center">
+        <v-btn width="80" @click="nextRecommendations" min-width="300">Load More</v-btn>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script lang="ts">
   import {Component, Vue} from "nuxt-property-decorator";
-  import {WatchGroupRecommendationForm} from "~/assets/interface-models";
+  import WatchGroupRecommendationsOptions from "~/components/Account/recommendations/watchgroup-recommendations-options.vue";
+  import {watchgroup} from "~/store/watchgroup";
+  import RecommendedDisplay from "~/components/recommended-display.vue";
+  import TestDisplay from "~/components/TestDisplay.vue";
 
-    @Component({})
+    @Component({
+      components: {
+        TestDisplay,
+        WatchGroupRecommendationsOptions,
+        RecommendedDisplay
+      }
+    })
     export default class WatchGroupId extends Vue{
-      private index:number = 0;
-      private genres:Array<string> = [];
-      private type:string = "both";
 
-      created(){
-
+      get currentRecommendationsDisplay(){
+        return (this.$store.state.watchgroup as watchgroup).watchGroupRecommendations;
       }
 
-      private getRecommendations(){
-        const payload:WatchGroupRecommendationForm = {
-          genres: this.genres,
-          index: this.index,
-          seed: this.uuidv4(),
-          type: this.type,
-        }
-        this.$store.dispatch('watchgroup/getRecomemendations', {route: this.$route.params.id, payload})
-      }
-
-      private uuidv4() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-          let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-          return v.toString(16);
-        });
+      nextRecommendations():void{
+        this.$store.dispatch('watchgroup/getRecomemendations', {route: this.$route.params.id})
+          .then(() => {
+            this.$store.commit('watchgroup/INC_RECOMMENDATIONS_INDEX');
+          })
+        .catch(() => {
+          // notify user something went wrong
+        })
       }
     }
 </script>

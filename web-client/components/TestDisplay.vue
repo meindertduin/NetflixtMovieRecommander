@@ -1,8 +1,10 @@
 ﻿﻿<template>
   <v-container>
-  <v-card max-width="300" height="700">
+  <v-card>
     <v-card-title class="justify-center">{{title}}</v-card-title>
-    <v-img :src="poster"></v-img>
+    <v-row justify="center">
+      <v-img class="justify-center" max-width="500" :src="poster"></v-img>
+    </v-row>
     <v-card-subtitle class="pb-0"><h4>{{type}}</h4></v-card-subtitle>
     <v-card-subtitle class="pb-0">
       <h4>{{genresString}}</h4>

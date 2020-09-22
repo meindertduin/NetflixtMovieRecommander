@@ -33,10 +33,14 @@ export const mutations: MutationTree<recommendation> = {
     state.selectedType = "";
   },
 
-  SET_RECOMMENDATIONS: (state, recommendations) =>
-    state.recommendations.length < 1?
-      state.recommendations = recommendations:
-      state.recommendations.concat(recommendations),
+  SET_RECOMMENDATIONS: (state, recommendations) =>{
+    if(state.recommendations.length < 1){
+      state.recommendations = recommendations;
+    }
+    else{
+      state.recommendations.concat(recommendations);
+    }
+  },
 
   SET_INITIAL_CURRENT_LOADED: (state) => state.currentLoadedRecommendations = state.recommendations.slice(0, 5),
 
