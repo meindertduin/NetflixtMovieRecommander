@@ -16,6 +16,7 @@ using NetflixMoviesRecommender.api.Forms;
 using NetflixMoviesRecommender.api.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using NinjaNye.SearchExtensions;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace NetflixMoviesRecommender.api.Controllers
@@ -217,5 +218,55 @@ namespace NetflixMoviesRecommender.api.Controllers
 
             return Ok();
         }
+
+        [HttpPost("{id}")]
+        [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
+        public async Task<IActionResult> GetRecommendations([FromRoute] string id, [FromBody] WatchGroupRecommendationForm recommendationForm)
+        {
+            int skipAmount = 25 * recommendationForm.Index;
+            
+            
+            var watchGroup = await _ctx.WatchGroups
+                .Where(x => x.Id == id)
+                .Include(x => x.WatchItems)
+                .FirstOrDefaultAsync();
+            
+            var watchedItems = watchGroup.WatchItems.ToList();
+            var watchTitles = new List<string>();
+            foreach (var watchedItem in watchedItems)
+            {
+                watchTitles.Add(watchedItem.Title);   
+            }
+            
+            IQueryable<NetflixRecommended> randomRecommendations;
+            
+            if (recommendationForm.Genres.Length > 0)
+            {
+                randomRecommendations = _ctx.NetflixRecommendations
+                    .Where(x => recommendationForm.Type == "both" || x.Type == recommendationForm.Type)
+                    .Where(x => watchTitles.All(p => x.Title != p))
+                    .Where(x => x.Deleted == false)
+                    .Search(x => x.Genres).Containing(recommendationForm.Genres)
+                    .OrderBy(x => recommendationForm.Seed)
+                    .Skip(skipAmount)
+                    .Take(25);
+            }
+            else
+            {
+                randomRecommendations = _ctx.NetflixRecommendations
+                    .Where(x => recommendationForm.Type == "both" || x.Type == recommendationForm.Type)
+                    .Where(x => watchTitles.All(p => x.Title != p))
+                    .Where(x => x.Deleted == false)
+                    .OrderBy(x => recommendationForm.Seed)
+                    .Skip(skipAmount)
+                    .Take(25);
+            }
+            
+            var recommendations = new List<NetflixRecommended>();
+            recommendations.AddRange(randomRecommendations);
+            
+            return Ok(recommendations);
+        }
+        
     }
 }

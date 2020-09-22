@@ -1,4 +1,4 @@
-﻿<template>
+﻿﻿﻿﻿﻿﻿﻿﻿<template>
   <v-container>
     <v-row  class="justify-center">
       <v-col :cols="8">
@@ -58,8 +58,6 @@
         return value.title.includes(this.searchTerm);
       })
     }
-
-
 
     get creationOverlayActive():boolean{
       return (this.$store.state.watchgroup as watchgroup).creationOverlayActive;

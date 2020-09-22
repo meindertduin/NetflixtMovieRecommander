@@ -34,11 +34,6 @@ namespace NetflixMoviesRecommender.api.Controllers
         [HttpPost("watchlist")]
         public IActionResult Recommendation([FromBody] WatchedInfoForm watchedInfo)
         {
-            if (ModelState.IsValid == false)
-            {
-                return BadRequest();
-            }
-
             List<string> watchedItems = watchedInfo.WatchedItems;
             List<string> genres = watchedInfo.Genres;
             List<NetflixRecommended> recommendations = new List<NetflixRecommended>();

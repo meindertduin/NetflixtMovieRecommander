@@ -52,7 +52,8 @@
     <v-card-actions>
 
       <v-btn @click="toggleEditOverlay">Edit</v-btn>
-      <v-btn text>Watch Now!</v-btn>
+      <v-btn >Watch Now!</v-btn>
+      <n-link :to="'/account'  + '/' + watchGroup.id" no-prefetch>Watch Now!</n-link>
     </v-card-actions>
   </v-card>
 

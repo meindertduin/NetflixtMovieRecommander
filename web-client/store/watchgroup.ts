@@ -1,4 +1,4 @@
-﻿import {UpdateWatchGroupModel, WatchGroupModel} from "~/assets/interface-models";
+﻿import {UpdateWatchGroupModel, WatchGroupModel, WatchGroupRecommendationForm} from "~/assets/interface-models";
 
 ﻿import {ActionTree, GetterTree, MutationTree} from 'vuex';
 import { RootState } from "~/store";
@@ -7,7 +7,7 @@ import { RootState } from "~/store";
 const initState = () => ({
   creationOverlayActive: false as boolean,
   editOverlayActive: false as boolean,
-  currentSelectedWatchGroup: null as WatchGroupModel | null
+  currentSelectedWatchGroup: null as WatchGroupModel | null,
 });
 
 export const state:any = initState;
@@ -49,5 +49,9 @@ interface editAddedNamesModel{
 export const actions: ActionTree<watchgroup, RootState> = {
   editGroup({dispatch}, payload:UpdateWatchGroupModel){
     const res = this.$axios.put('/api/watchgroup/edit', payload);
+  },
+  getRecomemendations({commit}, {payload, route}){
+    const res = this.$axios.post(`api/watchgroup/${route}`, payload);
+    console.log(res);
   }
 };
