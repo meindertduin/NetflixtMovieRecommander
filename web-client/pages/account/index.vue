@@ -54,10 +54,20 @@
 
     @Watch("searchTerm")
     onPropertyChanged(value: string, oldValue: string) {
-      this.displayedWatchGroups = this.userWatchGroups.filter((value:WatchGroup) => {
+      this.displayedWatchGroups = this.loadedUserWatchGroups.filter((value:WatchGroup) => {
         return value.title.includes(this.searchTerm);
       })
     }
+
+    get loadedUserWatchGroups():Array<WatchGroup>{
+      return (this.$store.state.watchgroup as watchgroup).watchGroups;
+    }
+
+    @Watch("loadedUserWatchGroups")
+    onUserWatchGroupsChange(value: Array<watchgroup>, oldValue:Array<watchgroup>){
+      this.displayedWatchGroups = value;
+    }
+
 
     get creationOverlayActive():boolean{
       return (this.$store.state.watchgroup as watchgroup).creationOverlayActive;
@@ -68,16 +78,10 @@
     }
 
     async created() {
-      await this.getData();
-      this.displayedWatchGroups= this.userWatchGroups;
+      await this.$store.dispatch('watchgroup/getUserWatchGroups');
+      this.displayedWatchGroups= this.loadedUserWatchGroups;
     }
-
-    async getData(){
-      const {data}:watchgroup = await this.$axios.get('api/watchgroup');
-      this.userWatchGroups = data;
-      console.log(this.userWatchGroups);
-    }
-
+    
     private toggleCreationOverlay():void{
       this.$store.commit('watchgroup/TOGGLE_CREATION_OVERLAY');
     }

@@ -7,6 +7,7 @@
 
 ﻿import {ActionTree, GetterTree, MutationTree} from 'vuex';
 import { RootState } from "~/store";
+import WatchGroup from "~/components/Account/watch-group.vue";
 
 
 const initState = () => ({
@@ -14,6 +15,8 @@ const initState = () => ({
   editOverlayActive: false as boolean,
   currentSelectedWatchGroup: null as WatchGroupModel | null,
   watchGroupRecommendations: null as null | Recommendation,
+
+  watchGroups: [] as WatchGroup,
 
   recommendationsIndex: 0 as number,
   selectedGenres: [] as Array<string>,
@@ -55,6 +58,8 @@ export const mutations: MutationTree<watchgroup> = {
   SET_SELECTED_TYPE: (state, type:string) => state.selectedType = type,
   SET_SEED: (state, seed:string) => state.seed = seed,
 
+  SET_USER_WATCH_GROUPS: (state, watchGroups:Array<WatchGroup>) => state.watchGroups = watchGroups,
+
 };
 
 interface editTitleModel{
@@ -73,10 +78,19 @@ interface editAddedNamesModel{
 }
 
 export const actions: ActionTree<watchgroup, RootState> = {
-  editGroup({dispatch}, payload:UpdateWatchGroupModel){
-    const res = this.$axios.put('/api/watchgroup/edit', payload);
+  async editGroup({dispatch}, payload:UpdateWatchGroupModel){
+    this.$axios.put('/api/watchgroup/edit', payload).then(() =>{
+      dispatch('getUserWatchGroups');
+    });
   },
-  getRecomemendations({commit, state}, {route}):Promise<void>{
+  async createGroup({commit, dispatch}, {groupForm}){
+    return new Promise((resolve, reject) => {
+      this.$axios.post('/api/watchgroup/create', groupForm)}).then(() =>{
+        dispatch('getUserWatchGroups');
+    });
+  },
+
+  async getRecomemendations({commit, state}, {route}):Promise<void>{
     const payload: WatchGroupRecommendationForm = {
       genres: state.selectedGenres,
       index: state.index,
@@ -93,6 +107,13 @@ export const actions: ActionTree<watchgroup, RootState> = {
         .catch(error => {
           reject();
         });
+    })
+  },
+  async getUserWatchGroups({commit}):void{
+    this.$axios.get('api/watchgroup').then(({data}) => {
+      commit('SET_USER_WATCH_GROUPS', data)
+    }).catch(err => {
+      console.log(err);
     })
   }
 };

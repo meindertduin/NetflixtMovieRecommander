@@ -143,17 +143,14 @@
           addedUsers: this.addedUsers,
         }
 
-        console.log(groupForm);
-        const res = await this.$axios.post('/api/watchgroup/create', {
-          title: this.groupTile,
-          description: this.description,
-          existingUsers: this.existingUsers,
-          addedUsers: this.addedUsers,
-        });
-
-        this.createdWatchGroupId = res.data;
-
-        this.step++;
+        await this.$store.dispatch('watchgroup/createGroup', {groupForm})
+          .then(({data}) => {
+            this.createdWatchGroupId = data;
+            this.step++;
+          })
+        .catch(() => {
+          // notify user
+        })
       }
 
       private toggleCreationOverlay():void{
