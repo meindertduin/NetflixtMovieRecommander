@@ -1,38 +1,47 @@
 ﻿<template>
-  <v-card min-width="400">
+  <v-card class="px-4">
     <v-card-title>
       Edit Group
     </v-card-title>
     <v-card-text>
-      <v-text-field label="Group Title" v-model="editedTitle"></v-text-field>
-      <v-text-field label="Description" v-model="editedDescription"></v-text-field>
       <v-row>
-        <v-chip-group column v-for="(x, index) in editedAddedNames" :key="index">
-          <v-chip close @click:close="removeAddedName(x)">{{x}}</v-chip>
-        </v-chip-group>
+        <v-col cols="12" sm="6">
+          <v-text-field label="Group Title" v-model="editedTitle"></v-text-field>
+          <v-text-field label="Description" v-model="editedDescription"></v-text-field>
+          <v-row>
+            <v-chip-group column v-for="(x, index) in editedAddedNames" :key="index">
+              <v-chip close @click:close="removeAddedName(x)">{{x}}</v-chip>
+            </v-chip-group>
+          </v-row>
+          <v-row justify="center" align="center">
+            <v-text-field label="Add Name" v-model="AddNameFormValue"></v-text-field>
+            <v-btn text color="green" @click="AddName">Add</v-btn>
+          </v-row>
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-row justify="center" align="center">
+            <v-text-field label="Invite User"></v-text-field>
+            <v-btn color="green" text>Invite</v-btn>
+          </v-row>
+          <h3 class="mb-3">Add Watchlist: </h3>
+          <v-row justify="center">
+            <AddWatchlist  :group-id="currentWatchGroup.id"/>
+          </v-row>
+        </v-col>
       </v-row>
-      <v-row class="justify-start align-center mx-2">
-        <v-text-field label="Add Name" v-model="AddNameFormValue"></v-text-field><v-btn color="green" @click="AddName">Add</v-btn>
+      <v-row justify="center">
+        <v-col cols="12">
+          <v-btn @click="save" color="green">Save Changes</v-btn>
+          <v-btn @click="initFields" >Cancel</v-btn>
+        </v-col>
       </v-row>
-      <v-btn @click="save" color="green">Save Changes</v-btn>
-      <v-btn @click="initFields" >Cancel</v-btn>
-
-      <hr class="my-3">
 
       <!-- Todo Add functionality for inviting people -->
-      <v-row class="justify-start align-center mx-2">
-        <v-text-field label="Invite User"></v-text-field><v-btn color="green" text>Invite</v-btn>
-      </v-row>
 
-
-      <h3 class="mb-3">Add Watchlist: </h3>
-      <v-row>
-        <AddWatchlist  :group-id="currentWatchGroup.id"/>
-      </v-row>
     </v-card-text>
     <v-card-actions>
-      <v-row>
-        <v-btn @click="closeEditOverlay" >
+      <v-row justify="center">
+        <v-btn @click="closeEditOverlay" width="90%">
           Close
         </v-btn>
       </v-row>

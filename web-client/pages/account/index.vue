@@ -4,7 +4,6 @@
       <v-col cols="12" md="4">
         <ProfileDisplay />
       </v-col>
-
       <v-col cols="12" md="8">
         <v-row  justify-md="end" justify="center">
           <v-card width="95%" color="green">
@@ -26,7 +25,9 @@
       <CreateGroup />
     </v-overlay>
     <v-overlay v-if="editOverlayActive">
-      <EditGroup />
+      <v-row>
+        <EditGroup />
+      </v-row>
     </v-overlay>
   </v-container>
 </template>
@@ -54,7 +55,11 @@
     private tab = null;
 
     private tabItems = [
-      {tab: "Watch Groups Display", content: WatchGroupDisplay}
+      {tab: "Watch Groups Display", content: WatchGroupDisplay},
+    ]
+
+    private nonListedTabItems = [
+      {tab: "...", content: WatchGroupDisplay}
     ]
 
 

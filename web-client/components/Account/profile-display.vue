@@ -8,7 +8,7 @@
       <v-card-text>
         <v-col cols="12">
           <v-row>
-            <h1>Meindert</h1>
+            <h1 class="mb-4">Meindert</h1>
           </v-row>
           <v-row>
             <div>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium amet culpa delectus fugiat in maxime nihil, officiis provident rerum velit.</div>
@@ -20,9 +20,32 @@
       </v-card-text>
       <v-card-actions>
         <v-row justify="center" class="my-3">
-          <v-btn text>Edit Profile</v-btn>
+          <v-btn text @click="toggleEditProfilePanel">Edit Profile</v-btn>
           <v-btn text>
             <v-icon>mdi-account-multiple</v-icon>{{followersCount}} Followers
+          </v-btn>
+        </v-row>
+      </v-card-actions>
+    </v-card>
+    <v-card v-if="editProfilePanel" width="90%" class="mt-3">
+      <v-card-title>
+        <v-row justify="center">Edit Profile</v-row>
+      </v-card-title>
+      <v-card-text>
+        <v-row justify="center">
+          <v-col cols="8">
+            <h3>Profile Picture: </h3>
+            <v-file-input label="profile picture"></v-file-input>
+          </v-col>
+        </v-row>
+      </v-card-text>
+      <v-card-actions>
+        <v-row justify="center">
+          <v-btn text color="green">
+            Save
+          </v-btn>
+          <v-btn text @click="toggleEditProfilePanel">
+            Cancel
           </v-btn>
         </v-row>
       </v-card-actions>
@@ -37,6 +60,12 @@
   export default class ProfileDisplay extends Vue{
     get followersCount(){
       return 12;
+    }
+
+    private editProfilePanel:boolean = false
+
+    private toggleEditProfilePanel():void{
+      this.editProfilePanel = !this.editProfilePanel;
     }
   }
 </script>
