@@ -2,7 +2,7 @@
   <v-container>
     <v-row justify="center">
       <v-col cols="12" md="4">
-        <ProfileDisplay />
+        <ProfileDisplay :user-profile="profileData" />
       </v-col>
       <v-col cols="12" md="8">
         <v-row  justify-md="end" justify="center">
@@ -53,6 +53,7 @@
   })
   export default class Account extends Vue{
     private tab = null;
+    private profileData = {};
 
     private tabItems = [
       {tab: "Watch Groups Display", content: WatchGroupDisplay},
@@ -62,7 +63,11 @@
       {tab: "...", content: WatchGroupDisplay}
     ]
 
-
+    async mounted() {
+      await this.$store.getters['getInitPromise'];
+      await this.$store.dispatch('watchgroup/getUserWatchGroups');
+      await this.$store.dispatch('user/getUserProfile');
+    }
 
     get creationOverlayActive():boolean{
       return (this.$store.state.watchgroup as watchgroup).creationOverlayActive;

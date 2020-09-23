@@ -19,8 +19,9 @@ namespace NetflixMovieRecommander.Data
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<NetflixRecommended> NetflixRecommendations { get; set; }
         public DbSet<WatchGroupUserProfile> WatchGroupUserProfiles { get; set; }
-        
-        
+
+        public DbSet<ProfileFile> ProfileFiles { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

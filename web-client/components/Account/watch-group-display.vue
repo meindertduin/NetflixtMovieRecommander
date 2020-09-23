@@ -49,9 +49,7 @@
         this.displayedWatchGroups = value;
       }
 
-      async mounted() {
-        await this.$store.getters['getInitPromise'];
-        await this.$store.dispatch('watchgroup/getUserWatchGroups');
+      mounted(){
         this.displayedWatchGroups= this.loadedUserWatchGroups;
       }
 

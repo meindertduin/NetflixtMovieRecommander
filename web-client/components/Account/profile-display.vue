@@ -3,15 +3,12 @@
     <v-card width="90%" color="dark">
       <v-card-title>
         <v-img class="white--text"
-               src="/netflix-logo.png"/>
+                src="/default_profile.jpg"  aspect-ratio="1"/>
       </v-card-title>
       <v-card-text>
         <v-col cols="12">
           <v-row>
-            <h1 class="mb-4">Meindert</h1>
-          </v-row>
-          <v-row>
-            <div>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium amet culpa delectus fugiat in maxime nihil, officiis provident rerum velit.</div>
+            <h1 class="mb-4">{{userProfile != null? userProfile.userName: ""}}</h1>
           </v-row>
           <v-row>
             <v-icon>fas fa-address-book</v-icon>
@@ -35,15 +32,15 @@
         <v-row justify="center">
           <v-col cols="8">
             <h3>Profile Picture: </h3>
-            <v-file-input label="profile picture"></v-file-input>
+            <v-file-input accept=".png" prepend-icon="mdi-paperclip" label="profile picture" v-model="uploadFile"></v-file-input>
+            <v-btn text color="green" @click="handleFileUpload">
+              Upload
+            </v-btn>
           </v-col>
         </v-row>
       </v-card-text>
       <v-card-actions>
         <v-row justify="center">
-          <v-btn text color="green">
-            Save
-          </v-btn>
           <v-btn text @click="toggleEditProfilePanel">
             Cancel
           </v-btn>
@@ -54,7 +51,9 @@
 </template>
 
 <script lang="ts">
-  import {Component, Vue} from "nuxt-property-decorator";
+  import {Component, Prop, Vue} from "nuxt-property-decorator";
+  import {user} from "~/store/user";
+  import {Profile} from "~/assets/interface-models";
 
   @Component({})
   export default class ProfileDisplay extends Vue{
@@ -62,10 +61,23 @@
       return 12;
     }
 
+    get userProfile():Profile | null{
+      return (this.$store.state.user as user).userProfile;
+    }
+
     private editProfilePanel:boolean = false
+    private uploadFile:File | null = null;
 
     private toggleEditProfilePanel():void{
       this.editProfilePanel = !this.editProfilePanel;
+    }
+
+    private handleFileUpload(){
+      if(this.uploadFile === null) return;
+      const form:FormData = new FormData();
+      form.append('picture', this.uploadFile);
+
+      this.$axios.post('api/profile/picture', form)
     }
   }
 </script>

@@ -25,7 +25,9 @@ namespace NetflixMovieRecommander.Models
         
         [MaxLength(30)]
         public string UserName { get; set; }
-        [MaxLength(200)]
-        public string AvatarUrl { get; set; }
+        // [MaxLength(200)]
+        // public string AvatarUrl { get; set; }
+
+        public ICollection<ProfileFile> ProfileFiles { get; set; }
     }
 }

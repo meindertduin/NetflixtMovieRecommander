@@ -14,6 +14,12 @@ export interface UserProfile {
   Id: string,
 }
 
+export interface Profile {
+  userName: string,
+  avatar: any,
+  Id: string,
+}
+
 export interface WatchGroupModel {
   id: string,
   addedNames: Array<string>,
