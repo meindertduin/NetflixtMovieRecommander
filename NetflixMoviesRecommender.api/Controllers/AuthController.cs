@@ -2,6 +2,7 @@
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using NetflixMovieRecommander.Models;
 
 namespace NetflixMoviesRecommender.api.Controllers
 {
@@ -12,7 +13,7 @@ namespace NetflixMoviesRecommender.api.Controllers
     {
         [HttpGet("logout")]
         public async Task<IActionResult> Logout(string logoutId,
-            [FromServices] SignInManager<IdentityUser> signInManager,
+            [FromServices] SignInManager<ApplicationUser> signInManager,
             [FromServices] IIdentityServerInteractionService interactionService)
         {
             await signInManager.SignOutAsync();

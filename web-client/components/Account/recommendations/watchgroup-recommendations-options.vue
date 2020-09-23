@@ -1,13 +1,13 @@
 ﻿<template>
   <div>
-    <v-row justify="start" al>
-      <v-col cols="7">
+    <v-row justify="start">
+      <v-col>
         <v-select height="30" :items="genres" v-model="selectedGenres" label="Select Genres" multiple deletable-chips chips></v-select>
       </v-col>
-      <v-col cols="3">
+      <v-col>
         <v-select height="30" :items="types" v-model="selectedType" label="Select Type"></v-select>
       </v-col>
-      <v-col cols="2">
+      <v-col>
         <v-btn @click="getRecommendations">Confirm</v-btn>
       </v-col>
     </v-row>

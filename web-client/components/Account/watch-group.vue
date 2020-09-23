@@ -1,6 +1,6 @@
 ﻿<template>
   <v-card
-    color="#385F73"
+    color="dark"
     dark
   >
     <v-card-title >

@@ -10,6 +10,11 @@
       <h4>{{genresString}}</h4>
     </v-card-subtitle>
     <v-card-text>{{plot}}</v-card-text>
+    <v-card-actions>
+      <v-row justify="center">
+        <v-btn color="orange" text>Already Watched</v-btn>
+      </v-row>
+    </v-card-actions>
   </v-card>
 </v-container>
 </template>

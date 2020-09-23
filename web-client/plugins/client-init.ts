@@ -1,6 +1,5 @@
 ﻿
-﻿import {UserManager, WebStorageStateStore} from "oidc-client";
-
+import {UserManager, WebStorageStateStore} from "oidc-client";
 
 const userManger: UserManager = new UserManager({
   authority: "https://localhost:5001",
@@ -28,11 +27,12 @@ declare module 'vue/types/vue' {
 const plugin: ({app, store}: { app: any; store: any }, inject:any) => void = async ({app, store}, inject) => {
   inject('auth', userManger)
 
-  await store.dispatch('clientInit');
+  app.fetch = async () => {
+    return store.dispatch('clientInit');
+  }
 
-  //app.fetch = () => {
-    //return store.dispatch('nuxtClientInit');
-  //}
+  // await store.dispatch('clientInit');
+
 }
 
 export default plugin;

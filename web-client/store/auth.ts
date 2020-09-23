@@ -1,7 +1,10 @@
-﻿﻿import { ActionTree, MutationTree, GetterTree } from 'vuex'
+﻿import get = Reflect.get;
+
+﻿import { ActionTree, MutationTree, GetterTree } from 'vuex'
 import { RootState } from "~/store";
 import {User} from "oidc-client";
 import {recommendation} from "~/store/recommendation";
+import {Getter} from "nuxt-property-decorator";
 
 const ROLES = {
   MODERATOR: "Mod",
@@ -11,8 +14,7 @@ const ROLES = {
 
 const initState = () => ({
   user: null as User | null,
-  profile: null as any,
-  authenticated: false as boolean,
+  loading: true as boolean,
 });
 
 
@@ -22,15 +24,31 @@ export const state:any = initState;
 export type auth = ReturnType<typeof state>
 
 export const getters: GetterTree<auth, RootState> = {
-
+  authenticated: (state) => !state.loading && state.user != null,
+  moderator: (state, getters) => getters.authenticated && state.user.profile.role === ROLES.MODERATOR,
 }
 
 export const mutations: MutationTree<auth> = {
-
+  SAVE_USER: (state, user:User) => state.user = user,
+  FINISH: (state) => state.loading = false,
 }
 
 export const actions: ActionTree<auth, RootState> = {
   async setBearer({commit}, access_token){
     this.$axios.setToken(access_token);
   },
+  async initialize({commit}){
+    return this.$auth.getUser().then(user => {
+      if(user){
+        this.$axios.setToken(`Bearer ${user.access_token}`);
+        commit('SAVE_USER', user);
+      }
+    })
+      .catch(err => {
+        console.log(err);
+      })
+      .finally(() => {
+        commit('FINISH');
+      })
+  }
 }
