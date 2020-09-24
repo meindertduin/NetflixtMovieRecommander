@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMovieRecommander.Models.Enums;
+using NetflixMoviesRecommender.api.Domain.Extensions;
 using NetflixMoviesRecommender.api.Services;
 
 namespace NetflixMoviesRecommender.api.Controllers
@@ -90,6 +92,11 @@ namespace NetflixMoviesRecommender.api.Controllers
                 return BadRequest();
             }
 
+            if (picture.IsImage() == false)
+            {
+                return BadRequest();
+            }
+
             var user = await _userManager.GetUserAsync(HttpContext.User);
             var userProfile = _ctx.UserProfiles
                 .Where(x => x.Id == user.Id)
@@ -143,6 +150,29 @@ namespace NetflixMoviesRecommender.api.Controllers
             }
             
             return File(avatar.Content, "image/jpeg");
+        }
+
+        [HttpGet("find")]
+        public IActionResult FindUser(string searchTerm)
+        {
+            var profiles = _ctx.UserProfiles
+                .Where(x => x.UserName.Contains(searchTerm))
+                .OrderBy(x => x.UserName.Length)
+                .Take(5);
+
+            List<UserProfileViewModel> result = new List<UserProfileViewModel>();
+            
+            foreach (var userProfile in profiles)
+            {
+                result.Add(new UserProfileViewModel
+                {
+                    UserName = userProfile.UserName,
+                    Id = userProfile.Id,
+                    AvatarUrl = "https://localhost:5001/api/profile/picture/" + userProfile.Id,
+                });
+            }
+            
+            return Ok(result);
         }
         
     }

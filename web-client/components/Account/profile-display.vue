@@ -1,10 +1,13 @@
-﻿<template>
+﻿﻿<template>
   <v-row justify-md="end" justify="center">
     <v-card width="90%" color="dark">
       <v-card-title>
-        <v-img v-if="userProfile == null" class="white--text"
-                src="/default_profile.jpg"  aspect-ratio="1"/>
-        <v-img v-else class="white--text" aspect-ratio="1" :src="userProfile.avatarUrl"></v-img>
+        <v-row justify="center" align-content="center">
+          <v-img v-if="userProfile == null" class="white--text"
+                 src="/default_profile.jpg"  aspect-ratio="1"/>
+          <v-img v-else class="white--text" aspect-ratio="1" max-height="200" max-width="200"
+                 :src="userProfile.avatarUrl != null? userProfile.avatarUrl: '/default_profile.jpg'"></v-img>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-col cols="12">
@@ -33,7 +36,10 @@
         <v-row justify="center">
           <v-col cols="8">
             <h3>Profile Picture: </h3>
-            <v-file-input accept=".png" prepend-icon="mdi-paperclip" label="profile picture" v-model="uploadFile"></v-file-input>
+            <div class="text-body-2 orange--text">
+              {{uploadMessage}}
+            </div>
+            <v-file-input accept="image/*" prepend-icon="mdi-paperclip" label="profile picture" v-model="uploadFile"></v-file-input>
             <v-btn text color="green" @click="handleFileUpload">
               Upload
             </v-btn>
@@ -43,7 +49,7 @@
       <v-card-actions>
         <v-row justify="center">
           <v-btn text @click="toggleEditProfilePanel">
-            Cancel
+            Close
           </v-btn>
         </v-row>
       </v-card-actions>
@@ -68,6 +74,7 @@
 
     private editProfilePanel:boolean = false
     private uploadFile:File | null = null;
+    private uploadMessage:string = "";
 
     private toggleEditProfilePanel():void{
       this.editProfilePanel = !this.editProfilePanel;
@@ -75,10 +82,21 @@
 
     private handleFileUpload(){
       if(this.uploadFile === null) return;
+      if(this.uploadFile.size > 100_000){
+        console.log("to big");
+        this.uploadMessage = "The size of the file is to big"
+        return;
+      }
+
       const form:FormData = new FormData();
       form.append('picture', this.uploadFile);
 
       this.$axios.post('api/profile/picture', form)
+        .then(() => {
+          this.uploadMessage = "The upload succeeded"
+        }).catch(() => {
+          this.uploadMessage = "Something went wrong uploading your file"
+      })
     }
   }
 </script>

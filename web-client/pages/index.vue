@@ -1,4 +1,5 @@
 <template>
+
   <v-layout>
     <v-flex class="d-flex justify-center mt-20">
       <v-card width="1200" class="mx-auto mt-12"  shaped>

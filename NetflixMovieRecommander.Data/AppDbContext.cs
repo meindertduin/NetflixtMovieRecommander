@@ -61,6 +61,7 @@ namespace NetflixMovieRecommander.Data
                 .WithMany(x => x.ProfileFiles)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
+            
 
         }
     }

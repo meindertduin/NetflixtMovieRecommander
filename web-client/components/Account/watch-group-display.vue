@@ -1,4 +1,4 @@
-﻿<template>
+﻿﻿<template>
   <v-card>
     <v-app-bar color="dark">
       <v-toolbar-title>Watch Groups</v-toolbar-title>
