@@ -7,23 +7,36 @@
     Layout = "Shared/_Layout";
 }
 
-<form method="post">
-    <input type="hidden" asp-for="Form.ReturnUrl" value="@Model.Form.ReturnUrl"/>
-    <div class="field">
-        <label>Username</label>
-        <input asp-for="Form.Username"/>
-        <span asp-validation-for="Form.Username"></span>
-    </div>
-    <div class="field">
-        <label>Password</label>
-        <input asp-for="Form.Password">
-        <span asp-validation-for="Form.Password"></span>
-    </div>
-    <div class="field flex-row">
-        <button type="submit">Log In</button>
-    </div>
-    <hr>
-    <div class="field flex-row">
-         <a asp-page="/Account/Login" asp-route-returnUrl="@Model.Form.ReturnUrl">Back to Login</a>
-    </div>
-</form>
+
+<div class="container">
+    <form method="post">
+        <input type="hidden" asp-for="Form.ReturnUrl" value="@Model.Form.ReturnUrl"/>
+        <div class="field">
+            <div>
+                <span asp-validation-for="Form.Username"></span>
+            </div>
+            <label>Username</label>
+            <input asp-for="Form.Username"/>
+        </div>
+        <div class="field">
+            <div>
+                <span asp-validation-for="Form.Password"></span>
+            </div>
+            <label>Password</label>
+            <input asp-for="Form.Password">
+        </div>
+        <div class="row">
+            <div class="field flex-row">
+                        <button type="submit">Log In</button>
+                    </div>
+                    <hr>
+                    <div class="field flex-row" id="link">
+                        <a asp-page="/Account/Register" asp-route-returnUrl="@Model.Form.ReturnUrl">Register</a>
+                    </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    
+</style>

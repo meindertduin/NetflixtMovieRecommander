@@ -26,6 +26,12 @@ namespace NetflixMoviesRecommender.api.Pages.Account
             }
             
             var user = new ApplicationUser(Form.Username) { Email = Form.Email };
+            
+            user.UserProfile = new UserProfile
+            {
+                UserName = Form.Username,
+            };
+            
             var creationResult = await userManager.CreateAsync(user, Form.Password);
 
             if (creationResult.Succeeded)
