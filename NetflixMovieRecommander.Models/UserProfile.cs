@@ -29,5 +29,8 @@ namespace NetflixMovieRecommander.Models
         // public string AvatarUrl { get; set; }
 
         public ICollection<ProfileFile> ProfileFiles { get; set; }
+
+        public ICollection<InboxMessage> InboxMessages { get; set; }
+        public ICollection<InboxMessage> SendMessages { get; set; }
     }
 }

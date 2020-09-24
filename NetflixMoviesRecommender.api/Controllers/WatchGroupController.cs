@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
+using NetflixMovieRecommander.Models.Enums;
 using NetflixMoviesRecommender.api.Forms;
 using NetflixMoviesRecommender.api.Services;
 using Newtonsoft.Json;
@@ -267,6 +268,41 @@ namespace NetflixMoviesRecommender.api.Controllers
             
             return Ok(recommendations);
         }
-        
+
+        [HttpPost("invite")]
+        [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
+        public async Task<IActionResult> Invite([FromBody] WatchGroupInviteViewModel groupInvite)
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var profile = await _ctx.UserProfiles.FindAsync(user.Id);
+            var watchGroup = await _ctx.WatchGroups.FindAsync(groupInvite.GroupId);
+
+            var subject = await _ctx.UserProfiles.FindAsync(groupInvite.SubjectId);
+            
+            if (subject == null || watchGroup == null)
+            {
+                return NotFound();
+            }
+            
+            if (profile == null)
+            {
+                return Forbid();
+            }
+
+            var invite = new InboxMessage
+            {
+                MessageType = MessageType.WatchGroupInvite,
+                Title = $"Invite from {user.UserName}",
+                Description = $"{user.UserName} invited you to join watch group: {watchGroup.Title}",
+                Sender = profile,
+                DateSend = DateTime.Now,
+                Receiver = subject,
+            };
+
+            await _ctx.InboxMessages.AddAsync(invite);
+            await _ctx.SaveChangesAsync();
+
+            return Ok();
+        }
     }
 }

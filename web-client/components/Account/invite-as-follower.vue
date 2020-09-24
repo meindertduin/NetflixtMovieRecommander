@@ -30,7 +30,7 @@
             <v-avatar>
               <v-img :src="selectedProfile.avatarUrl != null? selectedProfile.avatarUrl: '/default_profile.jpg'" max-height="30" max-width="30" aspect-ratio="1"></v-img>
               {{" " + selectedProfile.userName}}
-              <v-btn text>Invite</v-btn>
+              <v-btn text @click="invite(selectedProfile.id)">Invite</v-btn>
             </v-avatar>
           </v-list-item-content>
         </v-list-item>
@@ -52,7 +52,7 @@
 
 <script lang="ts">
   import {Component, Vue, Watch} from "nuxt-property-decorator";
-  import {Profile} from "~/assets/interface-models";
+  import {Profile, WatchGroupInvite} from "~/assets/interface-models";
 
     @Component({})
     export default class InviteAsFollower extends Vue{
@@ -85,6 +85,18 @@
         .catch(err => {
           console.log(err);
         }).finally(() => this.isLoading = false);
+      }
+
+      private invite(userId:string):void{
+        // test purpose function
+
+        const groupInvite :WatchGroupInvite = {
+          subjectId: userId,
+          groupId: "5f3d403c-2ff3-44a9-8336-2ff286eb1b84",
+        }
+
+        this.$axios.post('api/watchgroup/invite', groupInvite);
+
       }
     }
 </script>

@@ -25,8 +25,8 @@ namespace NetflixMoviesRecommender.api.Controllers
         private readonly AppDbContext _ctx;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public ProfileController(IFileHandlerService fileHandlerService, 
-            AppDbContext ctx, 
+        public ProfileController(IFileHandlerService fileHandlerService,
+            AppDbContext ctx,
             UserManager<ApplicationUser> userManager)
         {
             _fileHandlerService = fileHandlerService;
@@ -48,11 +48,11 @@ namespace NetflixMoviesRecommender.api.Controllers
             {
                 return Forbid();
             }
-            
+
             var result = new UserProfileViewModel
             {
-                UserName = userProfile.UserName, 
-                Id = userProfile.Id, 
+                UserName = userProfile.UserName,
+                Id = userProfile.Id,
                 AvatarUrl = "https://localhost:5001/api/profile/picture/" + userProfile.Id,
             };
 
@@ -67,22 +67,22 @@ namespace NetflixMoviesRecommender.api.Controllers
                 .Where(x => x.Id == id)
                 .Include(x => x.ProfileFiles)
                 .FirstOrDefault();
-            
+
             if (profile == null)
             {
                 return NotFound();
             }
-            
+
             var result = new UserProfileViewModel
             {
-                UserName = profile.UserName, 
+                UserName = profile.UserName,
                 Id = profile.Id,
                 AvatarUrl = "https://localhost:5001/api/profile/picture/" + profile.Id,
             };
-            
+
             return Ok(result);
         }
-        
+
         [HttpPost("picture")]
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
         public async Task<IActionResult> UploadPicture([FromForm] IFormFile picture)
@@ -102,12 +102,12 @@ namespace NetflixMoviesRecommender.api.Controllers
                 .Where(x => x.Id == user.Id)
                 .Include(x => x.ProfileFiles)
                 .FirstOrDefault();
-            
+
             if (userProfile == null)
             {
                 return Problem();
             }
-            
+
             var avatar = new ProfileFile
             {
                 FileName = picture.FileName,
@@ -118,21 +118,23 @@ namespace NetflixMoviesRecommender.api.Controllers
 
             using (var reader = new BinaryReader(picture.OpenReadStream()))
             {
-                avatar.Content = reader.ReadBytes((int)picture.Length);
-            };
+                avatar.Content = reader.ReadBytes((int) picture.Length);
+            }
+
+            ;
 
             var currentUserAvatar = userProfile.ProfileFiles.FirstOrDefault(x => x.FileType == FileType.Avatar);
-            
+
             if (currentUserAvatar != null)
             {
                 userProfile.ProfileFiles.Remove(currentUserAvatar);
                 await _ctx.SaveChangesAsync();
             }
-            
+
             userProfile.ProfileFiles.Add(avatar);
-            
+
             _ctx.SaveChanges();
-            
+
             return Ok();
         }
 
@@ -140,15 +142,14 @@ namespace NetflixMoviesRecommender.api.Controllers
         public IActionResult GetPicture(string id)
         {
             var avatar = _ctx.ProfileFiles
-                .Where(x => x.UserProfileId == id).
-                FirstOrDefault(x => x.FileType == FileType.Avatar);
+                .Where(x => x.UserProfileId == id).FirstOrDefault(x => x.FileType == FileType.Avatar);
 
             if (avatar == null)
             {
                 // return static image
                 return NotFound();
             }
-            
+
             return File(avatar.Content, "image/jpeg");
         }
 
@@ -161,7 +162,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                 .Take(5);
 
             List<UserProfileViewModel> result = new List<UserProfileViewModel>();
-            
+
             foreach (var userProfile in profiles)
             {
                 result.Add(new UserProfileViewModel
@@ -171,9 +172,47 @@ namespace NetflixMoviesRecommender.api.Controllers
                     AvatarUrl = "https://localhost:5001/api/profile/picture/" + userProfile.Id,
                 });
             }
-            
+
             return Ok(result);
         }
         
+        
+        [HttpGet("inbox")]
+        [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
+        public async Task<IActionResult> GetInbox()
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+
+            if (user == null)
+            {
+                return Forbid();
+            }
+
+            var inboxMessages = _ctx.InboxMessages.Where(x => x.ReceiverId == user.Id).ToList();
+
+            var result = new List<InboxMessageViewModel>();
+
+            foreach (var inboxMessage in inboxMessages)
+            {
+                var sender = inboxMessage.Sender;
+                if (sender != null)
+                {
+                    result.Add(new InboxMessageViewModel
+                    {
+                        MessageType = inboxMessage.MessageType,
+                        Title = inboxMessage.Title,
+                        Description = inboxMessage.Description,
+                        Sender = new UserProfileViewModel
+                        {
+                            UserName = sender.UserName,
+                            Id = sender.Id,
+                            AvatarUrl = "https://localhost:5001/api/profile/picture/" + sender.Id,
+                        },
+                        DateSend = inboxMessage.DateSend,
+                    });
+                }
+            }
+            return Ok(result);
+        }
     }
 }

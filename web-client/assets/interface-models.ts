@@ -17,7 +17,12 @@ export interface UserProfile {
 export interface Profile {
   userName: string,
   avatarUrl: string,
-  Id: string,
+  id: string,
+}
+
+export interface WatchGroupInvite {
+  subjectId: string,
+  groupId: string,
 }
 
 export interface WatchGroupModel {
