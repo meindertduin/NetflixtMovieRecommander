@@ -2,8 +2,9 @@
   <v-row justify-md="end" justify="center">
     <v-card width="90%" color="dark">
       <v-card-title>
-        <v-img class="white--text"
+        <v-img v-if="userProfile == null" class="white--text"
                 src="/default_profile.jpg"  aspect-ratio="1"/>
+        <v-img v-else class="white--text" aspect-ratio="1" :src="userProfile.avatarUrl"></v-img>
       </v-card-title>
       <v-card-text>
         <v-col cols="12">

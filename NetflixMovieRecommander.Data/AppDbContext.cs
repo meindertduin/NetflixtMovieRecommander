@@ -21,6 +21,7 @@ namespace NetflixMovieRecommander.Data
         public DbSet<WatchGroupUserProfile> WatchGroupUserProfiles { get; set; }
 
         public DbSet<ProfileFile> ProfileFiles { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -54,6 +55,13 @@ namespace NetflixMovieRecommander.Data
                 .HasConversion(
                     v => string.Join(',', v),
                     v => v.Split(',', StringSplitOptions.RemoveEmptyEntries));
+
+            modelBuilder.Entity<ProfileFile>()
+                .HasOne(x => x.UserProfile)
+                .WithMany(x => x.ProfileFiles)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

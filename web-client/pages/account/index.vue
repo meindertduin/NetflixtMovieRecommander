@@ -63,7 +63,7 @@
       {tab: "...", content: WatchGroupDisplay}
     ]
 
-    async mounted() {
+    async created() {
       await this.$store.getters['getInitPromise'];
       await this.$store.dispatch('watchgroup/getUserWatchGroups');
       await this.$store.dispatch('user/getUserProfile');

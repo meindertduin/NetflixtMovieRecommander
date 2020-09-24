@@ -47,13 +47,11 @@ namespace NetflixMoviesRecommender.api.Controllers
                 return Forbid();
             }
             
-            var profileAvatar = userProfile.ProfileFiles.FirstOrDefault(x => x.FileType == FileType.Avatar);
-
             var result = new UserProfileViewModel
             {
                 UserName = userProfile.UserName, 
                 Id = userProfile.Id, 
-                Avatar = profileAvatar,
+                AvatarUrl = "https://localhost:5001/api/profile/picture/" + userProfile.Id,
             };
 
             return Ok(result);
@@ -72,14 +70,12 @@ namespace NetflixMoviesRecommender.api.Controllers
             {
                 return NotFound();
             }
-
-            var profileAvatar = profile.ProfileFiles.FirstOrDefault(x => x.FileType == FileType.Avatar);
-
+            
             var result = new UserProfileViewModel
             {
                 UserName = profile.UserName, 
-                Id = profile.Id, 
-                Avatar = profileAvatar,
+                Id = profile.Id,
+                AvatarUrl = "https://localhost:5001/api/profile/picture/" + profile.Id,
             };
             
             return Ok(result);
@@ -95,7 +91,11 @@ namespace NetflixMoviesRecommender.api.Controllers
             }
 
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            var userProfile = await _ctx.UserProfiles.FindAsync(user.Id);
+            var userProfile = _ctx.UserProfiles
+                .Where(x => x.Id == user.Id)
+                .Include(x => x.ProfileFiles)
+                .FirstOrDefault();
+            
             if (userProfile == null)
             {
                 return Problem();
@@ -115,9 +115,11 @@ namespace NetflixMoviesRecommender.api.Controllers
             };
 
             var currentUserAvatar = userProfile.ProfileFiles.FirstOrDefault(x => x.FileType == FileType.Avatar);
+            
             if (currentUserAvatar != null)
             {
                 userProfile.ProfileFiles.Remove(currentUserAvatar);
+                await _ctx.SaveChangesAsync();
             }
             
             userProfile.ProfileFiles.Add(avatar);
@@ -126,5 +128,22 @@ namespace NetflixMoviesRecommender.api.Controllers
             
             return Ok();
         }
+
+        [HttpGet("picture/{id}")]
+        public IActionResult GetPicture(string id)
+        {
+            var avatar = _ctx.ProfileFiles
+                .Where(x => x.UserProfileId == id).
+                FirstOrDefault(x => x.FileType == FileType.Avatar);
+
+            if (avatar == null)
+            {
+                // return static image
+                return NotFound();
+            }
+            
+            return File(avatar.Content, "image/jpeg");
+        }
+        
     }
 }

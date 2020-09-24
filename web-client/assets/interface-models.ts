@@ -16,7 +16,7 @@ export interface UserProfile {
 
 export interface Profile {
   userName: string,
-  avatar: any,
+  avatarUrl: string,
   Id: string,
 }
 
