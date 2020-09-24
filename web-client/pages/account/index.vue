@@ -3,6 +3,7 @@
     <v-row justify="center">
       <v-col cols="12" md="4">
         <ProfileDisplay :user-profile="profileData" />
+        <InviteAsFollower />
       </v-col>
       <v-col cols="12" md="8">
         <v-row  justify-md="end" justify="center">
@@ -40,6 +41,7 @@
   import EditGroup from "~/components/Account/edit-group.vue";
   import WatchGroupDisplay from "~/components/Account/watch-group-display.vue";
   import ProfileDisplay from "~/components/Account/profile-display.vue";
+  import InviteAsFollower from "~/components/Account/invite-as-follower.vue";
 
   @Component({
     name: "account",
@@ -48,7 +50,8 @@
       CreateGroup,
       EditGroup,
       WatchGroupDisplay,
-      ProfileDisplay
+      ProfileDisplay,
+      InviteAsFollower,
     },
   })
   export default class Account extends Vue{
