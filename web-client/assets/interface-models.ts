@@ -48,3 +48,13 @@ export interface WatchGroupRecommendationForm {
   seed: string,
   type: string,
 }
+
+export interface InboxMessage {
+  messageId: number,
+  messageType: number,
+  groupId: string,
+  title: string,
+  description: string,
+  sender: Profile,
+  dateSend: string,
+}

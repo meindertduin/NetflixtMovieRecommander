@@ -271,7 +271,7 @@ namespace NetflixMoviesRecommender.api.Controllers
 
         [HttpPost("invite")]
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
-        public async Task<IActionResult> Invite([FromBody] WatchGroupInviteViewModel groupInvite)
+        public async Task<IActionResult> Invite([FromBody] WatchGroupInviteForm groupInvite)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
             var profile = await _ctx.UserProfiles.FindAsync(user.Id);
@@ -302,6 +302,75 @@ namespace NetflixMoviesRecommender.api.Controllers
             await _ctx.InboxMessages.AddAsync(invite);
             await _ctx.SaveChangesAsync();
 
+            return Ok();
+        }
+
+        [HttpPut("invite/response")]
+        [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
+        public async Task<IActionResult> Accept([FromBody] WatchGroupInviteResponseForm responseForm)
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var profile = await _ctx.UserProfiles.FindAsync(user.Id);
+            if (profile == null)
+            {
+                return Forbid();
+            }
+            
+            // validating invite
+            var message = await _ctx.InboxMessages.FindAsync(responseForm.MessageId);
+            if (message == null || responseForm.InviterId != message.SenderId || profile.Id != message.ReceiverId)
+            {
+                return BadRequest();
+            }
+            
+            if (responseForm.Accepted)
+            {
+                var watchGroup = _ctx.WatchGroups
+                    .Where(x => x.OwnerId == responseForm.InviterId)
+                    .FirstOrDefault(x => x.Title == responseForm.GroupName);
+
+                if (watchGroup == null)
+                {
+                    return BadRequest();
+                }
+                
+                watchGroup.Members.Add(new WatchGroupUserProfile
+                {
+                    WatchGroupId = watchGroup.Id,
+                    UserProfileId = profile.Id,
+                });
+                
+                var accept = new InboxMessage
+                {
+                    MessageType = MessageType.WatchGroupInvite,
+                    Title = $"Message from {user.UserName}",
+                    Description = $"{user.UserName} has accepted your invite",
+                    Sender = profile,
+                    DateSend = DateTime.Now,
+                    ReceiverId = message.SenderId,
+                };
+
+                _ctx.InboxMessages.Add(accept);
+                _ctx.SaveChanges();
+
+                return Ok();
+            }
+            
+            // implement way for resposne message
+            
+            var decline = new InboxMessage
+            {
+                MessageType = MessageType.WatchGroupInvite,
+                Title = $"Message from {user.UserName}",
+                Description = $"{user.UserName} has declined your invite",
+                Sender = profile,
+                DateSend = DateTime.Now,
+                ReceiverId = message.SenderId,
+            };
+            
+            _ctx.InboxMessages.Add(decline);
+            _ctx.SaveChanges();
+            
             return Ok();
         }
     }

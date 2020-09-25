@@ -1,0 +1,59 @@
+﻿<template>
+  <v-card>
+    <v-card-title>
+      <v-row justify="center">
+        Inbox
+      </v-row>
+    </v-card-title>
+    <v-card-text>
+      <v-row justify="center">
+        <v-btn v-if="true" text @click="toggleInbox">
+          click to open messages
+        </v-btn>
+        <div v-else class="text-button white--text">Your inbox is empty</div>
+        <v-expand-transition>
+          <v-list v-if="inbox">
+            <InviteMessage v-for="(invite, index) in inviteMessages" :key="index" :message="invite"/>
+          </v-list>
+        </v-expand-transition>
+      </v-row>
+    </v-card-text>
+  </v-card>
+</template>
+
+<script lang="ts">
+  import {Component, Vue} from "nuxt-property-decorator";
+  import InviteMessage from "~/components/Account/invite-message.vue";
+  import {InboxMessage} from "~/assets/interface-models";
+
+
+    @Component({
+      components: {
+        InviteMessage,
+      }
+    })
+    export default class Inbox extends Vue{
+      private inviteMessages: Array<InboxMessage> = [];
+      private generalMessages: Array<InboxMessage> = []
+
+      private inbox:boolean = false;
+
+      private created(){
+        this.$axios.get('api/profile/inbox')
+          .then(response => {
+            console.log(response.data);
+            const messages:Array<InboxMessage> = response.data;
+            messages.forEach(x => x.messageType === 0? this.inviteMessages.push(x): this.generalMessages.push(x));
+            console.log(this.inviteMessages);
+          })
+      }
+
+      private toggleInbox():void{
+        this.inbox = ! this.inbox;
+      }
+    }
+</script>
+
+<style scoped>
+
+</style>

@@ -24,39 +24,7 @@
         </v-list-item>
         <v-list-item>
           <v-list-item-content>
-            <v-card>
-              <v-card-title>
-                <v-row justify="center">
-                  Inbox
-                </v-row>
-              </v-card-title>
-              <v-card-text>
-                <v-row justify="center">
-                  <v-btn v-if="true" text @click="toggleInbox">
-                    click to open messages
-                  </v-btn>
-                  <div v-else class="text-button white--text">Your inbox is empty</div>
-                  <v-expand-transition>
-                    <v-list v-if="inbox">
-                      <v-list-item>
-                        <v-list-item-avatar>
-                          <img src="/default_profile.jpg" alt="">
-                        </v-list-item-avatar>
-                        <v-list-item-content>
-                          <v-list-item-title>
-                            Invite From kaas
-                          </v-list-item-title>
-                          <v-list-item-action-text>
-                            <v-btn text color="green">Accept</v-btn>
-                            <v-btn text color="white">Decline</v-btn>
-                          </v-list-item-action-text>
-                        </v-list-item-content>
-                      </v-list-item>
-                    </v-list>
-                  </v-expand-transition>
-                </v-row>
-              </v-card-text>
-            </v-card>
+            <Inbox v-if="authenticated" />
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -85,16 +53,18 @@
 <script lang="ts">
   import {Component, Vue} from "nuxt-property-decorator";
   import {auth} from "~/store/auth";
+  import InviteMessage from "~/components/Account/invite-message.vue";
+  import Inbox from "~/components/Account/inbox.vue";
 
-@Component({})
+@Component({
+  components: {
+    Inbox,
+  }
+})
 export default class DefaultLayout extends Vue
 {
   private drawer = null;
-  private inbox:boolean = false;
 
-  private toggleInbox():void{
-    this.inbox = ! this.inbox;
-  }
 
   get loadingState(){
     return (this.$store.state.auth as auth).loading;
@@ -111,5 +81,6 @@ export default class DefaultLayout extends Vue
   private navigate(path:string){
     this.$router.push(path);
   }
+
 }
 </script>

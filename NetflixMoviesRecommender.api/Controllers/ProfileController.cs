@@ -182,23 +182,31 @@ namespace NetflixMoviesRecommender.api.Controllers
         public async Task<IActionResult> GetInbox()
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-
+            
             if (user == null)
             {
                 return Forbid();
             }
+            
 
-            var inboxMessages = _ctx.InboxMessages.Where(x => x.ReceiverId == user.Id).ToList();
+            var inbox = _ctx.UserInboxes
+                .Where(x => x.OwnerId == user.Id)
+                .Include(x => x.WatchGroupInviteMessages)
+                .Include(x => x.GeneralMessages)
+                .FirstOrDefault();
+                
 
             var result = new List<InboxMessageViewModel>();
 
-            foreach (var inboxMessage in inboxMessages)
+            foreach (var inviteMessage in inbox.WatchGroupInviteMessages)
             {
                 var sender = inboxMessage.Sender;
+                
                 if (sender != null)
                 {
                     result.Add(new InboxMessageViewModel
                     {
+                        MessageId = inboxMessage.Id,
                         MessageType = inboxMessage.MessageType,
                         Title = inboxMessage.Title,
                         Description = inboxMessage.Description,
