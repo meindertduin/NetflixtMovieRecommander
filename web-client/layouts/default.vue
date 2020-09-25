@@ -14,12 +14,20 @@
             <v-list-item-title>Home</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item link>
+        <v-list-item link v-if="authenticated">
           <v-list-item-action>
             <v-icon>mdi-account</v-icon>
           </v-list-item-action>
           <v-list-item-content @click="navigate('/account')">
             <v-list-item-title>Account</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item link v-else>
+          <v-list-item-action>
+            <v-icon>mdi-filmstrip</v-icon>
+          </v-list-item-action>
+          <v-list-item-content @click="navigate('/recommended')">
+            <v-list-item-title>Watchlist Recommended</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item>

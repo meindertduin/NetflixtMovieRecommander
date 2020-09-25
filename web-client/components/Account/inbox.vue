@@ -7,7 +7,7 @@
     </v-card-title>
     <v-card-text>
       <v-row justify="center">
-        <v-btn v-if="true" text @click="toggleInbox">
+        <v-btn v-if="messageCount > 0" text @click="toggleInbox">
           click to open messages
         </v-btn>
         <div v-else class="text-button white--text">Your inbox is empty</div>
@@ -38,6 +38,7 @@
     export default class Inbox extends Vue{
       private inviteMessages: Array<InboxMessage> = [];
       private generalMessages: Array<InboxMessage> = []
+      private messageCount: number = 0;
 
       private inbox:boolean = false;
 
@@ -46,6 +47,7 @@
           .then(response => {
             console.log(response.data);
             const messages:Array<InboxMessage> = response.data;
+            this.messageCount = messages.length;
             messages.forEach(x => x.messageType === 1? this.inviteMessages.push(x): this.generalMessages.push(x));
             console.log(this.inviteMessages);
           })
