@@ -38,12 +38,6 @@
             <div v-for="x in displayNameList" :key="x">{{x}}</div>
           </div>
 
-
-          <div>
-            Add Existing User
-          </div>
-          <v-text-field label="User Name"></v-text-field>
-
           <hr class="my-4">
 
           Add Group Member Name
@@ -67,6 +61,11 @@
 
         <v-stepper-content step="3">
 
+          <div>
+            Add Existing User
+          </div>
+          <InviteAsFollower :group-id="this.createdWatchGroupId"/>
+
           <p>
             Add a Netflix Watchlist to get movies you haven't watched To see a guide on how to
             add a watch list click <a>Here</a>. You can also add a watchlist later.
@@ -87,6 +86,7 @@
 <script lang="ts">
   import {Component, Vue, Watch} from "nuxt-property-decorator";
   import AddWatchlist from "~/components/Account/add-watchlist.vue";
+  import InviteAsFollower from "~/components/Account/invite-as-follower.vue";
 
 
     interface existingUser{
@@ -104,6 +104,7 @@
     @Component({
       components: {
         AddWatchlist,
+        InviteAsFollower,
       }
     })
     export default class CreateGroup extends Vue{

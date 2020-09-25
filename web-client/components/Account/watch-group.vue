@@ -51,7 +51,7 @@
     </v-card-text>
     <v-card-actions>
 
-      <v-btn @click="toggleEditOverlay">Edit</v-btn>
+      <v-btn v-if="isOwner" @click="toggleEditOverlay">Edit</v-btn>
       <v-btn >Watch Now!</v-btn>
       <n-link :to="'/account'  + '/' + watchGroup.id" no-prefetch>Watch Now!</n-link>
     </v-card-actions>
@@ -62,6 +62,7 @@
 <script lang="ts">
   import {Component, Prop, Vue} from "nuxt-property-decorator";
   import {Profile, UserProfile, WatchGroupModel} from "~/assets/interface-models";
+  import {auth} from "~/store/auth";
 
     @Component({})
     export default class WatchGroup extends Vue{
@@ -75,6 +76,14 @@
 
       created(){
         console.log(this.members);
+      }
+
+      get isOwner():boolean{
+        const userProfile = (this.$store.state.auth as auth).userProfile;
+        if(userProfile && userProfile.id == this.owner.Id){
+          return true;
+        }
+        return  false;
       }
 
       get sharedWithCount(){

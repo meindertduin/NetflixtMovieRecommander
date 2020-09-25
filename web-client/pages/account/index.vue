@@ -3,7 +3,6 @@
     <v-row justify="center">
       <v-col cols="12" md="4">
         <ProfileDisplay :user-profile="profileData" />
-        <InviteAsFollower />
       </v-col>
       <v-col cols="12" md="8">
         <v-row  justify-md="end" justify="center">
@@ -51,7 +50,6 @@
       EditGroup,
       WatchGroupDisplay,
       ProfileDisplay,
-      InviteAsFollower,
     },
   })
   export default class Account extends Vue{

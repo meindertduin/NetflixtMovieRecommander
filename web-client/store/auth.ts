@@ -5,6 +5,7 @@ import { RootState } from "~/store";
 import {User} from "oidc-client";
 import {recommendation} from "~/store/recommendation";
 import {Getter} from "nuxt-property-decorator";
+import {Profile} from "~/assets/interface-models";
 
 const ROLES = {
   MODERATOR: "Mod",
@@ -15,6 +16,7 @@ const ROLES = {
 const initState = () => ({
   user: null as User | null,
   loading: true as boolean,
+  userProfile: null as Profile | null
 });
 
 
@@ -31,6 +33,7 @@ export const getters: GetterTree<auth, RootState> = {
 export const mutations: MutationTree<auth> = {
   SAVE_USER: (state, user:User) => state.user = user,
   FINISH: (state) => state.loading = false,
+  SET_PROFILE: (state, profile:Profile) => state.userProfile = profile,
 }
 
 export const actions: ActionTree<auth, RootState> = {
@@ -42,6 +45,10 @@ export const actions: ActionTree<auth, RootState> = {
       if(user){
         this.$axios.setToken(`Bearer ${user.access_token}`);
         commit('SAVE_USER', user);
+        this.$axios.get('api/profile')
+          .then(({data}) => {
+            commit('SET_PROFILE', data);
+          })
       }
     })
       .catch(err => {

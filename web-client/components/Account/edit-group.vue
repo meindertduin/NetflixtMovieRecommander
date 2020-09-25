@@ -20,8 +20,7 @@
         </v-col>
         <v-col cols="12" sm="6">
           <v-row justify="center" align="center">
-            <v-text-field label="Invite User"></v-text-field>
-            <v-btn color="green" text>Invite</v-btn>
+            <InviteAsFollower :group-id="currentWatchGroup.id"/>
           </v-row>
           <h3 class="mb-3">Add Watchlist: </h3>
           <v-row justify="center">
@@ -54,10 +53,12 @@
   import {UpdateWatchGroupModel, WatchGroupModel} from "~/assets/interface-models";
   import {watchgroup} from "~/store/watchgroup";
   import AddWatchlist from "~/components/Account/add-watchlist.vue";
+  import InviteAsFollower from "~/components/Account/invite-as-follower.vue";
 
   @Component({
     components: {
-      AddWatchlist
+      AddWatchlist,
+      InviteAsFollower,
     }
   })
   export default class EditGroup extends Vue{
@@ -92,7 +93,7 @@
 
       console.log(payload);
 
-      this.$store.dispatch('watchgroup/editGroup', payload);
+      this.$store.dispatch('watchgroup/editGroup', payload)
     }
 
     private initFields():void{

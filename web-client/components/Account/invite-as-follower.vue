@@ -3,7 +3,7 @@
     dark
   >
     <v-card-title class="headline">
-      Search Friend
+      Search Username
     </v-card-title>
     <v-card-text>
       <v-autocomplete
@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts">
-  import {Component, Vue, Watch} from "nuxt-property-decorator";
+  import {Component, Prop, Vue, Watch} from "nuxt-property-decorator";
   import {Profile, WatchGroupInvite} from "~/assets/interface-models";
 
     @Component({})
@@ -59,6 +59,8 @@
       private searchResults:Array<Profile> = [];
       private selected:string | null =  null;
       private isLoading:boolean = false;
+
+      @Prop({type: String, required: true}) readonly groupId !:string;
 
       get resultEntries():Array<string>{
         return this.searchResults.map(x => x.userName);
@@ -89,10 +91,10 @@
 
       private invite(userId:string):void{
         // test purpose function
-
+        if(this.groupId == null || userId == null) return;
         const groupInvite :WatchGroupInvite = {
           subjectId: userId,
-          groupId: "5f3d403c-2ff3-44a9-8336-2ff286eb1b84",
+          groupId: this.groupId,
         }
 
         this.$axios.post('api/watchgroup/invite', groupInvite);
