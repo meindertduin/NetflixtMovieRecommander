@@ -61,17 +61,21 @@
 
 <script lang="ts">
   import {Component, Prop, Vue} from "nuxt-property-decorator";
-  import {UserProfile, WatchGroupModel} from "~/assets/interface-models";
+  import {Profile, UserProfile, WatchGroupModel} from "~/assets/interface-models";
 
     @Component({})
     export default class WatchGroup extends Vue{
       @Prop({type: String, required: true}) readonly title!: string
-      @Prop({type: Array, required: true}) readonly members!: Array<UserProfile>
+      @Prop({type: Array, required: true}) readonly members!: Array<Profile>
       @Prop({type: Array, required: true}) readonly addedNames!: Array<string>
       @Prop({type: Object, required: true}) readonly owner!: UserProfile
       @Prop({type: String, required: true}) readonly description!: string
 
       @Prop({type: Object, required: true}) watchGroup!: WatchGroupModel
+
+      created(){
+        console.log(this.members);
+      }
 
       get sharedWithCount(){
         return this.members.length + this.addedNames.length;

@@ -47,18 +47,45 @@ namespace NetflixMoviesRecommender.api.Controllers
                 .Where(x => x.OwnerId == user.Id && x.Deleted == false)
                 .Include(x => x.Owner)
                 .Include(x => x.Members)
-                .Select(WatchGroupViewModel.Projection)
                 .ToList();
-
-
-            var json = JsonConvert.SerializeObject(watchGroups, new JsonSerializerSettings 
-            { 
-                ContractResolver = new CamelCasePropertyNamesContractResolver() 
-            });
             
-            // todo: map the watchgroup model in a viewmodel
+            var result = new List<WatchGroupViewModel>();
+
+            foreach (var watchGroup in watchGroups)
+            {
+                var members = new List<UserProfileViewModel>();
+                var owner = new UserProfileViewModel
+                {
+                    Id = watchGroup.Owner.Id,
+                    UserName = watchGroup.Owner.UserName,
+                    AvatarUrl = "https://localhost:5001/api/profile/picture/" + watchGroup.Owner.Id,
+                };
+                foreach (var member in watchGroup.Members)
+                {
+                    var memberProfile = await _userManager.FindByIdAsync(member.UserProfileId);
+                    if (memberProfile.UserName != null)
+                    {
+                        members.Add(new UserProfileViewModel
+                        {
+                            Id = member.UserProfileId,
+                            UserName = memberProfile.UserName,
+                            AvatarUrl = "https://localhost:5001/api/profile/picture/" + member.UserProfileId,
+                        });
+                    }
+                }
+                
+                result.Add(new WatchGroupViewModel
+                {
+                    Id = watchGroup.Id,
+                    Title = watchGroup.Title,
+                    Description = watchGroup.Description,
+                    Owner = owner,
+                    Members = members,
+                    AddedNames = watchGroup.AddedNames,
+                });
+            }
             
-            return Ok(json);
+            return Ok(result);
 
         }
 
