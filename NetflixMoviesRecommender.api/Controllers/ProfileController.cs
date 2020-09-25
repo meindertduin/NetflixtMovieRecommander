@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Mime;
@@ -188,23 +189,21 @@ namespace NetflixMoviesRecommender.api.Controllers
                 return Forbid();
             }
             
+            var inboxMessages = _ctx.InboxMessages
+                .Where(x => x.ReceiverId == user.Id)
+                .Include(x => x.Sender)
+                .ToList();
 
-            var inbox = _ctx.UserInboxes
-                .Where(x => x.OwnerId == user.Id)
-                .Include(x => x.WatchGroupInviteMessages)
-                .Include(x => x.GeneralMessages)
-                .FirstOrDefault();
-                
 
             var result = new List<InboxMessageViewModel>();
 
-            foreach (var inviteMessage in inbox.WatchGroupInviteMessages)
+            foreach (var inboxMessage in inboxMessages)
             {
                 var sender = inboxMessage.Sender;
                 
                 if (sender != null)
                 {
-                    result.Add(new InboxMessageViewModel
+                    var message = new InboxMessageViewModel
                     {
                         MessageId = inboxMessage.Id,
                         MessageType = inboxMessage.MessageType,
@@ -217,10 +216,47 @@ namespace NetflixMoviesRecommender.api.Controllers
                             AvatarUrl = "https://localhost:5001/api/profile/picture/" + sender.Id,
                         },
                         DateSend = inboxMessage.DateSend,
-                    });
+                    };
+                    
+                    if(inboxMessage.MessageType == MessageType.WatchGroupInvite)
+                    {
+                        var invite = (WatchGroupInviteMessage) inboxMessage;
+                        var appendix = new WatchGroupInviteViewModel
+                        {
+                            GroupId = invite.GroupId,
+                            GroupTitle = invite.GroupTitle,
+                        };
+                        
+                        message.Appendix = appendix;
+                    }
+                    
+                    result.Add(message);
                 }
             }
             return Ok(result);
+        }
+
+        [HttpDelete("inbox")]
+        [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
+        public async Task<IActionResult> DeleteMessage([FromQuery] int id)
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var message = await _ctx.InboxMessages.FindAsync(id);
+
+            if (message == null)
+            {
+                return NotFound();
+            }
+
+            if (message.ReceiverId != user.Id)
+            {
+                return Forbid();
+            }
+
+            _ctx.InboxMessages.Remove(message);
+            _ctx.SaveChanges();
+
+            return Ok();
         }
     }
 }

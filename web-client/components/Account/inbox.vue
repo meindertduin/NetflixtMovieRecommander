@@ -14,6 +14,7 @@
         <v-expand-transition>
           <v-list v-if="inbox">
             <InviteMessage v-for="(invite, index) in inviteMessages" :key="index" :message="invite"/>
+            <GeneralMessage v-for="(message, index) in generalMessages" :key="index" :message="message" />
           </v-list>
         </v-expand-transition>
       </v-row>
@@ -25,10 +26,12 @@
   import {Component, Vue} from "nuxt-property-decorator";
   import InviteMessage from "~/components/Account/invite-message.vue";
   import {InboxMessage} from "~/assets/interface-models";
+  import GeneralMessage from "~/components/Account/general-message.vue";
 
 
     @Component({
       components: {
+        GeneralMessage,
         InviteMessage,
       }
     })
@@ -43,7 +46,7 @@
           .then(response => {
             console.log(response.data);
             const messages:Array<InboxMessage> = response.data;
-            messages.forEach(x => x.messageType === 0? this.inviteMessages.push(x): this.generalMessages.push(x));
+            messages.forEach(x => x.messageType === 1? this.inviteMessages.push(x): this.generalMessages.push(x));
             console.log(this.inviteMessages);
           })
       }

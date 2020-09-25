@@ -10,8 +10,7 @@
       <v-list-item-action-text>
         {{dateString}}
         {{message.description}}
-        <v-btn text color="green" @click="accept">Accept</v-btn>
-        <v-btn text color="white">Decline</v-btn>
+        <v-btn text color="white" @click="deleteMessage">Delete</v-btn>
       </v-list-item-action-text>
     </v-list-item-content>
   </v-list-item>
@@ -22,8 +21,9 @@
   import {InboxMessage} from "~/assets/interface-models";
 
     @Component({})
-    export default class InviteMessage extends Vue{
+    export default class GeneralMessage extends Vue{
       @Prop({ type: Object, required: true}) readonly message !:InboxMessage;
+
       get dateString():string{
         const monthNames = ["January", "February", "March", "April", "May", "June",
           "July", "August", "September", "October", "November", "December"
@@ -35,13 +35,8 @@
         return "Send: " + days.toString() + " " + monthNames[month];
       }
 
-      private accept(): void{
-        const payload = {
-          messageId: this.message.messageId,
-          accepted: true,
-          inviterId: this.message.sender.id,
-        }
-        this.$axios.put('api/watchgroup/invite/response', payload)
+      private deleteMessage():void{
+        this.$axios.delete(`api/profile/inbox?id=${this.message.messageId}`);
       }
     }
 </script>

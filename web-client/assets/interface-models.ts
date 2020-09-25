@@ -52,7 +52,7 @@ export interface WatchGroupRecommendationForm {
 export interface InboxMessage {
   messageId: number,
   messageType: number,
-  groupId: string,
+  appendix: object,
   title: string,
   description: string,
   sender: Profile,

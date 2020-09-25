@@ -22,12 +22,8 @@ namespace NetflixMovieRecommander.Data
 
         public DbSet<ProfileFile> ProfileFiles { get; set; }
         public DbSet<InboxMessage> InboxMessages { get; set; }
-
+        public DbSet<WatchGroupInviteMessage> WatchGroupInviteMessages { get; set; }
         
-        // user inboxes
-        public DbSet<UserInbox> UserInboxes { get; set; }
-        public DbSet<UserInboxWatchGroupInviteMessage> UserInboxWatchGroupInviteMessages { get; set; }
-        public DbSet<UserInboxMessageBase> GeneralMessages { get; set; }
         
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -79,15 +75,10 @@ namespace NetflixMovieRecommander.Data
                 .WithMany(x => x.InboxMessages)
                 .HasForeignKey(x => x.ReceiverId);
 
-            modelBuilder.Entity<UserInboxMessageBase>()
-                .HasOne(x => x.UserInbox)
-                .WithMany(x => x.GeneralMessages)
-                .HasForeignKey(x => x.UserInboxId);
-
-            modelBuilder.Entity<UserInboxWatchGroupInviteMessage>()
-                .HasOne(x => x.UserInbox)
-                .WithMany(x => x.WatchGroupInviteMessages)
-                .HasForeignKey(x => x.UserInboxId);
+            modelBuilder.Entity<InboxMessage>()
+                .HasDiscriminator<string>("type")
+                .HasValue<InboxMessage>("general")
+                .HasValue<WatchGroupInviteMessage>("watch_group_invite");
 
         }
     }

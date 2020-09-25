@@ -32,8 +32,6 @@ namespace NetflixMovieRecommander.Models
 
         public ICollection<InboxMessage> InboxMessages { get; set; }
         public ICollection<InboxMessage> SendMessages { get; set; }
-
-        public int UserInboxId { get; set; }
-        public UserInbox UserInbox { get; set; }
+        
     }
 }

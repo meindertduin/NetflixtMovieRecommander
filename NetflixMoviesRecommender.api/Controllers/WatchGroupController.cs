@@ -289,7 +289,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                 return Forbid();
             }
 
-            var invite = new InboxMessage
+            var invite = new WatchGroupInviteMessage
             {
                 MessageType = MessageType.WatchGroupInvite,
                 Title = $"Invite from {user.UserName}",
@@ -297,6 +297,8 @@ namespace NetflixMoviesRecommender.api.Controllers
                 Sender = profile,
                 DateSend = DateTime.Now,
                 Receiver = subject,
+                GroupId = watchGroup.Id,
+                GroupTitle = watchGroup.Title,
             };
 
             await _ctx.InboxMessages.AddAsync(invite);
@@ -317,7 +319,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             }
             
             // validating invite
-            var message = await _ctx.InboxMessages.FindAsync(responseForm.MessageId);
+            var message = await _ctx.InboxMessages.FindAsync(responseForm.MessageId) as WatchGroupInviteMessage;
             if (message == null || responseForm.InviterId != message.SenderId || profile.Id != message.ReceiverId)
             {
                 return BadRequest();
@@ -326,8 +328,9 @@ namespace NetflixMoviesRecommender.api.Controllers
             if (responseForm.Accepted)
             {
                 var watchGroup = _ctx.WatchGroups
-                    .Where(x => x.OwnerId == responseForm.InviterId)
-                    .FirstOrDefault(x => x.Title == responseForm.GroupName);
+                    .Where(x => x.Id == message.GroupId)
+                    .Include(x => x.Members)
+                    .FirstOrDefault();
 
                 if (watchGroup == null)
                 {
@@ -342,7 +345,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                 
                 var accept = new InboxMessage
                 {
-                    MessageType = MessageType.WatchGroupInvite,
+                    MessageType = MessageType.General,
                     Title = $"Message from {user.UserName}",
                     Description = $"{user.UserName} has accepted your invite",
                     Sender = profile,
@@ -351,16 +354,16 @@ namespace NetflixMoviesRecommender.api.Controllers
                 };
 
                 _ctx.InboxMessages.Add(accept);
+                _ctx.InboxMessages.Remove(message);
+                
                 _ctx.SaveChanges();
 
                 return Ok();
             }
             
-            // implement way for resposne message
-            
             var decline = new InboxMessage
             {
-                MessageType = MessageType.WatchGroupInvite,
+                MessageType = MessageType.General,
                 Title = $"Message from {user.UserName}",
                 Description = $"{user.UserName} has declined your invite",
                 Sender = profile,
@@ -369,6 +372,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             };
             
             _ctx.InboxMessages.Add(decline);
+            _ctx.InboxMessages.Remove(message);
             _ctx.SaveChanges();
             
             return Ok();
