@@ -27,7 +27,7 @@
           active-class="deep-purple accent-4 white--text"
           column
         >
-          <v-list-item v-for="(x, index) in members" :key="index">
+          <v-list-item v-for="(x, index) in members" :key="x.id">
             <v-list-item-avatar color="blue">
               <img v-if="x.avatarUrl !== null" :src="x.avatarUrl" alt="">
               <span v-else class="white--text headline">{{x.userName[0].toUpperCase()}}</span>

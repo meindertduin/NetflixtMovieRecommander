@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMovieRecommander.Models.Enums;
@@ -43,11 +44,28 @@ namespace NetflixMoviesRecommender.api.Controllers
         public async Task<IActionResult> GetUserWatchGroups()
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            var watchGroups =  _ctx.WatchGroups
-                .Where(x => x.OwnerId == user.Id && x.Deleted == false)
+            var profile = _ctx.UserProfiles
+                .Where(x => x.Id == user.Id)
+                .Include(x => x.OwnedWatchGroups)
+                .Include(x => x.MemberWatchGroups)
+                .FirstOrDefault();
+
+
+            if (profile == null)
+            {
+                return Forbid();
+            }
+
+            var watchGroups = profile.OwnedWatchGroups.ToList();
+
+            var memberGroupIds = profile.MemberWatchGroups.Select(x => x.WatchGroupId).ToArray();
+            
+            var memberWatchGroups = _ctx.WatchGroups
+                .Where(x => memberGroupIds.Contains(x.Id))
                 .Include(x => x.Owner)
-                .Include(x => x.Members)
                 .ToList();
+            
+            watchGroups.AddRange(memberWatchGroups);
             
             var result = new List<WatchGroupViewModel>();
 
