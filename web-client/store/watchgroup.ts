@@ -60,6 +60,8 @@ export const mutations: MutationTree<watchgroup> = {
 
   SET_USER_WATCH_GROUPS: (state, watchGroups:Array<WatchGroup>) => state.watchGroups = watchGroups,
 
+  REMOVE_WATCH_GROUP: (state, watchGroupId:string) => state.watchGroups = state.watchGroups.filter((group:WatchGroupModel) => group.id !== watchGroupId),
+
 };
 
 interface editTitleModel{
@@ -76,6 +78,7 @@ interface editAddedNamesModel{
   addedNames: Array<string>,
   id: string,
 }
+
 
 export const actions: ActionTree<watchgroup, RootState> = {
   async editGroup({dispatch}, payload:UpdateWatchGroupModel){
@@ -118,5 +121,18 @@ export const actions: ActionTree<watchgroup, RootState> = {
     }).catch(err => {
       console.log(err);
     })
+  },
+  deleteWatchGroup({commit}, watchGroupId:string){
+    return this.$axios.delete('api/watchgroup', {
+      params: {
+        id: watchGroupId,
+      },
+    })
+      .then(() => {
+        commit('REMOVE_WATCH_GROUP', watchGroupId);
+    })
+      .catch((err) => {
+        console.log(err);
+      })
   }
 };

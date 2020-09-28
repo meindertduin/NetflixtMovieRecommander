@@ -17,6 +17,12 @@
             <v-text-field label="Add Name" v-model="AddNameFormValue"></v-text-field>
             <v-btn text color="green" @click="AddName">Add</v-btn>
           </v-row>
+          <v-row justify="center">
+            <v-col cols="12">
+              <v-btn @click="save" color="green">Save Changes</v-btn>
+              <v-btn @click="initFields" >Cancel</v-btn>
+            </v-col>
+          </v-row>
         </v-col>
         <v-col cols="12" sm="6">
           <v-row justify="center" align="center">
@@ -27,16 +33,23 @@
             <AddWatchlist  :group-id="currentWatchGroup.id"/>
           </v-row>
         </v-col>
-      </v-row>
-      <v-row justify="center">
-        <v-col cols="12">
-          <v-btn @click="save" color="green">Save Changes</v-btn>
-          <v-btn @click="initFields" >Cancel</v-btn>
+        <v-col cols="12" sm="6">
+          <v-row>
+            <v-card>
+              <v-card-title>Delete Group</v-card-title>
+              <v-card-text>
+                <div>Type <span class="red--text">Delete</span> and click the button to delete the watchgroup</div>
+                <v-text-field v-model="deleteGuardText"></v-text-field>
+              </v-card-text>
+              <v-card-actions>
+                <v-row justify="center">
+                  <v-btn @click="deleteWatchGroup">Delete</v-btn>
+                </v-row>
+              </v-card-actions>
+            </v-card>
+          </v-row>
         </v-col>
       </v-row>
-
-      <!-- Todo Add functionality for inviting people -->
-
     </v-card-text>
     <v-card-actions>
       <v-row justify="center">
@@ -68,6 +81,8 @@
 
     private editedAddedNames:Array<string> = [];
     private AddNameFormValue:string = "";
+
+    private deleteGuardText:string = "";
 
     get currentWatchGroup():WatchGroupModel{
       return (this.$store.state.watchgroup as watchgroup).currentSelectedWatchGroup;
@@ -104,6 +119,15 @@
 
     private closeEditOverlay(){
       this.$store.commit('watchgroup/CLOSE_EDIT_OVERLAY');
+    }
+
+    private async deleteWatchGroup() {
+      if (this.deleteGuardText.toLocaleLowerCase() !== "delete") return;
+      this.$store.dispatch('watchgroup/deleteWatchGroup', this.currentWatchGroup.id)
+        .then(() => {
+        this.closeEditOverlay();
+      }).catch(err => console.log(err));
+
     }
 
     created(){

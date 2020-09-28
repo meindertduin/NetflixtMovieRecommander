@@ -73,36 +73,39 @@ namespace NetflixMoviesRecommender.api.Controllers
 
             foreach (var watchGroup in watchGroups)
             {
-                var members = new List<UserProfileViewModel>();
-                var owner = new UserProfileViewModel
+                if (watchGroup.Deleted == false)
                 {
-                    Id = watchGroup.Owner.Id,
-                    UserName = watchGroup.Owner.UserName,
-                    AvatarUrl = "https://localhost:5001/api/profile/picture/" + watchGroup.Owner.Id,
-                };
-                foreach (var member in watchGroup.Members)
-                {
-                    var memberProfile = await _userManager.FindByIdAsync(member.UserProfileId);
-                    if (memberProfile.UserName != null)
+                    var members = new List<UserProfileViewModel>();
+                    var owner = new UserProfileViewModel
                     {
-                        members.Add(new UserProfileViewModel
+                        Id = watchGroup.Owner.Id,
+                        UserName = watchGroup.Owner.UserName,
+                        AvatarUrl = "https://localhost:5001/api/profile/picture/" + watchGroup.Owner.Id,
+                    };
+                    foreach (var member in watchGroup.Members)
+                    {
+                        var memberProfile = await _userManager.FindByIdAsync(member.UserProfileId);
+                        if (memberProfile.UserName != null)
                         {
-                            Id = member.UserProfileId,
-                            UserName = memberProfile.UserName,
-                            AvatarUrl = "https://localhost:5001/api/profile/picture/" + member.UserProfileId,
-                        });
+                            members.Add(new UserProfileViewModel
+                            {
+                                Id = member.UserProfileId,
+                                UserName = memberProfile.UserName,
+                                AvatarUrl = "https://localhost:5001/api/profile/picture/" + member.UserProfileId,
+                            });
+                        }
                     }
-                }
                 
-                result.Add(new WatchGroupViewModel
-                {
-                    Id = watchGroup.Id,
-                    Title = watchGroup.Title,
-                    Description = watchGroup.Description,
-                    Owner = owner,
-                    Members = members,
-                    AddedNames = watchGroup.AddedNames,
-                });
+                    result.Add(new WatchGroupViewModel
+                    {
+                        Id = watchGroup.Id,
+                        Title = watchGroup.Title,
+                        Description = watchGroup.Description,
+                        Owner = owner,
+                        Members = members,
+                        AddedNames = watchGroup.AddedNames,
+                    });
+                }
             }
             
             return Ok(result);
@@ -254,13 +257,18 @@ namespace NetflixMoviesRecommender.api.Controllers
         {
             var watchGroup = await _ctx.WatchGroups.FindAsync(id);
             var user = await _userManager.GetUserAsync(HttpContext.User);
+
+            if (watchGroup == null)
+            {
+                return BadRequest();
+            }
             
             if (watchGroup.OwnerId != user.Id)
             {
-                return StatusCode(401);
+                return Forbid();
             }
 
-            watchGroup.Deleted = true;
+            _ctx.WatchGroups.Remove(watchGroup);
             await _ctx.SaveChangesAsync();
 
             return Ok();

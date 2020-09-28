@@ -18,9 +18,12 @@ export const mutations: MutationTree<inbox> = {
   ADD_GENERAL_MESSAGE: (state, message: InboxMessage) => state.generalMessage.push(message),
   ADD_WATCH_GROUP_INVITE_MESSAGE: (state, message: InboxMessage) => state.watchGroupInviteMessage.push(message),
   SET_MESSAGE_COUNT: (state, count:number) => state.messageCount = count,
+
   REMOVE_MESSAGE: (state, message: InboxMessage) => {
-    if(message.messageType === 0) state.generalMessage.filter((x) => x.messageId !== message.messageId)
-    if(message.messageType === 1) state.watchGroupInviteMessage.filter((x) => x.messageId !== message.messageId)
+    if(message.messageType === 0) state.generalMessage = state.generalMessage
+      .filter((x) => x.messageId !== message.messageId)
+    if(message.messageType === 1) state.watchGroupInviteMessage = state.watchGroupInviteMessage
+      .filter((x) => x.messageId !== message.messageId)
   }
 }
 
