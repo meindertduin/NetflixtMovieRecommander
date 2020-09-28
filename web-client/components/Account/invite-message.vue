@@ -10,8 +10,8 @@
       <v-list-item-action-text>
         {{dateString}}
         {{message.description}}
-        <v-btn text color="green" @click="accept">Accept</v-btn>
-        <v-btn text color="white" @click="decline">Decline</v-btn>
+        <v-btn text color="green" @click="response(true)">Accept</v-btn>
+        <v-btn text color="white" @click="response(false)">Decline</v-btn>
       </v-list-item-action-text>
     </v-list-item-content>
   </v-list-item>
@@ -20,39 +20,27 @@
 <script lang="ts">
   import {Component, Prop, Vue} from "nuxt-property-decorator";
   import {InboxMessage, WatchGroupInviteResponseMessage} from "~/assets/interface-models";
+  import DateStringHelper from "~/assets/date-string-helper";
 
     @Component({})
     export default class InviteMessage extends Vue{
       @Prop({ type: Object, required: true}) readonly message !:InboxMessage;
 
       get dateString():string{
-        const monthNames = ["January", "February", "March", "April", "May", "June",
-          "July", "August", "September", "October", "November", "December"
-        ];
         let date = new Date(this.message.dateSend);
-        let days = date.getDay();
-        let month = date.getMonth();
-
-        return "Send: " + days.toString() + " " + monthNames[month];
+        const helper = new DateStringHelper();
+        return helper.convertToDayMonth(date);
       }
 
-      private accept(): void{
+      private response(accepted: boolean): void{
         const payload: WatchGroupInviteResponseMessage = {
           messageId: this.message.messageId,
-          accepted: true,
+          accepted,
           inviterId: this.message.sender.id,
         }
         this.$store.dispatch('inbox/watchGroupInviteResponse', {payload, message: this.message})
       }
 
-      private decline():void{
-        const payload: WatchGroupInviteResponseMessage = {
-          messageId: this.message.messageId,
-          accepted: true,
-          inviterId: this.message.sender.id,
-        }
-        this.$store.dispatch('inbox/watchGroupInviteResponse', {payload, message: this.message})
-      }
     }
 </script>
 

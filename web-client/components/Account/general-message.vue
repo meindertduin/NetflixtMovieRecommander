@@ -19,20 +19,16 @@
 <script lang="ts">
   import {Component, Prop, Vue} from "nuxt-property-decorator";
   import {InboxMessage} from "~/assets/interface-models";
+  import DateStringHelper from "~/assets/date-string-helper";
 
     @Component({})
     export default class GeneralMessage extends Vue{
       @Prop({ type: Object, required: true}) readonly message !:InboxMessage;
 
       get dateString():string{
-        const monthNames = ["January", "February", "March", "April", "May", "June",
-          "July", "August", "September", "October", "November", "December"
-        ];
         let date = new Date(this.message.dateSend);
-        let days = date.getDay();
-        let month = date.getMonth();
-
-        return "Send: " + days.toString() + " " + monthNames[month];
+        const helper = new DateStringHelper();
+        return helper.convertToDayMonth(date);
       }
 
       private deleteMessage():void{
