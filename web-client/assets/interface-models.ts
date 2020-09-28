@@ -30,7 +30,7 @@ export interface WatchGroupModel {
   addedNames: Array<string>,
   description: string,
   title: string,
-  owner: UserProfile,
+  owner: Profile,
   members: Array<Profile>,
 }
 

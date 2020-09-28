@@ -74,14 +74,12 @@
 
       @Prop({type: Object, required: true}) watchGroup!: WatchGroupModel
 
-
-      get isOwner():boolean{
+      get isOwner(): boolean{
         const userProfile = (this.$store.state.auth as auth).userProfile;
-        if(userProfile && userProfile.id == this.owner.Id){
-          return true;
-        }
-        return  false;
+        return !!(userProfile && userProfile.id === this.owner.id);
       }
+
+
 
       get sharedWithCount(){
         return this.members.length + this.addedNames.length;

@@ -16,7 +16,7 @@ const initState = () => ({
   currentSelectedWatchGroup: null as WatchGroupModel | null,
   watchGroupRecommendations: null as null | Recommendation,
 
-  watchGroups: [] as WatchGroup,
+  watchGroups: [] as Array<WatchGroupModel>,
 
   recommendationsIndex: 0 as number,
   selectedGenres: [] as Array<string>,

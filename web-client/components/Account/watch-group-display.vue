@@ -22,6 +22,7 @@
   import {Component, Vue, Watch} from "nuxt-property-decorator";
   import WatchGroup from "~/components/Account/watch-group.vue";
   import {watchgroup} from "~/store/watchgroup";
+  import {WatchGroupModel} from "~/assets/interface-models";
 
     @Component({
       components: {
@@ -30,7 +31,7 @@
     })
     export default class WatchGroupDisplay extends Vue{
       private userWatchGroups:Array<WatchGroup> = [];
-      private displayedWatchGroups: Array<WatchGroup> = [];
+      private displayedWatchGroups: Array<WatchGroupModel> = [];
       private searchTerm:string = "";
 
       @Watch("searchTerm")
@@ -50,7 +51,7 @@
       }
 
       mounted(){
-        this.displayedWatchGroups= this.loadedUserWatchGroups;
+        this.displayedWatchGroups = this.loadedUserWatchGroups;
       }
 
       private toggleCreationOverlay():void{

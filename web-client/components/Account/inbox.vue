@@ -45,11 +45,9 @@
       private created(){
         this.$axios.get('api/profile/inbox')
           .then(response => {
-            console.log(response.data);
             const messages:Array<InboxMessage> = response.data;
             this.messageCount = messages.length;
             messages.forEach(x => x.messageType === 1? this.inviteMessages.push(x): this.generalMessages.push(x));
-            console.log(this.inviteMessages);
           })
       }
 
