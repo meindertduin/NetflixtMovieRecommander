@@ -68,7 +68,14 @@ namespace NetflixMoviesRecommender.api
             {
                 app.UseDeveloperExceptionPage();
             }
-                
+            
+            app.UseHttpsRedirection();
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ServeUnknownFileTypes = true,
+            });
+            
             app.UseCors("AllowClientOrigin");
             
             app.UseRouting();
@@ -143,6 +150,13 @@ namespace NetflixMoviesRecommender.api
 
             services.AddLocalApiAuthentication();
 
+            services.AddAuthentication("CookieAuth")
+                .AddCookie("CookieAuth", config =>
+                {
+                    config.Cookie.Name = "server";
+                    config.LoginPath = "/account/login";
+                });
+
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(IdentityServerConstants.LocalApi.PolicyName, policy =>
@@ -150,12 +164,13 @@ namespace NetflixMoviesRecommender.api
                     policy.AddAuthenticationSchemes(IdentityServerConstants.LocalApi.AuthenticationScheme);
                     policy.RequireAuthenticatedUser();
                 });
-                
+
                 options.AddPolicy(ApiConstants.Policies.Mod, policy =>
                 {
-                    var isPolicy = options.GetPolicy(IdentityServerConstants.LocalApi.PolicyName);
+                    var isPolicy = options.DefaultPolicy;
                     policy.Combine(isPolicy);
                     policy.RequireClaim(ApiConstants.Claims.Role, ApiConstants.Roles.Mod);
+                    policy.RequireAuthenticatedUser();
                 });
             });
         }

@@ -66,31 +66,5 @@ namespace NetflixMoviesRecommender.api.Controllers
             return Ok(recommendations);
         }
         
-        [HttpPost]
-        public async Task<IActionResult> Create(string title)
-        {
-            try
-            {
-                var res = await _client.GetAsync($"http://www.omdbapi.com/" +
-                                                 $"?apikey={_configuration.GetValue<string>("OMDB_KEY")}" +
-                                                 $"&t={title}");
-
-                var resJsonString = await res.Content.ReadAsStringAsync();
-                var recommended = JsonConvert.DeserializeObject<Recommended>(resJsonString);
-
-                if (string.IsNullOrEmpty(recommended.Title))
-                {
-                    return StatusCode(400);
-                }
-                
-                await _recommendedDatabaseParser.StoreRecommendedToDatabase(recommended);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500);
-            }
-            
-            return Ok();
-        }
     }
 }

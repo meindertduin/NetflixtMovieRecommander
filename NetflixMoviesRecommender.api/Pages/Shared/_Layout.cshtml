@@ -1,15 +1,14 @@
-﻿<!DOCTYPE html>
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
 <html>
 <head>
     <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="/vendor.min.css" />
 </head>
-<body id="body">
-
+<body>
 @RenderBody()
-
 </body>
+    
 </html>
-
-<style>
-
-</style>
+<script src="/vendor.min.js"></script>
