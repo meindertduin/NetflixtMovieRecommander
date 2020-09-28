@@ -36,7 +36,7 @@
       }
 
       private deleteMessage():void{
-        this.$axios.delete(`api/profile/inbox?id=${this.message.messageId}`);
+        this.$store.dispatch('inbox/deleteGeneralMessage', this.message);
       }
     }
 </script>

@@ -57,3 +57,9 @@ export interface InboxMessage {
   sender: Profile,
   dateSend: string,
 }
+
+export interface WatchGroupInviteResponseMessage {
+  messageId: number
+  accepted: boolean,
+  inviterId: string,
+}
