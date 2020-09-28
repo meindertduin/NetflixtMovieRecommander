@@ -47,6 +47,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             var profile = _ctx.UserProfiles
                 .Where(x => x.Id == user.Id)
                 .Include(x => x.OwnedWatchGroups)
+                .ThenInclude(x => x.Members)
                 .Include(x => x.MemberWatchGroups)
                 .FirstOrDefault();
 
@@ -63,6 +64,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             var memberWatchGroups = _ctx.WatchGroups
                 .Where(x => memberGroupIds.Contains(x.Id))
                 .Include(x => x.Owner)
+                .Include(x => x.Members)
                 .ToList();
             
             watchGroups.AddRange(memberWatchGroups);

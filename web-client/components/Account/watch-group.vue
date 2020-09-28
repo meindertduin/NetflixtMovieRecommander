@@ -74,9 +74,6 @@
 
       @Prop({type: Object, required: true}) watchGroup!: WatchGroupModel
 
-      created(){
-        console.log(this.members);
-      }
 
       get isOwner():boolean{
         const userProfile = (this.$store.state.auth as auth).userProfile;
