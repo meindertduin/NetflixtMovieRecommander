@@ -114,10 +114,8 @@
       private groupTile:string = "";
       private description:string = "";
 
-      private watchList:any = {};
       private watchListsCount:number = 0;
 
-      private existingUserSearchValue:string = "";
       private existingUsers: Array<existingUser> = [];
 
       private addedUserFormName:string = "";
@@ -144,13 +142,15 @@
           addedUsers: this.addedUsers,
         }
 
-        await this.$store.dispatch('watchgroup/createGroup', {groupForm})
-          .then(({data}) => {
-            this.createdWatchGroupId = data;
+        this.$store.dispatch('watchgroup/createGroup', {groupForm})
+          .then(response => {
+            console.log("this happens")
+            this.createdWatchGroupId = response.data;
             this.step++;
           })
-        .catch(() => {
-          // notify user
+        .catch(err => {
+          // todo add notification that something went wrong
+          console.log(err)
         })
       }
 

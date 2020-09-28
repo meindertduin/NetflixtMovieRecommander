@@ -83,11 +83,13 @@ export const actions: ActionTree<watchgroup, RootState> = {
       dispatch('getUserWatchGroups');
     });
   },
-  async createGroup({commit, dispatch}, {groupForm}){
-    return new Promise((resolve, reject) => {
-      this.$axios.post('/api/watchgroup/create', groupForm)}).then(() =>{
-        dispatch('getUserWatchGroups');
-    });
+  createGroup({commit, dispatch}, {groupForm}):Promise<any>{
+      return this.$axios.post('/api/watchgroup/create', groupForm)
+        .then(response => {
+          dispatch('getUserWatchGroups');
+          return response;
+        })
+        .catch(err => console.log(err));
   },
 
   async getRecomemendations({commit, state}, {route}):Promise<void>{
