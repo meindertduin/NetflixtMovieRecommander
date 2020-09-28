@@ -24,14 +24,23 @@
     </v-card-text>
     <v-divider></v-divider>
     <v-expand-transition>
-      <v-list v-if="selectedProfile != null">
-        <v-list-item>
+      <v-list>
+        <v-list-item v-if="selectedProfile != null">
           <v-list-item-content>
             <v-avatar>
               <v-img :src="selectedProfile.avatarUrl != null? selectedProfile.avatarUrl: '/default_profile.jpg'" max-height="30" max-width="30" aspect-ratio="1"></v-img>
               {{" " + selectedProfile.userName}}
               <v-btn text @click="invite(selectedProfile.id)">Invite</v-btn>
             </v-avatar>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item v-if="selectedProfile == null">
+          <v-list-item-content>
+            <v-list-item-title  class="orange--text">
+              <v-row justify="center">
+                {{inviteMessage}}
+              </v-row>
+            </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -59,6 +68,8 @@
       private searchResults:Array<Profile> = [];
       private selected:string | null =  null;
       private isLoading:boolean = false;
+
+      private inviteMessage:string = "";
 
       @Prop({type: String, required: true}) readonly groupId !:string;
 
@@ -97,8 +108,17 @@
           groupId: this.groupId,
         }
 
-        this.$axios.post('api/watchgroup/invite', groupInvite);
-
+        this.$axios.post('api/watchgroup/invite', groupInvite)
+          .then(() => {
+            this.inviteMessage = "Invite has been sent";
+          })
+          .catch((err) => {
+            this.inviteMessage = "Something went wrong sending your invite";
+            console.log(err);
+          })
+          .finally(() => {
+            this.selected = null;
+          })
       }
     }
 </script>

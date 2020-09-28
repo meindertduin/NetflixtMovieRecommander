@@ -190,7 +190,6 @@ namespace NetflixMoviesRecommender.api.Controllers
                     AddedNames = watchGroupForm.AddedUsers.ToArray(),
                 };
             
-                // todo need to implement a way yo invite the existing users to the watchlist and let them accept
                 await _ctx.WatchGroups.AddAsync(watchGroup);
                 await _ctx.SaveChangesAsync();
                 
@@ -322,20 +321,32 @@ namespace NetflixMoviesRecommender.api.Controllers
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
             var profile = await _ctx.UserProfiles.FindAsync(user.Id);
-            var watchGroup = await _ctx.WatchGroups.FindAsync(groupInvite.GroupId);
-
-            var subject = await _ctx.UserProfiles.FindAsync(groupInvite.SubjectId);
+            var subject = _ctx.UserProfiles
+                .Include(x => x.InboxMessages)
+                .FirstOrDefault(x => x.Id == groupInvite.SubjectId);
             
-            if (subject == null || watchGroup == null)
-            {
-                return NotFound();
-            }
+            var watchGroup = await _ctx.WatchGroups.FindAsync(groupInvite.GroupId);
             
             if (profile == null)
             {
                 return Forbid();
             }
 
+            if (watchGroup == null || subject == null)
+            {
+                return NotFound();
+            }
+
+            
+            // validating if request has already been send
+            foreach (var message in subject.InboxMessages)
+            {
+                if (message.MessageType == MessageType.WatchGroupInvite && message.SenderId == user.Id)
+                {
+                    return Ok();
+                }
+            }
+            
             var invite = new WatchGroupInviteMessage
             {
                 MessageType = MessageType.WatchGroupInvite,
