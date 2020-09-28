@@ -22,9 +22,6 @@
       <v-card-actions>
         <v-row justify="center" class="my-3">
           <v-btn text @click="toggleEditProfilePanel">Edit Profile</v-btn>
-          <v-btn text>
-            <v-icon>mdi-account-multiple</v-icon>{{followersCount}} Followers
-          </v-btn>
         </v-row>
       </v-card-actions>
     </v-card>

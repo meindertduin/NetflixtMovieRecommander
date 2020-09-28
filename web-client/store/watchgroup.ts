@@ -60,7 +60,8 @@ export const mutations: MutationTree<watchgroup> = {
 
   SET_USER_WATCH_GROUPS: (state, watchGroups:Array<WatchGroup>) => state.watchGroups = watchGroups,
 
-  REMOVE_WATCH_GROUP: (state, watchGroupId:string) => state.watchGroups = state.watchGroups.filter((group:WatchGroupModel) => group.id !== watchGroupId),
+  REMOVE_WATCH_GROUP: (state, watchGroupId:string) => state.watchGroups = state.watchGroups
+    .filter((group:WatchGroupModel) => group.id !== watchGroupId),
 
 };
 
@@ -116,7 +117,6 @@ export const actions: ActionTree<watchgroup, RootState> = {
   },
   async getUserWatchGroups({commit}):void{
     this.$axios.get('api/watchgroup').then(({data}) => {
-      console.log(data);
       commit('SET_USER_WATCH_GROUPS', data)
     }).catch(err => {
       console.log(err);

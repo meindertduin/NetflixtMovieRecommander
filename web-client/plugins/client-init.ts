@@ -9,7 +9,8 @@ const userManger: UserManager = new UserManager({
   scope: "openid profile IdentityServerApi Role",
   post_logout_redirect_uri: "https://localhost:3000",
   userStore: new WebStorageStateStore({store: window.localStorage}),
-  //silent_redirect_uri: "http://localhost:3000/auth/silent-sign-in-callback",
+  automaticSilentRenew: true,
+  silent_redirect_uri: "http://localhost:3000/auth/silent-sign-in-callback",
 });
 
 declare module 'vuex/types/index' {

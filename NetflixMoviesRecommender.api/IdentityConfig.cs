@@ -44,7 +44,7 @@ namespace NetflixMoviesRecommender.api
                     RedirectUris =
                     {
                         "https://localhost:3000/oidc/sign-in-callback.html",
-                        //"https://localhost:3000/auth/silent-sign-in-callback",
+                        "https://localhost:3000/oidc/silent-sign-in-callback.html",
                         
                     },
 
