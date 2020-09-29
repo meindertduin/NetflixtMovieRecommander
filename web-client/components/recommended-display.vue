@@ -10,11 +10,6 @@
         <h4>{{recommendation.genresString}}</h4>
       </v-card-subtitle>
       <v-card-text>{{recommendation.plot}}</v-card-text>
-      <v-card-actions>
-        <v-row justify="center">
-          <v-btn color="orange" text @click="addAlreadyWatched">Already Watched</v-btn>
-        </v-row>
-      </v-card-actions>
     </v-card>
   </v-container>
 </template>
@@ -41,14 +36,6 @@
             }
           })
         }
-      }
-
-      private async addAlreadyWatched(): Promise<void> {
-        const groupId = this.$route.params.id;
-        await this.$store.dispatch('watchgroup/addAlreadyWatchedItem', {
-          groupId: groupId,
-          title: this.recommendation.title,
-        })
       }
     }
 </script>

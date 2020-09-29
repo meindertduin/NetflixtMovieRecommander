@@ -49,6 +49,7 @@
       private getRecommendations() {
         this.index = 0;
 
+        this.$store.commit('watchgroup/RESET_ALREADY_LOADED');
         this.$store.commit('watchgroup/SET_RECOMMENDATIONS_INDEX', 0);
         this.$store.dispatch('watchgroup/getRecomemendations', {route: this.$route.params.id, reset: true})
           .then(() => {

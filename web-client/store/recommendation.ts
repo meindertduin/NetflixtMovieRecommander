@@ -10,6 +10,7 @@ const initState = () => ({
   selectedGenres: [] as Array<string>,
   selectedType: "both" as string,
   index: 0 as number,
+  alreadyLoaded: [] as Array<number>
 });
 
 export const state = initState;
@@ -22,11 +23,15 @@ export const getters: GetterTree<recommendation, RootState> = {
 
 export const mutations: MutationTree<recommendation> = {
   SET_RECOMMENDATIONS: (state, recommendations:Array<Recommendation>) => {
+    recommendations.forEach(x => state.alreadyLoaded.push(x.id));
     state.recommendations = recommendations;
   },
 
   ADD_RECOMMENDATIONS: (state, recommendations:Array<Recommendation>) => {
-    recommendations.forEach(x => state.recommendations.push(x));
+    recommendations.forEach(x => {
+      state.recommendations.push(x);
+      state.alreadyLoaded.push(x.id);
+    });
   },
 
   SET_TYPE: (state, type: string) => state.selectedType = type,
@@ -36,6 +41,8 @@ export const mutations: MutationTree<recommendation> = {
   SET_INDEX: (state, value: number) => state.index = value,
 
   INC_INDEX: (state) => state.index++,
+
+  RESET_ALREADY_LOADED: (state) => state.alreadyLoaded = [],
 };
 
 export const actions: ActionTree<recommendation, RootState> = {
@@ -46,6 +53,7 @@ export const actions: ActionTree<recommendation, RootState> = {
         genres: state.selectedGenres,
         index: state.index,
         type: state.selectedType,
+        alreadyLoaded: state.alreadyLoaded,
       })
       .then(({data}) => {
         if(reset){

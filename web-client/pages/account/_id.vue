@@ -9,7 +9,7 @@
 <!--          <RecommendedDisplay :title="x.title" :plot="x.plot" :type="x.type" :genres="x.genres" :poster="x.poster"  />-->
 <!--        </v-col>-->
         <v-col v-for="(x, index) in currentRecommendationsDisplay" :key="index">
-          <RecommendedDisplay :recommendation="x"/>
+          <WatchgroupRecommendedDisplay :recommendation="x"/>
         </v-col>
       </v-row>
       <v-row justify="center">
@@ -23,14 +23,14 @@
   import {Component, Vue} from "nuxt-property-decorator";
   import WatchGroupRecommendationsOptions from "~/components/Account/recommendations/watchgroup-recommendations-options.vue";
   import {watchgroup} from "~/store/watchgroup";
-  import RecommendedDisplay from "~/components/recommended-display.vue";
+  import WatchgroupRecommendedDisplay from "~/components/Account/recommendations/watchgroup-recommended-display.vue";
   import TestDisplay from "~/components/TestDisplay.vue";
 
     @Component({
       components: {
         TestDisplay,
         WatchGroupRecommendationsOptions,
-        RecommendedDisplay
+        WatchgroupRecommendedDisplay
       }
     })
     export default class WatchGroupId extends Vue{

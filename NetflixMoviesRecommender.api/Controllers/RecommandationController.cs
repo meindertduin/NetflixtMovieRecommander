@@ -30,12 +30,11 @@ namespace NetflixMoviesRecommender.api.Controllers
             _recommendedDatabaseParser = recommendedDatabaseParser;
             _client = clientFactory.CreateClient();
         }
+        
 
         [HttpPost("watchlist")]
         public IActionResult Recommendation([FromBody] WatchedInfoForm watchedInfo)
         {
-            int skipAmount = 25 * watchedInfo.Index;
-            
             List<NetflixRecommended> recommendations = new List<NetflixRecommended>();
             
             IQueryable<NetflixRecommended> randomRecommendations;
@@ -45,10 +44,10 @@ namespace NetflixMoviesRecommender.api.Controllers
                 randomRecommendations = _ctx.NetflixRecommendations
                     .Where(x => watchedInfo.Type == "both" || x.Type == watchedInfo.Type)
                     .Where(x => watchedInfo.WatchedItems.All(p => x.Title != p))
+                    .Where(x => watchedInfo.AlreadyLoaded.All(p => x.Id != p))
                     .Where(x => x.Deleted == false)
                     .Search(x => x.Genres).Containing(watchedInfo.Genres)
                     .OrderBy(x => Guid.NewGuid())
-                    .Skip(skipAmount)
                     .Take(25);
             }
             else
@@ -56,9 +55,9 @@ namespace NetflixMoviesRecommender.api.Controllers
                 randomRecommendations = _ctx.NetflixRecommendations
                     .Where(x => watchedInfo.Type == "both" || x.Type == watchedInfo.Type)
                     .Where(x => watchedInfo.WatchedItems.All(p => x.Title != p))
+                    .Where(x => watchedInfo.AlreadyLoaded.All(p => x.Id != p))
                     .Where(x => x.Deleted == false)
                     .OrderBy(x => Guid.NewGuid())
-                    .Skip(skipAmount)
                     .Take(25);
             }
             

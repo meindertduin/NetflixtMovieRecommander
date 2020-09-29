@@ -278,9 +278,6 @@ namespace NetflixMoviesRecommender.api.Controllers
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
         public async Task<IActionResult> GetRecommendations([FromRoute] string id, [FromBody] WatchGroupRecommendationForm recommendationForm)
         {
-            int skipAmount = 25 * recommendationForm.Index;
-            
-            
             var watchGroup = await _ctx.WatchGroups
                 .Where(x => x.Id == id)
                 .Include(x => x.WatchItems)
@@ -300,10 +297,10 @@ namespace NetflixMoviesRecommender.api.Controllers
                 randomRecommendations = _ctx.NetflixRecommendations
                     .Where(x => recommendationForm.Type == "both" || x.Type == recommendationForm.Type)
                     .Where(x => watchTitles.All(p => x.Title != p))
+                    .Where(x => recommendationForm.AlreadyLoaded.All(p => x.Id != p))
                     .Where(x => x.Deleted == false)
                     .Search(x => x.Genres).Containing(recommendationForm.Genres)
                     .OrderBy(x => Guid.NewGuid())
-                    .Skip(skipAmount)
                     .Take(25);
             }
             else
@@ -311,9 +308,9 @@ namespace NetflixMoviesRecommender.api.Controllers
                 randomRecommendations = _ctx.NetflixRecommendations
                     .Where(x => recommendationForm.Type == "both" || x.Type == recommendationForm.Type)
                     .Where(x => watchTitles.All(p => x.Title != p))
+                    .Where(x => recommendationForm.AlreadyLoaded.All(p => x.Id != p))
                     .Where(x => x.Deleted == false)
                     .OrderBy(x => Guid.NewGuid())
-                    .Skip(skipAmount)
                     .Take(25);
             }
             

@@ -45,6 +45,7 @@
     private getRecommendations() {
       this.index = 0;
 
+      this.$store.commit('recommendation/RESET_ALREADY_LOADED');
       this.$store.commit('recommendation/SET_INDEX', 0);
       const watchedItems = this.$store.getters['watchlist/getWatchedItems']
 

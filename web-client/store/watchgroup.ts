@@ -21,6 +21,8 @@ const initState = () => ({
   recommendationsIndex: 0 as number,
   selectedGenres: [] as Array<string>,
   selectedType: "both" as string,
+
+  alreadyLoadedRecommendations: [] as Array<number>,
 });
 
 export const state:any = initState;
@@ -42,13 +44,17 @@ export const mutations: MutationTree<watchgroup> = {
     state.currentSelectedWatchGroup = null;
     state.editOverlayActive = ! state.editOverlayActive;
   },
-  
+
   SET_WATCH_GROUP_RECOMMENDATIONS: (state, recommendations:Array<Recommendation>) => {
+    recommendations.forEach(x => state.alreadyLoadedRecommendations.push(x.id));
     state.watchGroupRecommendations = recommendations;
   },
 
   ADD_WATCH_GROUP_RECOMMENDATIONS: (state, recommendations:Array<Recommendation>) => {
-    recommendations.forEach(x => state.watchGroupRecommendations.push(x));
+    recommendations.forEach(x => {
+      state.watchGroupRecommendations.push(x)
+      state.alreadyLoadedRecommendations.push(x.id);
+    });
   },
 
   SET_RECOMMENDATIONS_INDEX: (state, index:number) => state.recommendationsIndex = index,
@@ -63,6 +69,7 @@ export const mutations: MutationTree<watchgroup> = {
   REMOVE_WATCH_GROUP: (state, watchGroupId:string) => state.watchGroups = state.watchGroups
     .filter((group:WatchGroupModel) => group.id !== watchGroupId),
 
+  RESET_ALREADY_LOADED: (state) => state.alreadyLoadedRecommendations = [],
 };
 
 interface editTitleModel{
@@ -100,11 +107,11 @@ export const actions: ActionTree<watchgroup, RootState> = {
       genres: state.selectedGenres,
       index: state.recommendationsIndex,
       type: state.selectedType,
+      alreadyLoaded: state.alreadyLoadedRecommendations,
     }
 
     return this.$axios.post(`api/watchgroup/${route}`, payload)
       .then(({data}) =>{
-        console.log(data);
         if(reset === true){
           commit('SET_WATCH_GROUP_RECOMMENDATIONS', data);
         }

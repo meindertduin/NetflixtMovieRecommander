@@ -45,6 +45,7 @@ export interface WatchGroupRecommendationForm {
   genres: Array<string>,
   index: number,
   type: string,
+  alreadyLoaded: Array<number>,
 }
 
 export interface InboxMessage {
