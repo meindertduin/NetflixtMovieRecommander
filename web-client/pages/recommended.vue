@@ -4,15 +4,13 @@
       <v-row justify="center">
         <OptionsBar></OptionsBar>
       </v-row>
-      <v-row>
-        <v-btn width="80" @click="previousRecommendations">Previous</v-btn>
-        <v-divider></v-divider>
-        <v-btn width="80" @click="nextRecommendations">Next</v-btn>
+      <v-row justify="center">
+        <v-col v-for="(x, index) in currentRecommendationsDisplay" :key="index">
+          <RecommendedDisplay :recommendation="x"/>
+        </v-col>
       </v-row>
       <v-row justify="center">
-        <v-col v-for="x in currentRecommendationsDisplay" :key="x.id">
-          <RecommendedDisplay :title="x.title" :plot="x.plot" :type="x.type" :genres="x.genres" :poster="x.poster"  />
-        </v-col>
+        <v-btn width="80" @click="nextRecommendations" min-width="300">Load More</v-btn>
       </v-row>
     </v-container>
     <v-overlay v-if="overlayActive">
@@ -51,45 +49,23 @@
       }
 
       get currentRecommendationsDisplay(){
-        return (this.$store.state.recommendation as recommendation).currentLoadedRecommendations;
-      }
-
-      get currRecIndex(){
-        return (this.$store.state.recommendation as recommendation).currentRecIndex;
-      }
-      get recommendations(){
         return (this.$store.state.recommendation as recommendation).recommendations;
       }
 
+
       private nextRecommendations(){
-        console.log(this.currRecIndex)
-        if(this.currRecIndex >= this.recommendations.length - 5){
-          this.addRecommendationsToWatched();
-          this.getNewRecommendations();
-        }
-        this.$store.commit('recommendation/INC_CURR_REC_INDEX', 5);
-        this.$store.commit('recommendation/SET_CURR_RECOMMENDATIONS', {from:  this.currRecIndex, to: this.currRecIndex + 5})
-      }
-
-      private previousRecommendations(){
-        console.log(this.currRecIndex)
-        if(this.currRecIndex < 5){
-          return;
-        }
-
-        this.$store.commit('recommendation/SET_CURR_RECOMMENDATIONS', {from:  this.currRecIndex -5, to: this.currRecIndex})
-        this.$store.commit('recommendation/INC_CURR_REC_INDEX', -5);
+        this.addRecommendationsToWatched();
+        const watchedItems = this.$store.getters['watchlist/getWatchedItems']
+        this.$store.dispatch('recommendation/GetRecommendations', {watchedItems, reset: false})
+          .then(() => {
+            this.$store.commit('recommendation/INC_INDEX')
+            // notify user something went wrong
+          })
+        .catch(err => console.log(err))
       }
 
       private addRecommendationsToWatched(){
         this.$store.commit('watchlist/ADD_TO_WATCHED_ITEMS', this.$store.state.recommendation.recommendations);
-      }
-
-      private async getNewRecommendations(){
-        const watchedItems = this.$store.getters['watchlist/getWatchedItems'];
-        const genres = this.$store.getters['recommendation/getSelectedGenres'];
-        const type = this.$store.getters['recommendation/getSelectedType'];
-        await this.$store.dispatch('recommendation/GetRecommendations', {watchedItems, genres: genres, type: type })
       }
     }
 </script>

@@ -15,31 +15,46 @@
 </template>
 
 <script lang="ts">
-  import {Component, Vue} from "nuxt-property-decorator";
+  import {Component, Vue, Watch} from "nuxt-property-decorator";
   import {genresOptions, typesOptions} from "~/assets/shared-variables";
 
   @Component({})
   export default class OptionsBar extends Vue{
-    private genres = genresOptions
+    private genres:Array<string> = genresOptions;
+
+    private types:Array<string> = typesOptions;
+
+    private index:number = 0;
+    @Watch("index")
+    onIndexChanged(value: number, oldValue: number) {
+      this.$store.commit('recommendation/SET_INDEX', value);
+    }
+
     private selectedGenres:Array<string> = [];
+    @Watch("selectedGenres")
+    onSelectedGenresChange(value: Array<string>, oldValue: Array<string>) {
+      this.$store.commit('recommendation/SET_GENRES', value);
+    }
 
-    private types:Array<string> = typesOptions
     private selectedType:string = "both";
+    @Watch("selectedType")
+    onSelectedTypeChange(value: string, oldValue: string) {
+      this.$store.commit('recommendation/SET_TYPE', value);
+    }
 
-    private async getRecommendations(){
-      this.$store.commit('recommendation/RESET');
+    private getRecommendations() {
+      this.index = 0;
 
-      const watchedItems:Array<string> | null = this.$store.getters['watchlist/getWatchedItems'];
-      console.log(watchedItems);
-      await this.$store.dispatch('recommendation/GetRecommendations', {watchedItems, genres: this.selectedGenres, type: this.selectedType })
+      this.$store.commit('recommendation/SET_INDEX', 0);
+      const watchedItems = this.$store.getters['watchlist/getWatchedItems']
 
-      this.$store.commit('recommendation/SET_INITIAL_CURRENT_LOADED');
-      this.$store.commit('recommendation/SET_TYPE', this.selectedType);
-      this.$store.commit('recommendation/SET_GENRES', this.selectedGenres);
-      this.$store.commit('recommendation/SET_CURR_RECOMMENDATIONS', {from: 0, to: 5});
-
-      console.log(this.$store.state.recommendation.currentLoadedRecommendations);
-      console.log(this.$store.state.recommendation.recommendations);
+      this.$store.dispatch('recommendation/GetRecommendations', {watchedItems, reset: true})
+        .then(() => {
+          this.index++;
+        })
+        .catch(() => {
+          // todo implement way to notify if failed
+        })
     }
 
   }

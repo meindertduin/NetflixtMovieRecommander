@@ -42,6 +42,7 @@ export const mutations: MutationTree<watchgroup> = {
     state.currentSelectedWatchGroup = null;
     state.editOverlayActive = ! state.editOverlayActive;
   },
+  
   SET_WATCH_GROUP_RECOMMENDATIONS: (state, recommendations:Array<Recommendation>) => {
     state.watchGroupRecommendations = recommendations;
   },

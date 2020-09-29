@@ -41,10 +41,11 @@
 
       nextRecommendations():void{
         this.$store.dispatch('watchgroup/getRecomemendations', {route: this.$route.params.id, reset: false})
-        .catch(() => {
+        .then(() => {
           this.$store.commit('watchgroup/INC_RECOMMENDATIONS_INDEX')
           // notify user something went wrong
         })
+        .catch(err => console.log(err));
       }
     }
 </script>

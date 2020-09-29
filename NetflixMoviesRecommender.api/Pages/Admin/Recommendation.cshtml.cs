@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
@@ -13,6 +14,7 @@ using Newtonsoft.Json;
 
 namespace NetflixMoviesRecommender.api.Pages.Admin
 {
+    [Authorize(Policy = ApiConstants.Policies.Mod)]
     public class Recommendation : PageModel
     {
         private readonly IConfiguration _configuration;

@@ -34,30 +34,31 @@ namespace NetflixMoviesRecommender.api.Controllers
         [HttpPost("watchlist")]
         public IActionResult Recommendation([FromBody] WatchedInfoForm watchedInfo)
         {
-            List<string> watchedItems = watchedInfo.WatchedItems;
-            List<string> genres = watchedInfo.Genres;
-            List<NetflixRecommended> recommendations = new List<NetflixRecommended>();
+            int skipAmount = 25 * watchedInfo.Index;
             
+            List<NetflixRecommended> recommendations = new List<NetflixRecommended>();
             
             IQueryable<NetflixRecommended> randomRecommendations;
 
-            if (watchedInfo.Genres.Count > 0)
+            if (watchedInfo.Genres.Length > 0)
             {
                 randomRecommendations = _ctx.NetflixRecommendations
                     .Where(x => watchedInfo.Type == "both" || x.Type == watchedInfo.Type)
-                    .Where(x => watchedItems.All(p => x.Title != p))
+                    .Where(x => watchedInfo.WatchedItems.All(p => x.Title != p))
                     .Where(x => x.Deleted == false)
-                    .Search(x => x.Genres).Containing(genres.ToArray())
+                    .Search(x => x.Genres).Containing(watchedInfo.Genres)
                     .OrderBy(x => Guid.NewGuid())
+                    .Skip(skipAmount)
                     .Take(25);
             }
             else
             {
                 randomRecommendations = _ctx.NetflixRecommendations
                     .Where(x => watchedInfo.Type == "both" || x.Type == watchedInfo.Type)
-                    .Where(x => watchedItems.All(p => x.Title != p))
+                    .Where(x => watchedInfo.WatchedItems.All(p => x.Title != p))
                     .Where(x => x.Deleted == false)
                     .OrderBy(x => Guid.NewGuid())
+                    .Skip(skipAmount)
                     .Take(25);
             }
             
