@@ -225,14 +225,14 @@ namespace NetflixMoviesRecommender.api.Controllers
         
         [HttpPost("watch-item")]
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
-        public async Task<IActionResult> AddWatchItem(string id, string title)
+        public async Task<IActionResult> AddWatchItem([FromBody] WatchItemAdditionForm watchItemForm)
         {
-            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(title))
+            if (string.IsNullOrEmpty(watchItemForm.GroupId) || string.IsNullOrEmpty(watchItemForm.WatchItemTitle))
             {
                 return BadRequest();
             }
             
-            var watchGroup = await _ctx.WatchGroups.FindAsync(id);
+            var watchGroup = await _ctx.WatchGroups.FindAsync(watchItemForm.GroupId);
             var user = await _userManager.GetUserAsync(HttpContext.User);
 
             if (watchGroup.OwnerId != user.Id)
@@ -242,8 +242,8 @@ namespace NetflixMoviesRecommender.api.Controllers
 
             _ctx.WatchItems.Add(new WatchItem
             {
-                WatchGroupId = id,
-                Title = title,
+                WatchGroupId = watchItemForm.GroupId,
+                Title = watchItemForm.WatchItemTitle,
             });
 
             await _ctx.SaveChangesAsync();
