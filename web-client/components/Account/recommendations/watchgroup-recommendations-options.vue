@@ -17,8 +17,6 @@
 <script lang="ts">
   import {Component, Vue, Watch} from "nuxt-property-decorator";
   import {genresOptions, typesOptions} from "~/assets/shared-variables";
-  import {WatchGroupRecommendationForm} from "~/assets/interface-models";
-  import WatchGroup from "~/components/Account/watch-group.vue";
 
     @Component({})
     export default class WatchGroupRecommendationsOptions extends  Vue{

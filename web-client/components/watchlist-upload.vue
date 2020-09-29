@@ -11,7 +11,8 @@
     </v-card-text>
     <v-card-actions>
       <v-file-input accept=".csv" label="File input" multiple v-model="watchLists" prepend-icon="mdi-paperclip"></v-file-input>
-      <v-btn @click="handleFileUpload">Upload</v-btn>
+      <v-btn @click="handleFileUpload" color="green" text>Upload</v-btn>
+      <v-btn @click="toggleOverlay" color="white" text>Close</v-btn>
     </v-card-actions>
   </v-card>
 </template>
