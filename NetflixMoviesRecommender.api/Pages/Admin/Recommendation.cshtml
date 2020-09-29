@@ -8,7 +8,7 @@
 }
 
 <div class="container">
-    <div class="row justify-content-center">
+    <div class="row justify-content-center mt-5">
         <div class="card" style="width: 18rem;">
             <h5 class="card-title">Add a Recommendation</h5>
             <div class="card-body">
@@ -22,31 +22,55 @@
 </div>
 
 <div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-6">
+            <form>
+                <p>
+                    Title: <input type="text" asp-for="SearchString" />
+                    <input type="submit" value="Search" />
+                </p>
+            </form>
+        </div>
+        <div class="col-4">
+            <div class="dropdown show">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        @for (int x = 0; x < @Model.PagesCount; x++)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-for="Index" asp-route-index="@x" >@(x + 1)</a>
+                            </li>    
+                        }
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
     <table class="table">
-      <thead>
+        <thead>
         <tr>
-          <th scope="col">Id</th>
-          <th scope="col">Title</th>
+            <th scope="col">Id</th>
+            <th scope="col">Title</th>
             <th scope="col">Type</th>
             <th scope="col">Delete</th>
         </tr>
-      </thead>
-      <tbody>
+        </thead>
+        <tbody>
         @foreach (var recommendation in @Model.Recommendations)
         {
             <tr>
-                <th scope="row">@recommendation.Id</th> 
+                <th scope="row">@recommendation.Id</th>
                 <td>@recommendation.Title</td>
                 <td>@recommendation.Plot</td>
                 <td>@recommendation.Type</td>
                 <td>
                     <form id="remove" method="post" asp-page-handler="Delete">
-                      <button type="submit" name="id" value="@recommendation.Id">Delete</button>
+                        <button type="submit" name="id" value="@recommendation.Id">Delete</button>
                     </form>
                 </td>
             </tr>
-        }    
-      </tbody>
+        }
+        </tbody>
     </table>
 
 </div>

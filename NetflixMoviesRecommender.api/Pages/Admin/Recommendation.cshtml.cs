@@ -21,6 +21,10 @@ namespace NetflixMoviesRecommender.api.Pages.Admin
         [BindProperty] public string Title { get; set; }
         [BindProperty] public List<NetflixRecommended> Recommendations { get; set; }
         
+        [BindProperty(SupportsGet = true)] public string SearchString { get; set; }
+        [BindProperty(SupportsGet = true)] public int DisplayPerPage { get; set; } = 50;
+        [BindProperty(SupportsGet = true)] public double PagesCount { get; set; }
+
         public Recommendation(IConfiguration configuration, IRecommendedDatabaseParser recommendedDatabaseParser, AppDbContext ctx)
         {
             _configuration = configuration;
@@ -28,9 +32,30 @@ namespace NetflixMoviesRecommender.api.Pages.Admin
             _ctx = ctx;
         }
         
-        public IActionResult OnGet()
+        public IActionResult OnGet(int index)
         {
-            Recommendations = _ctx.NetflixRecommendations.OrderBy(x => x.Title).ToList();
+            int skipAmount = DisplayPerPage * index;
+            
+            if (string.IsNullOrEmpty(SearchString) == false)
+            {
+                Recommendations = _ctx.NetflixRecommendations
+                    .OrderBy(x => x.Title)
+                    .Where(x => x.Title.Contains(SearchString))
+                    .Skip(skipAmount)
+                    .Take(DisplayPerPage)
+                    .ToList();
+            }
+            else
+            {
+                Recommendations = _ctx.NetflixRecommendations
+                    .OrderBy(x => x.Title)
+                    .Skip(skipAmount)
+                    .Take(DisplayPerPage)
+                    .ToList();
+            }
+
+            PagesCount = Math.Ceiling( _ctx.NetflixRecommendations.ToArray().Length / (double) DisplayPerPage);
+            
             return Page();
         }
 

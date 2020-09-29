@@ -122,7 +122,7 @@ export const actions: ActionTree<watchgroup, RootState> = {
       watchItemTitle: title,
     });
   },
-  async getUserWatchGroups({commit}):void{
+  getUserWatchGroups({commit}):void{
     this.$axios.get('api/watchgroup').then(({data}) => {
       commit('SET_USER_WATCH_GROUPS', data)
     }).catch(err => {
