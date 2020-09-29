@@ -9,6 +9,7 @@ obj/
 wwwroot/
 vue-client/
 tempkey.jwk
+node_modules/
 
 server.key
 server.cert

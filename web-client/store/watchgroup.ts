@@ -14,7 +14,7 @@ const initState = () => ({
   creationOverlayActive: false as boolean,
   editOverlayActive: false as boolean,
   currentSelectedWatchGroup: null as WatchGroupModel | null,
-  watchGroupRecommendations: null as null | Recommendation,
+  watchGroupRecommendations: [] as Array<Recommendation>,
 
   watchGroups: [] as Array<WatchGroupModel>,
 
@@ -43,17 +43,18 @@ export const mutations: MutationTree<watchgroup> = {
     state.currentSelectedWatchGroup = null;
     state.editOverlayActive = ! state.editOverlayActive;
   },
-  SET_WATCH_GROUP_RECOMMENDATIONS: (STATE, recommendations:Array<Recommendation>) => {
-    if(state.watchGroupRecommendations.length < 1){
-      state.watchGroupRecommendations = recommendations;
-    }
-    else{
-      state.watchGroupRecommendations.concat(recommendations);
-    }
+  SET_WATCH_GROUP_RECOMMENDATIONS: (state, recommendations:Array<Recommendation>) => {
+    state.watchGroupRecommendations = recommendations;
+  },
+
+  ADD_WATCH_GROUP_RECOMMENDATIONS: (state, recommendations:Array<Recommendation>) => {
+    recommendations.forEach(x => state.watchGroupRecommendations.push(x));
   },
 
   SET_RECOMMENDATIONS_INDEX: (state, index:number) => state.recommendationsIndex = index,
+
   INC_RECOMMENDATIONS_INDEX: (state) => state.recommendationsIndex++,
+
   SET_SELECTED_GENRES: (state, genres:Array<string>) => state.selectedGenres = genres,
   SET_SELECTED_TYPE: (state, type:string) => state.selectedType = type,
   SET_SEED: (state, seed:string) => state.seed = seed,
@@ -95,25 +96,34 @@ export const actions: ActionTree<watchgroup, RootState> = {
         })
         .catch(err => console.log(err));
   },
-
-  async getRecomemendations({commit, state}, {route}):Promise<void>{
+  getRecomemendations({commit, state}, {route, reset}):Promise<void>{
     const payload: WatchGroupRecommendationForm = {
       genres: state.selectedGenres,
-      index: state.index,
+      index: state.recommendationsIndex,
       seed: state.seed,
       type: state.selectedType,
     }
 
-    return new Promise((resolve, reject) => {
-      this.$axios.post(`api/watchgroup/${route}`, payload)
-        .then(({data}) =>{
+    return this.$axios.post(`api/watchgroup/${route}`, payload)
+      .then(({data}) =>{
+        console.log(data);
+        if(reset === true){
           commit('SET_WATCH_GROUP_RECOMMENDATIONS', data);
-          resolve()
-        })
-        .catch(error => {
-          reject();
-        });
-    })
+        }
+        else {
+          commit('ADD_WATCH_GROUP_RECOMMENDATIONS', data);
+        }
+
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  },
+  async addAlreadyWatchedItem({commit}, {groupId, title}): Promise<void> {
+    await this.$axios.post('api/watchgroup/watch-item', {
+      groupId: groupId,
+      watchItemTitle: title,
+    });
   },
   async getUserWatchGroups({commit}):void{
     this.$axios.get('api/watchgroup').then(({data}) => {

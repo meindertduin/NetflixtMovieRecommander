@@ -3,7 +3,7 @@
   title: string,
   deleted: boolean,
   type: string,
-  genres: Array<string>,
+  genres: string,
   poster: string,
   plot: string,
 }

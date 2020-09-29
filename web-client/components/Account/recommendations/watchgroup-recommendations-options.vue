@@ -45,19 +45,21 @@
         this.$store.commit('watchgroup/SET_SELECTED_TYPE', value);
       }
 
-      created(){
+
+      private getRecommendations() {
+        this.index = 0;
+
         const seed = this.uuidv4();
         this.$store.commit('watchgroup/SET_SEED', seed);
-      }
 
-      private async getRecommendations() {
-        const promise = this.$store.dispatch('watchgroup/getRecomemendations', {route: this.$route.params.id})
+        this.$store.commit('watchgroup/SET_RECOMMENDATIONS_INDEX', 0);
+        this.$store.dispatch('watchgroup/getRecomemendations', {route: this.$route.params.id, reset: true})
           .then(() => {
-            console.log("loading done")
-          }).catch(() => {
+            this.index++;
+          })
+          .catch(() => {
             // todo implement way to notify if failed
           })
-        this.index++;
       }
 
       private uuidv4() {

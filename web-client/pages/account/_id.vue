@@ -8,8 +8,8 @@
 <!--        <v-col v-for="x in currentRecommendationsDisplay" :key="x.id">-->
 <!--          <RecommendedDisplay :title="x.title" :plot="x.plot" :type="x.type" :genres="x.genres" :poster="x.poster"  />-->
 <!--        </v-col>-->
-        <v-col v-for="(x, index) in 25" :key="index">
-          <TestDisplay />
+        <v-col v-for="(x, index) in currentRecommendationsDisplay" :key="index">
+          <RecommendedDisplay :recommendation="x"/>
         </v-col>
       </v-row>
       <v-row justify="center">
@@ -40,11 +40,9 @@
       }
 
       nextRecommendations():void{
-        this.$store.dispatch('watchgroup/getRecomemendations', {route: this.$route.params.id})
-          .then(() => {
-            this.$store.commit('watchgroup/INC_RECOMMENDATIONS_INDEX');
-          })
+        this.$store.dispatch('watchgroup/getRecomemendations', {route: this.$route.params.id, reset: false})
         .catch(() => {
+          this.$store.commit('watchgroup/INC_RECOMMENDATIONS_INDEX')
           // notify user something went wrong
         })
       }

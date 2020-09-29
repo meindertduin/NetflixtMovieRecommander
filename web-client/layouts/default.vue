@@ -37,8 +37,6 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-
-
       <v-app-bar app dense clipped-left>
         <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <v-toolbar-title>Netflix recommander</v-toolbar-title>
@@ -61,7 +59,6 @@
 <script lang="ts">
   import {Component, Vue} from "nuxt-property-decorator";
   import {auth} from "~/store/auth";
-  import InviteMessage from "~/components/Account/invite-message.vue";
   import Inbox from "~/components/Account/inbox.vue";
 
 @Component({
