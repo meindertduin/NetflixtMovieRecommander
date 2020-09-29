@@ -21,7 +21,6 @@ const initState = () => ({
   recommendationsIndex: 0 as number,
   selectedGenres: [] as Array<string>,
   selectedType: "both" as string,
-  seed: "" as string,
 });
 
 export const state:any = initState;
@@ -57,7 +56,6 @@ export const mutations: MutationTree<watchgroup> = {
 
   SET_SELECTED_GENRES: (state, genres:Array<string>) => state.selectedGenres = genres,
   SET_SELECTED_TYPE: (state, type:string) => state.selectedType = type,
-  SET_SEED: (state, seed:string) => state.seed = seed,
 
   SET_USER_WATCH_GROUPS: (state, watchGroups:Array<WatchGroup>) => state.watchGroups = watchGroups,
 
@@ -100,7 +98,6 @@ export const actions: ActionTree<watchgroup, RootState> = {
     const payload: WatchGroupRecommendationForm = {
       genres: state.selectedGenres,
       index: state.recommendationsIndex,
-      seed: state.seed,
       type: state.selectedType,
     }
 

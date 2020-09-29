@@ -44,7 +44,6 @@ export interface UpdateWatchGroupModel {
 export interface WatchGroupRecommendationForm {
   genres: Array<string>,
   index: number,
-  seed: string,
   type: string,
 }
 

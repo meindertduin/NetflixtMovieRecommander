@@ -49,9 +49,6 @@
       private getRecommendations() {
         this.index = 0;
 
-        const seed = this.uuidv4();
-        this.$store.commit('watchgroup/SET_SEED', seed);
-
         this.$store.commit('watchgroup/SET_RECOMMENDATIONS_INDEX', 0);
         this.$store.dispatch('watchgroup/getRecomemendations', {route: this.$route.params.id, reset: true})
           .then(() => {
@@ -60,13 +57,6 @@
           .catch(() => {
             // todo implement way to notify if failed
           })
-      }
-
-      private uuidv4() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-          let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-          return v.toString(16);
-        });
       }
     }
 </script>

@@ -45,6 +45,7 @@ export const actions: ActionTree<auth, RootState> = {
       if(user){
         this.$axios.setToken(`Bearer ${user.access_token}`);
         commit('SAVE_USER', user);
+        console.log("user Got")
         this.$axios.get('api/profile')
           .then(({data}) => {
             commit('SET_PROFILE', data);

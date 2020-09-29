@@ -302,7 +302,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                     .Where(x => watchTitles.All(p => x.Title != p))
                     .Where(x => x.Deleted == false)
                     .Search(x => x.Genres).Containing(recommendationForm.Genres)
-                    .OrderBy(x => recommendationForm.Seed)
+                    .OrderBy(x => Guid.NewGuid())
                     .Skip(skipAmount)
                     .Take(25);
             }
@@ -312,7 +312,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                     .Where(x => recommendationForm.Type == "both" || x.Type == recommendationForm.Type)
                     .Where(x => watchTitles.All(p => x.Title != p))
                     .Where(x => x.Deleted == false)
-                    .OrderBy(x => recommendationForm.Seed)
+                    .OrderBy(x => Guid.NewGuid())
                     .Skip(skipAmount)
                     .Take(25);
             }
