@@ -1,0 +1,29 @@
+﻿@page
+@using NetflixMovieRecommander.Models.Enums
+@model NetflixMoviesRecommender.api.Pages.Admin.Message
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Message";
+    Layout = "Shared/_Layout";
+}
+
+
+<div class="row justify-content-center mt-5">
+    <div class="col-6">
+        <form method="post" asp-page-handler="message">
+            <div>MessageType: </div>
+            @Html.DropDownListFor(m => m.GlobalMessage.MessageType, new SelectList(Enum.GetValues(typeof(MessageType))))
+            <div class="form-group">
+                <label for="titleForm">Title</label>
+                <input type="text" class="form-control" id="titleForm" asp-for="@Model.GlobalMessage.Title"/>
+            </div>
+            <div class="form-group">
+                <label for="descriptionForm">Description</label>
+                <textarea class="form-control" id="descriptionForm" rows="3" asp-for="@Model.GlobalMessage.Description"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary mb-2">Send</button>
+        </form>
+    </div>
+</div>
+
