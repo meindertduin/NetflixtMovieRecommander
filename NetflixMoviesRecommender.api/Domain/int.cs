@@ -1,4 +1,0 @@
-﻿namespace NetflixMoviesRecommender.api.Domain
-{
-
-}

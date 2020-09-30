@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMovieRecommander.Models.Enums;
+using NetflixMoviesRecommender.api.Domain;
 
 namespace NetflixMoviesRecommender.api.Controllers
 {
@@ -20,16 +21,7 @@ namespace NetflixMoviesRecommender.api.Controllers
         [HttpGet]
         public IActionResult Test()
         {
-            var messages = _ctx.InboxMessages.ToList();
-            foreach (var message in messages)
-            {
-                if (message.MessageType == MessageType.WatchGroupInvite)
-                {
-                    var invite = (WatchGroupInviteMessage) message;
-                }
-            }
-            
-            return Ok();
+            return Ok(AppHttpContext.AppBaseUrl);
         }
     }
 }

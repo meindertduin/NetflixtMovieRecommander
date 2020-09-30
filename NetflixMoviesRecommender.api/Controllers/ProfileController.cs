@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMovieRecommander.Models.Enums;
+using NetflixMoviesRecommender.api.Domain;
 using NetflixMoviesRecommender.api.Domain.Extensions;
 using NetflixMoviesRecommender.api.Services;
 
@@ -25,14 +26,17 @@ namespace NetflixMoviesRecommender.api.Controllers
         private readonly IFileHandlerService _fileHandlerService;
         private readonly AppDbContext _ctx;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IImageProcessingService _imageProcessingService;
 
         public ProfileController(IFileHandlerService fileHandlerService,
             AppDbContext ctx,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IImageProcessingService imageProcessingService)
         {
             _fileHandlerService = fileHandlerService;
             _ctx = ctx;
             _userManager = userManager;
+            _imageProcessingService = imageProcessingService;
         }
 
         [HttpGet]
@@ -54,7 +58,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             {
                 UserName = userProfile.UserName,
                 Id = userProfile.Id,
-                AvatarUrl = "https://localhost:5001/api/profile/picture/" + userProfile.Id,
+                AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + userProfile.Id,
             };
 
             return Ok(result);
@@ -78,7 +82,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             {
                 UserName = profile.UserName,
                 Id = profile.Id,
-                AvatarUrl = "https://localhost:5001/api/profile/picture/" + profile.Id,
+                AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + profile.Id,
             };
 
             return Ok(result);
@@ -116,13 +120,19 @@ namespace NetflixMoviesRecommender.api.Controllers
                 ContentType = picture.ContentType,
             };
 
-
-            using (var reader = new BinaryReader(picture.OpenReadStream()))
+            var savePath = await _fileHandlerService.SaveFile(picture, 100_000_0);
+            string outputPath;
+            var imagePath = _imageProcessingService.ProcessImage(savePath, out outputPath, 200);
+            imagePath.Wait();
+            
+            
+            using (var reader = new BinaryReader(System.IO.File.OpenRead(outputPath)))
             {
                 avatar.Content = reader.ReadBytes((int) picture.Length);
             }
-
-            ;
+            
+            System.IO.File.Delete(savePath);
+            System.IO.File.Delete(outputPath);
 
             var currentUserAvatar = userProfile.ProfileFiles.FirstOrDefault(x => x.FileType == FileType.Avatar);
 
@@ -170,7 +180,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                 {
                     UserName = userProfile.UserName,
                     Id = userProfile.Id,
-                    AvatarUrl = "https://localhost:5001/api/profile/picture/" + userProfile.Id,
+                    AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + userProfile.Id,
                 });
             }
 
@@ -213,7 +223,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                         {
                             UserName = sender.UserName,
                             Id = sender.Id,
-                            AvatarUrl = "https://localhost:5001/api/profile/picture/" + sender.Id,
+                            AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + sender.Id,
                         },
                         DateSend = inboxMessage.DateSend,
                     };

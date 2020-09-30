@@ -15,6 +15,8 @@ using Microsoft.Extensions.Hosting;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMoviesRecommender.api.Domain;
+using NetflixMoviesRecommender.api.Domain.Extensions;
+using NetflixMoviesRecommender.api.Domain.Services;
 using NetflixMoviesRecommender.api.Services;
 
 namespace NetflixMoviesRecommender.api
@@ -40,6 +42,7 @@ namespace NetflixMoviesRecommender.api
 
             services.AddTransient<IRecommendedDatabaseParser, RecommendedDatabaseParser>();
             services.AddTransient<IFileHandlerService, FileHandlerService>();
+            services.AddTransient<IImageProcessingService, ImageProcessingService>();
 
             services.AddHttpClient();
             
@@ -68,6 +71,8 @@ namespace NetflixMoviesRecommender.api
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseHttpContext();
             
             app.UseHttpsRedirection();
 
