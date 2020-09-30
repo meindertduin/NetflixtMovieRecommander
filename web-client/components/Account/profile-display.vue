@@ -32,6 +32,9 @@
       <v-card-text>
         <v-row justify="center">
           <v-col cols="8">
+            <v-btn text @click="changePassword">
+              Change password
+            </v-btn>
             <h3>Profile Picture: </h3>
             <div class="text-body-2 orange--text">
               {{uploadMessage}}
@@ -61,12 +64,13 @@
 
   @Component({})
   export default class ProfileDisplay extends Vue{
-    get followersCount(){
-      return 12;
-    }
-
     get userProfile():Profile | null{
       return (this.$store.state.user as user).userProfile;
+    }
+
+    private changePassword():void{
+      const url: string = process.env.serverUrl + `/Account/ChangePassword?returnUrl=${process.env.baseUrl + this.$route.path.toString()}`;
+      location.href = url;
     }
 
     private editProfilePanel:boolean = false

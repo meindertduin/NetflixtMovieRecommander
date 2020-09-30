@@ -29,8 +29,10 @@ export default {
       https: false,
     },
   },
-
-
+  env: {
+    baseUrl: 'https://localhost:3000',
+    serverUrl:'https://localhost:5001',
+  },
   server:{
     https: {
       key: fs.readFileSync(path.relative(__dirname, 'server.key')),
