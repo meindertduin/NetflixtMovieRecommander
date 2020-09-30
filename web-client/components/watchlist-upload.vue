@@ -3,11 +3,14 @@
     <v-card-title>
       Watch History Upload
     </v-card-title>
-    <v-card-subtitle v-if="errorMessage.length > 0">
-      {{errorMessage}}
-    </v-card-subtitle>
     <v-card-text>
       Fill in here your watchlist.csv file. <a @click="toggleUploadGuide">Click here</a> to see how to obtain it.
+      <v-row justify="start">
+        <div class="orange--text mx-3">{{statusMessage}}</div>
+      </v-row>
+      <v-row justify="start">
+        <div v-if="uploadCount > 0" class="White--text mx-3">{{uploadCount}}: files succesfully uploaded</div>
+      </v-row>
     </v-card-text>
     <v-card-actions>
       <v-file-input accept=".csv" label="File input" multiple v-model="watchLists" prepend-icon="mdi-paperclip"></v-file-input>
@@ -19,11 +22,19 @@
 
 <script lang="ts">
   import {Component, Vue} from "nuxt-property-decorator";
+  import {watchlist} from "~/store/watchlist";
 
     @Component({})
     export default class WatchlistUpload extends Vue{
-
       private watchLists:any = {};
+
+      created(){
+        this.$store.commit('watchlist/SET_UPLOAD_COUNT', 0);
+      }
+
+      get uploadCount():number{
+        return (this.$store.state.watchlist as watchlist).uploadCount;
+      }
 
       private toggleOverlay():void{
         this.$store.commit('watchlist/TOGGLE_OVERLAY');
@@ -33,28 +44,30 @@
         this.$store.commit('watchlist/TOGGLE_GUIDE');
       }
 
-      private errorMessage:string = "";
+      private statusMessage:string = "";
 
 
       private async handleFileUpload():Promise<void>{
-        if(Object.keys(this.watchLists).length === 0 && this.watchLists.constructor === Object) return;
-        console.log(this.watchLists)
-        let form:FormData = new FormData();
+        this.statusMessage = "";
+        if(Object.keys(this.watchLists).length === 0 && this.watchLists.constructor === Object) {
+          this.statusMessage = "Please select a file"
+          return;
+        }
 
+        let form:FormData = new FormData();
         let count:number = 0;
         for (let files in this.watchLists){
           form.append('watchlists', this.watchLists[count]);
           count++;
         }
-
-        const res:number = await this.$store.dispatch('watchlist/uploadWatchLists', {form});
-
-        if(res != 200 && res < 500){
-          this.errorMessage = "something went wrong while processing your watchlist, did you upload the right file?";
+        this.$store.dispatch('watchlist/uploadWatchLists', {form, count})
+        .then((response) => {
+          this.statusMessage = "Upload Succeeded";
+        })
+        .catch(err => {
+          this.statusMessage = "something went wrong while processing your watchlist, did you upload the right file?";
           this.watchLists = {};
-          return;
-        }
-        this.toggleOverlay();
+        });
       }
 
 
