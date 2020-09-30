@@ -48,8 +48,8 @@ namespace NetflixMoviesRecommender.api.Pages.Account
     public class RegisterForm
     {
         [Required] public string ReturnUrl { get; set; }
-        public string Email { get; set; }
-        public string Username { get; set; }
+        [Required] public string Email { get; set; }
+        [Required] public string Username { get; set; }
         
         [Required]
         [DataType(DataType.Password)]
