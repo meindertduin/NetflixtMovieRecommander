@@ -5,6 +5,7 @@ namespace NetflixMoviesRecommender.api.Services
 {
     public interface IImageProcessingService
     {
-        public Task ProcessImage(string filePath, out string outputPath, int size);
+        public Task ProcessImage(string filePath,  int size, out string outputPath);
+        public bool TryProcessImage(string filePath,  int size, out string outputPath, out Task promise);
     }
 }

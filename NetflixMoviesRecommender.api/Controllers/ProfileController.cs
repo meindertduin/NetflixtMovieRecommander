@@ -92,16 +92,11 @@ namespace NetflixMoviesRecommender.api.Controllers
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
         public async Task<IActionResult> UploadPicture([FromForm] IFormFile picture)
         {
-            if (picture == null)
+            if (picture == null || picture.IsImage() == false)
             {
                 return BadRequest();
             }
-
-            if (picture.IsImage() == false)
-            {
-                return BadRequest();
-            }
-
+            
             var user = await _userManager.GetUserAsync(HttpContext.User);
             var userProfile = _ctx.UserProfiles
                 .Where(x => x.Id == user.Id)
@@ -121,10 +116,14 @@ namespace NetflixMoviesRecommender.api.Controllers
             };
 
             var savePath = await _fileHandlerService.SaveFile(picture, 100_000_0);
-            string outputPath;
-            var imagePath = _imageProcessingService.ProcessImage(savePath, out outputPath, 200);
-            imagePath.Wait();
+            var parseStatus = _imageProcessingService.TryProcessImage(savePath, 200, out string outputPath, out Task processingTask);
             
+            if(parseStatus == false)
+            {
+                return BadRequest();
+            }
+            
+            processingTask.Wait();
             
             using (var reader = new BinaryReader(System.IO.File.OpenRead(outputPath)))
             {
@@ -133,7 +132,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             
             System.IO.File.Delete(savePath);
             System.IO.File.Delete(outputPath);
-
+            
             var currentUserAvatar = userProfile.ProfileFiles.FirstOrDefault(x => x.FileType == FileType.Avatar);
 
             if (currentUserAvatar != null)

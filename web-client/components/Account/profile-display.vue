@@ -79,7 +79,7 @@
 
     private handleFileUpload(){
       if(this.uploadFile === null) return;
-      if(this.uploadFile.size > 100_000){
+      if(this.uploadFile.size > 100_000_0){
         console.log("to big");
         this.uploadMessage = "The size of the file is to big"
         return;

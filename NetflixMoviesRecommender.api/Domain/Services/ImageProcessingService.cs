@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -18,7 +20,7 @@ namespace NetflixMoviesRecommender.api.Domain.Services
             _env = env;
         }
         
-        public Task ProcessImage(string filePath, out string outputPath, int size)
+        public Task ProcessImage(string filePath, int size, out string outputPath)
         {
             using (var input = File.OpenRead(filePath))
             {
@@ -32,10 +34,44 @@ namespace NetflixMoviesRecommender.api.Domain.Services
                         });
                     });
                     
-                    var savePath = Path.Combine(_env.WebRootPath, Path.GetRandomFileName());
+                    var savePath = Path.Combine(_env.WebRootPath, string.Concat(Path.GetRandomFileName(), ".", filePath.Split('.').Last()));
                     outputPath = savePath;
                     return image.SaveAsync(savePath);
                 }
+            }
+        }
+
+        public bool TryProcessImage(string filePath, int size, out string outputPath, out Task promise)
+        {
+            try
+            {
+                using (var input = File.OpenRead(filePath))
+                {
+                    using (var image = Image.Load(input))
+                    {
+                        image.Mutate(x =>
+                        {
+                            x.Resize(new ResizeOptions
+                            {
+                                Size = new Size(size, size)
+                            });
+                        });
+
+                        var savePath = Path.Combine(_env.WebRootPath,
+                            string.Concat(Path.GetRandomFileName(), ".", filePath.Split('.').Last()));
+                        outputPath = savePath;
+                        promise = image.SaveAsync(savePath);
+
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                outputPath = null;
+                promise = null;
+                
+                return false;
             }
         }
     }
