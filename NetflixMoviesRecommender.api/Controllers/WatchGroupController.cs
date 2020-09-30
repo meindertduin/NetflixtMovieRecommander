@@ -124,10 +124,10 @@ namespace NetflixMoviesRecommender.api.Controllers
 
             if (watchGroup == null || watchList == null)
             {
-                return StatusCode(413);
+                return BadRequest();
             }
 
-            var savePath = await _fileHandlerService.SaveFile(watchList, new[] {".csv"});
+            var savePath = await _fileHandlerService.SaveFile(watchList, new[] {".csv"}, 100_000_0);
             
             if (savePath == null)
             {
@@ -154,6 +154,11 @@ namespace NetflixMoviesRecommender.api.Controllers
             shortTitles = shortTitles.Distinct().ToList();
             
             // convert titles to watch items that use the watchgroup id as foreign key
+
+            var watchGroupItems = _ctx.WatchItems
+                .Where(x => x.WatchGroupId == watchGroupId)
+                .ToArray();
+            
             var watchItems = new List<WatchItem>();
             
             for (int i = 0; i < shortTitles.Count; i++)
@@ -163,10 +168,17 @@ namespace NetflixMoviesRecommender.api.Controllers
                     Title = shortTitles[i],
                     WatchGroupId = watchGroup.Id,
                 };
-                watchItems.Add(watchItem);
+                if (watchGroupItems.Contains(watchItem) == false)
+                {
+                    watchItems.Add(watchItem);
+                }
             }
 
-            await _ctx.WatchItems.AddRangeAsync(watchItems);
+            if (watchItems.Count + watchGroupItems.Length < 3000)
+            {
+                await _ctx.WatchItems.AddRangeAsync(watchItems);
+            }
+            
             await _ctx.SaveChangesAsync();
             System.IO.File.Delete(savePath);
 

@@ -18,12 +18,15 @@ namespace NetflixMoviesRecommender.api.Controllers
     {
         private IWebHostEnvironment _env;
         private readonly AppDbContext _ctx;
+        private readonly IFileHandlerService _fileHandlerService;
 
         public WatchlistController(IWebHostEnvironment env, 
-            AppDbContext ctx)
+            AppDbContext ctx,
+            IFileHandlerService fileHandlerService)
         {
             _env = env;
             _ctx = ctx;
+            _fileHandlerService = fileHandlerService;
         }
         
         [HttpPost]
@@ -42,24 +45,16 @@ namespace NetflixMoviesRecommender.api.Controllers
             for (int i = 0; i < watchLists.Count; i++)
             {
                 var watchList = watchLists[i];
-                
-                // checks to see if the file is of the correct type
-                var extension = Path.GetExtension(watchList.FileName);
-                if (allowedFileExtensions.Contains(extension.ToLower()) == false)
+
+                var savePath = await _fileHandlerService
+                    .SaveFile(watchList, new[] {".scv"}, 500_000);
+
+                if (savePath == null)
                 {
-                    return StatusCode(412);
+                    return BadRequest();
                 }
-                
-                var mime = watchList.FileName.Split('.').Last();
-                var fileName = string.Concat(Path.GetRandomFileName(), ".", mime);
-                var savePath = Path.Combine(_env.WebRootPath, fileName);
                 
                 savePaths.Add(savePath);
-            
-                await using (var fileStream = new FileStream(savePath, FileMode.Create, FileAccess.Write))
-                {
-                    await watchList.CopyToAsync(fileStream);
-                }
             }
             
             List<string> refinedTitles = new List<string>();
@@ -76,6 +71,11 @@ namespace NetflixMoviesRecommender.api.Controllers
                     if (string.IsNullOrEmpty(shortTitle[0]) == false)
                     {
                         refinedTitles.Add(shortTitle[0]);
+                    }
+
+                    if (refinedTitles.Count > 1000)
+                    {
+                        break;
                     }
                 }
                 
