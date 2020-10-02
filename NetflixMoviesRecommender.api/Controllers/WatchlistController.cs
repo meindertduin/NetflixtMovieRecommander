@@ -40,7 +40,6 @@ namespace NetflixMoviesRecommender.api.Controllers
             }
             
             List<string> savePaths = new List<string>();
-            string[] allowedFileExtensions = new string[] {".csv"};
             
             for (int i = 0; i < watchLists.Count; i++)
             {

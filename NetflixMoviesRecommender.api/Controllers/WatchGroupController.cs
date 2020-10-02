@@ -1,25 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using IdentityServer4;
-using IdentityServer4.Stores.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMovieRecommander.Models.Enums;
 using NetflixMoviesRecommender.api.Forms;
 using NetflixMoviesRecommender.api.Services;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using NinjaNye.SearchExtensions;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace NetflixMoviesRecommender.api.Controllers
 {
@@ -30,15 +23,19 @@ namespace NetflixMoviesRecommender.api.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AppDbContext _ctx;
         private readonly IFileHandlerService _fileHandlerService;
+        private readonly ICsvReader _csvReader;
 
+        private const int MAX_WATCH_ITEMS = 3000;
         private const int MAX_WATCHLIST_FILE_SIZE = 100_000_0;
         
         public WatchGroupController(UserManager<ApplicationUser> userManager
-            , AppDbContext ctx, IFileHandlerService fileHandlerService)
+            , AppDbContext ctx, IFileHandlerService fileHandlerService,
+            ICsvReader csvReader)
         {
             _userManager = userManager;
             _ctx = ctx;
             _fileHandlerService = fileHandlerService;
+            _csvReader = csvReader;
         }
 
         [HttpGet]
@@ -52,18 +49,22 @@ namespace NetflixMoviesRecommender.api.Controllers
                 .ThenInclude(x => x.Members)
                 .Include(x => x.MemberWatchGroups)
                 .FirstOrDefault();
-
-
+            
             if (profile == null)
             {
                 return Forbid();
             }
 
-            var watchGroups = profile.OwnedWatchGroups.ToList();
+            var watchGroups = profile.OwnedWatchGroups
+                .Where(x => x.Deleted ==false)
+                .ToList();
 
-            var memberGroupIds = profile.MemberWatchGroups.Select(x => x.WatchGroupId).ToArray();
+            var memberGroupIds = profile.MemberWatchGroups
+                .Select(x => x.WatchGroupId)
+                .ToArray();
             
             var memberWatchGroups = _ctx.WatchGroups
+                .Where(x => x.Deleted == false)
                 .Where(x => memberGroupIds.Contains(x.Id))
                 .Include(x => x.Owner)
                 .Include(x => x.Members)
@@ -71,47 +72,51 @@ namespace NetflixMoviesRecommender.api.Controllers
             
             watchGroups.AddRange(memberWatchGroups);
             
+            var result = await MapWatchGroups(watchGroups);
+
+            return Ok(result);
+
+        }
+
+        private async Task<List<WatchGroupViewModel>> MapWatchGroups(List<WatchGroup> watchGroups)
+        {
             var result = new List<WatchGroupViewModel>();
 
             foreach (var watchGroup in watchGroups)
             {
-                if (watchGroup.Deleted == false)
+                var members = new List<UserProfileViewModel>();
+                var owner = new UserProfileViewModel
                 {
-                    var members = new List<UserProfileViewModel>();
-                    var owner = new UserProfileViewModel
+                    Id = watchGroup.Owner.Id,
+                    UserName = watchGroup.Owner.UserName,
+                    AvatarUrl = "https://localhost:5001/api/profile/picture/" + watchGroup.Owner.Id,
+                };
+                foreach (var member in watchGroup.Members)
+                {
+                    var memberProfile = await _userManager.FindByIdAsync(member.UserProfileId);
+                    if (memberProfile.UserName != null)
                     {
-                        Id = watchGroup.Owner.Id,
-                        UserName = watchGroup.Owner.UserName,
-                        AvatarUrl = "https://localhost:5001/api/profile/picture/" + watchGroup.Owner.Id,
-                    };
-                    foreach (var member in watchGroup.Members)
-                    {
-                        var memberProfile = await _userManager.FindByIdAsync(member.UserProfileId);
-                        if (memberProfile.UserName != null)
+                        members.Add(new UserProfileViewModel
                         {
-                            members.Add(new UserProfileViewModel
-                            {
-                                Id = member.UserProfileId,
-                                UserName = memberProfile.UserName,
-                                AvatarUrl = "https://localhost:5001/api/profile/picture/" + member.UserProfileId,
-                            });
-                        }
+                            Id = member.UserProfileId,
+                            UserName = memberProfile.UserName,
+                            AvatarUrl = "https://localhost:5001/api/profile/picture/" + member.UserProfileId,
+                        });
                     }
-                
-                    result.Add(new WatchGroupViewModel
-                    {
-                        Id = watchGroup.Id,
-                        Title = watchGroup.Title,
-                        Description = watchGroup.Description,
-                        Owner = owner,
-                        Members = members,
-                        AddedNames = watchGroup.AddedNames,
-                    });
                 }
-            }
-            
-            return Ok(result);
 
+                result.Add(new WatchGroupViewModel
+                {
+                    Id = watchGroup.Id,
+                    Title = watchGroup.Title,
+                    Description = watchGroup.Description,
+                    Owner = owner,
+                    Members = members,
+                    AddedNames = watchGroup.AddedNames,
+                });
+            }
+
+            return result;
         }
 
         [HttpPost("watchlist-upload")]
@@ -119,11 +124,8 @@ namespace NetflixMoviesRecommender.api.Controllers
         public async Task<IActionResult> UploadWatchList([FromForm] WatchGroupWatchListForm watchGroupWatchListForm)
         {
             var watchList = watchGroupWatchListForm.WatchList;
-            var watchGroupId = watchGroupWatchListForm.watchGroupId;
+            var watchGroup = await _ctx.WatchGroups.FindAsync(watchGroupWatchListForm.watchGroupId);
             
-            var watchGroup = await _ctx.WatchGroups.FindAsync(watchGroupId);
-
-
             if (watchGroup == null || watchList == null || watchGroupWatchListForm.WatchList.Length > MAX_WATCHLIST_FILE_SIZE)
             {
                 return BadRequest();
@@ -133,41 +135,51 @@ namespace NetflixMoviesRecommender.api.Controllers
             
             if (savePath == null)
             {
-                return StatusCode(500);
+                return BadRequest();
             }
             
-            var fileReader = new CsvReader();
-            var pairs = fileReader.ReadKeyValues(savePath);
-            
-            // processes the pairs and ads them to the watchgroup.watchitems
+            var pairs = _csvReader.ReadKeyValues(savePath);
             var titles = pairs.Item1;
-            List<string> shortTitles = new List<string>();
             
-            // deprecading titles in shorter titles and removing duplicates
+            var shortenedTitles = ShortenTitles(titles);
+            var distinctTitles = shortenedTitles.Distinct().ToList();
+            
+            var watchGroupItems = _ctx.WatchItems
+                .Where(x => x.WatchGroupId == watchGroupWatchListForm.watchGroupId)
+                .ToArray();
+            
+            var watchItems = MapWatchItemsOfTitles(distinctTitles, watchGroup, watchGroupItems);
+
+            await SaveWatchItems(watchItems, watchGroupItems, savePath);
+
+            return Ok();
+        }
+        
+        private List<string> ShortenTitles(List<string> titles)
+        {
+            List<string> shortenedTitles = new List<string>();
+
             for (int i = 0; i < titles.Count; i++)
             {
                 var shortTitle = titles[i].Split(':');
                 if (string.IsNullOrEmpty(shortTitle[0]) == false)
                 {
-                    shortTitles.Add(shortTitle[0]);
+                    shortenedTitles.Add(shortTitle[0]);
                 }
             }
 
-            shortTitles = shortTitles.Distinct().ToList();
-            
-            // convert titles to watch items that use the watchgroup id as foreign key
-
-            var watchGroupItems = _ctx.WatchItems
-                .Where(x => x.WatchGroupId == watchGroupId)
-                .ToArray();
-            
+            return shortenedTitles;
+        }
+        
+        private List<WatchItem> MapWatchItemsOfTitles(List<string> distinctTitles, WatchGroup watchGroup, WatchItem[] watchGroupItems)
+        {
             var watchItems = new List<WatchItem>();
-            
-            for (int i = 0; i < shortTitles.Count; i++)
+
+            for (int i = 0; i < distinctTitles.Count; i++)
             {
                 var watchItem = new WatchItem
                 {
-                    Title = shortTitles[i],
+                    Title = distinctTitles[i],
                     WatchGroupId = watchGroup.Id,
                 };
                 if (watchGroupItems.Contains(watchItem) == false)
@@ -176,17 +188,21 @@ namespace NetflixMoviesRecommender.api.Controllers
                 }
             }
 
-            if (watchItems.Count + watchGroupItems.Length < 3000)
+            return watchItems;
+        }
+        
+        
+        private async Task SaveWatchItems(List<WatchItem> watchItems, WatchItem[] watchGroupItems, string savePath)
+        {
+            if (watchItems.Count + watchGroupItems.Length < MAX_WATCH_ITEMS)
             {
                 await _ctx.WatchItems.AddRangeAsync(watchItems);
             }
-            
+
             await _ctx.SaveChangesAsync();
             System.IO.File.Delete(savePath);
-
-            return Ok();
         }
-        
+
         [HttpPost("create")]
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
         public async Task<IActionResult> CreateGroup([FromBody] WatchGroupForm watchGroupForm)
@@ -194,8 +210,6 @@ namespace NetflixMoviesRecommender.api.Controllers
             var user = await _userManager.GetUserAsync(HttpContext.User);
             UserProfile userProfile = await _ctx.UserProfiles.FindAsync(user.Id);
             
-            // check if title already exists
-
             if (userProfile != null)
             {
                 var watchGroup = new WatchGroup
@@ -227,7 +241,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             {
                 return StatusCode(401);
             }
-
+            
             watchGroup.Title = watchGroupForm.Title;
             watchGroup.AddedNames = watchGroupForm.AddedNames;
             watchGroup.Description = watchGroupForm.Description;
@@ -292,6 +306,8 @@ namespace NetflixMoviesRecommender.api.Controllers
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
         public async Task<IActionResult> GetRecommendations([FromRoute] string id, [FromBody] WatchGroupRecommendationForm recommendationForm)
         {
+            int recommendationsReturnAmount = 25;
+            
             var watchGroup = await _ctx.WatchGroups
                 .Where(x => x.Id == id)
                 .Include(x => x.WatchItems)
@@ -306,27 +322,18 @@ namespace NetflixMoviesRecommender.api.Controllers
             
             IQueryable<NetflixRecommended> randomRecommendations;
             
+            randomRecommendations = _ctx.NetflixRecommendations
+                .Where(x => recommendationForm.Type == "both" || x.Type == recommendationForm.Type)
+                .Where(x => watchTitles.All(p => x.Title != p))
+                .Where(x => recommendationForm.AlreadyLoaded.All(p => x.Id != p))
+                .Where(x => x.Deleted == false);
+            
             if (recommendationForm.Genres.Length > 0)
             {
-                randomRecommendations = _ctx.NetflixRecommendations
-                    .Where(x => recommendationForm.Type == "both" || x.Type == recommendationForm.Type)
-                    .Where(x => watchTitles.All(p => x.Title != p))
-                    .Where(x => recommendationForm.AlreadyLoaded.All(p => x.Id != p))
-                    .Where(x => x.Deleted == false)
-                    .Search(x => x.Genres).Containing(recommendationForm.Genres)
-                    .OrderBy(x => Guid.NewGuid())
-                    .Take(25);
+                randomRecommendations.Search(x => x.Genres).Containing(recommendationForm.Genres);
             }
-            else
-            {
-                randomRecommendations = _ctx.NetflixRecommendations
-                    .Where(x => recommendationForm.Type == "both" || x.Type == recommendationForm.Type)
-                    .Where(x => watchTitles.All(p => x.Title != p))
-                    .Where(x => recommendationForm.AlreadyLoaded.All(p => x.Id != p))
-                    .Where(x => x.Deleted == false)
-                    .OrderBy(x => Guid.NewGuid())
-                    .Take(25);
-            }
+
+            randomRecommendations.OrderBy(x => Guid.NewGuid()).Take(recommendationsReturnAmount);
             
             var recommendations = new List<NetflixRecommended>();
             recommendations.AddRange(randomRecommendations);
@@ -356,15 +363,12 @@ namespace NetflixMoviesRecommender.api.Controllers
                 return NotFound();
             }
 
-            
-            // validating if request has already been send
-            foreach (var message in subject.InboxMessages)
+
+            if (AlreadySend(subject.InboxMessages, user.Id))
             {
-                if (message.MessageType == MessageType.WatchGroupInvite && message.SenderId == user.Id)
-                {
-                    return Ok();
-                }
+                return Ok();
             }
+            
             
             var invite = new WatchGroupInviteMessage
             {
@@ -384,6 +388,19 @@ namespace NetflixMoviesRecommender.api.Controllers
             return Ok();
         }
 
+        private bool AlreadySend(ICollection<InboxMessage> inboxMessages, string userId)
+        {
+            foreach (var message in inboxMessages)
+            {
+                if (message.MessageType == MessageType.WatchGroupInvite && message.SenderId == userId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         [HttpPut("invite/response")]
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
         public async Task<IActionResult> Accept([FromBody] WatchGroupInviteResponseForm responseForm)
@@ -395,12 +412,21 @@ namespace NetflixMoviesRecommender.api.Controllers
                 return Forbid();
             }
             
-            // validating invite
             var message = await _ctx.InboxMessages.FindAsync(responseForm.MessageId) as WatchGroupInviteMessage;
+            
             if (message == null || responseForm.InviterId != message.SenderId || profile.Id != message.ReceiverId)
             {
                 return BadRequest();
             }
+            
+            var response = new InboxMessage
+            {
+                MessageType = MessageType.General,
+                Title = $"Message from {user.UserName}",
+                Sender = profile,
+                DateSend = DateTime.Now,
+                ReceiverId = message.SenderId,
+            };
             
             if (responseForm.Accepted)
             {
@@ -419,36 +445,15 @@ namespace NetflixMoviesRecommender.api.Controllers
                     WatchGroupId = watchGroup.Id,
                     UserProfileId = profile.Id,
                 });
-                
-                var accept = new InboxMessage
-                {
-                    MessageType = MessageType.General,
-                    Title = $"Message from {user.UserName}",
-                    Description = $"{user.UserName} has accepted your invite",
-                    Sender = profile,
-                    DateSend = DateTime.Now,
-                    ReceiverId = message.SenderId,
-                };
 
-                _ctx.InboxMessages.Add(accept);
-                _ctx.InboxMessages.Remove(message);
-                
-                _ctx.SaveChanges();
-
-                return Ok();
+                response.Description = $"{user.UserName} has accepted your invite";
+            }
+            else
+            {
+                response.Description = $"{user.UserName} has declined your invite";
             }
             
-            var decline = new InboxMessage
-            {
-                MessageType = MessageType.General,
-                Title = $"Message from {user.UserName}",
-                Description = $"{user.UserName} has declined your invite",
-                Sender = profile,
-                DateSend = DateTime.Now,
-                ReceiverId = message.SenderId,
-            };
-            
-            _ctx.InboxMessages.Add(decline);
+            _ctx.InboxMessages.Add(response);
             _ctx.InboxMessages.Remove(message);
             _ctx.SaveChanges();
             

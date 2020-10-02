@@ -8,11 +8,11 @@ using NetflixMoviesRecommender.api.Services;
 
 namespace NetflixMoviesRecommender.api.Domain
 {
-    public class ApiFileHandlerService : IFileHandlerService
+    public class FileHandlerService : IFileHandlerService
     {
         private readonly IWebHostEnvironment _env;
 
-        public ApiFileHandlerService(IWebHostEnvironment env)
+        public FileHandlerService(IWebHostEnvironment env)
         {
             _env = env;
         }
