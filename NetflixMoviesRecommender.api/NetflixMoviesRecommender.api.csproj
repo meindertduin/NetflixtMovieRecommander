@@ -11,9 +11,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ApplicationCore\ApplicationCore.csproj" />
-      <ProjectReference Include="..\Data\Data.csproj" />
       <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
-      <ProjectReference Include="..\NetflixMovieRecommander.Data\NetflixMovieRecommander.Data.csproj" />
     </ItemGroup>
 
     <ItemGroup>
