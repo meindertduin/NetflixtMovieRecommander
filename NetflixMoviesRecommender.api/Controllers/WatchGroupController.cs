@@ -326,14 +326,9 @@ namespace NetflixMoviesRecommender.api.Controllers
                 .Where(x => recommendationForm.Type == "both" || x.Type == recommendationForm.Type)
                 .Where(x => watchTitles.All(p => x.Title != p))
                 .Where(x => recommendationForm.AlreadyLoaded.All(p => x.Id != p))
-                .Where(x => x.Deleted == false);
-            
-            if (recommendationForm.Genres.Length > 0)
-            {
-                randomRecommendations.Search(x => x.Genres).Containing(recommendationForm.Genres);
-            }
-
-            randomRecommendations.OrderBy(x => Guid.NewGuid()).Take(recommendationsReturnAmount);
+                .Where(x => x.Deleted == false)
+                .Search(x => x.Genres).Containing(recommendationForm.Genres)
+                .OrderBy(x => Guid.NewGuid()).Take(recommendationsReturnAmount);
             
             var recommendations = new List<NetflixRecommended>();
             recommendations.AddRange(randomRecommendations);
