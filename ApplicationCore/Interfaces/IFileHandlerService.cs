@@ -5,8 +5,8 @@ namespace NetflixMoviesRecommender.api.Services
 {
     public interface IFileHandlerService
     {
-        Task<string> SaveFile(IFormFile file, int maxSize);
-        Task<string> SaveFile(IFormFile file, string[] allowedFileExtensions, int maxSize);
+        Task<string> SaveFile(IFormFile file);
+        Task<string> SaveFile(IFormFile file, string[] allowedFileExtensions);
 
     }
 }

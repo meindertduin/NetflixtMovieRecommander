@@ -20,7 +20,7 @@ namespace NetflixMoviesRecommender.api.Domain.Services
             _env = env;
         }
         
-        public Task ProcessImage(string filePath, int size, out string outputPath)
+        public Task ResizeImage(string filePath, int size, out string outputPath)
         {
             using (var input = File.OpenRead(filePath))
             {
@@ -41,7 +41,7 @@ namespace NetflixMoviesRecommender.api.Domain.Services
             }
         }
 
-        public bool TryProcessImage(string filePath, int size, out string outputPath, out Task promise)
+        public bool TryResizeImage(string filePath, int size, out string outputPath, out Task promise)
         {
             try
             {

@@ -12,6 +12,5 @@ namespace NetflixMovieRecommander.Models
         public string Description { get; set; }
         public UserProfileViewModel Sender { get; set; }
         public DateTime DateSend { get; set; }
-        
     }
 }

@@ -31,6 +31,8 @@ namespace NetflixMoviesRecommender.api.Controllers
         private readonly AppDbContext _ctx;
         private readonly IFileHandlerService _fileHandlerService;
 
+        private const int MAX_WATCHLIST_FILE_SIZE = 100_000_0;
+        
         public WatchGroupController(UserManager<ApplicationUser> userManager
             , AppDbContext ctx, IFileHandlerService fileHandlerService)
         {
@@ -122,12 +124,12 @@ namespace NetflixMoviesRecommender.api.Controllers
             var watchGroup = await _ctx.WatchGroups.FindAsync(watchGroupId);
 
 
-            if (watchGroup == null || watchList == null)
+            if (watchGroup == null || watchList == null || watchGroupWatchListForm.WatchList.Length > MAX_WATCHLIST_FILE_SIZE)
             {
                 return BadRequest();
             }
 
-            var savePath = await _fileHandlerService.SaveFile(watchList, new[] {".csv"}, 100_000_0);
+            var savePath = await _fileHandlerService.SaveFile(watchList, new[] {".csv"});
             
             if (savePath == null)
             {

@@ -27,6 +27,9 @@ namespace NetflixMoviesRecommender.api.Controllers
         private readonly AppDbContext _ctx;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IImageProcessingService _imageProcessingService;
+        
+        private const int AVATAR_PIXEL_SIZE = 200;
+        private const int MAX_AVATAR_BYTE_SIZE = 100_000_0;
 
         public ProfileController(IFileHandlerService fileHandlerService,
             AppDbContext ctx,
@@ -92,47 +95,65 @@ namespace NetflixMoviesRecommender.api.Controllers
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
         public async Task<IActionResult> UploadPicture([FromForm] IFormFile picture)
         {
-            if (picture == null || picture.IsImage() == false)
+            if (picture == null || picture.IsImage() == false || picture.Length > MAX_AVATAR_BYTE_SIZE)
             {
                 return BadRequest();
             }
             
             var user = await _userManager.GetUserAsync(HttpContext.User);
+            
             var userProfile = _ctx.UserProfiles
                 .Where(x => x.Id == user.Id)
                 .Include(x => x.ProfileFiles)
                 .FirstOrDefault();
-
-            if (userProfile == null)
+            
+            var savePath = await _fileHandlerService.SaveFile(picture);
+            var resizeSucceeded = _imageProcessingService.TryResizeImage(savePath, AVATAR_PIXEL_SIZE,
+                                                                                        out string outputPath,
+                                                                                        out Task resizingTask);
+            await resizingTask;
+            
+            if(resizeSucceeded == false)
             {
-                return Problem();
+                return BadRequest();
             }
+            
+            await ParseImageToDatabase(picture, outputPath, savePath, userProfile);
 
+            return Ok();
+        }
+
+        private async Task ParseImageToDatabase(IFormFile picture, string outputPath, string savePath,
+            UserProfile userProfile)
+        {
             var avatar = new ProfileFile
             {
                 FileName = picture.FileName,
                 FileType = FileType.Avatar,
                 ContentType = picture.ContentType,
             };
-
-            var savePath = await _fileHandlerService.SaveFile(picture, 100_000_0);
-            var parseStatus = _imageProcessingService.TryProcessImage(savePath, 200, out string outputPath, out Task processingTask);
             
-            if(parseStatus == false)
-            {
-                return BadRequest();
-            }
+            ReadProcessedImage(picture, outputPath, avatar);
+            DeleteSavedImages(outputPath, savePath);
+            await SetUserAvatar(userProfile, avatar);
+        }
 
-            await processingTask;
-            
+        private void ReadProcessedImage(IFormFile picture, string outputPath, ProfileFile avatar)
+        {
             using (var reader = new BinaryReader(System.IO.File.OpenRead(outputPath)))
             {
                 avatar.Content = reader.ReadBytes((int) picture.Length);
             }
-            
+        }
+
+        private void DeleteSavedImages(string outputPath, string savePath)
+        {
             System.IO.File.Delete(savePath);
             System.IO.File.Delete(outputPath);
-            
+        }
+        
+        private async Task SetUserAvatar(UserProfile userProfile, ProfileFile avatar)
+        {
             var currentUserAvatar = userProfile.ProfileFiles.FirstOrDefault(x => x.FileType == FileType.Avatar);
 
             if (currentUserAvatar != null)
@@ -144,8 +165,6 @@ namespace NetflixMoviesRecommender.api.Controllers
             userProfile.ProfileFiles.Add(avatar);
 
             _ctx.SaveChanges();
-
-            return Ok();
         }
 
         [HttpGet("picture/{id}")]
@@ -164,7 +183,7 @@ namespace NetflixMoviesRecommender.api.Controllers
         }
 
         [HttpGet("find")]
-        public IActionResult FindUser(string searchTerm)
+        public IActionResult FindUsers(string searchTerm)
         {
             var profiles = _ctx.UserProfiles
                 .Where(x => x.UserName.Contains(searchTerm))
@@ -186,24 +205,17 @@ namespace NetflixMoviesRecommender.api.Controllers
             return Ok(result);
         }
         
-        
         [HttpGet("inbox")]
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
         public async Task<IActionResult> GetInbox()
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
             
-            if (user == null)
-            {
-                return Forbid();
-            }
-            
             var inboxMessages = _ctx.InboxMessages
                 .Where(x => x.ReceiverId == user.Id)
                 .Include(x => x.Sender)
                 .ToList();
-
-
+            
             var result = new List<InboxMessageViewModel>();
 
             foreach (var inboxMessage in inboxMessages)
@@ -212,45 +224,62 @@ namespace NetflixMoviesRecommender.api.Controllers
                 
                 if (sender != null)
                 {
-                    var message = new InboxMessageViewModel
-                    {
-                        MessageId = inboxMessage.Id,
-                        MessageType = inboxMessage.MessageType,
-                        Title = inboxMessage.Title,
-                        Description = inboxMessage.Description,
-                        Sender = new UserProfileViewModel
-                        {
-                            UserName = sender.UserName,
-                            Id = sender.Id,
-                            AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + sender.Id,
-                        },
-                        DateSend = inboxMessage.DateSend,
-                    };
-                    
-                    if(inboxMessage.MessageType == MessageType.WatchGroupInvite)
-                    {
-                        var invite = (WatchGroupInviteMessage) inboxMessage;
-                        var appendix = new WatchGroupInviteViewModel
-                        {
-                            GroupId = invite.GroupId,
-                            GroupTitle = invite.GroupTitle,
-                        };
-                        
-                        message.Appendix = appendix;
-                    }
-                    
+                    var message = MapInboxMessage(inboxMessage, sender);
                     result.Add(message);
                 }
             }
             return Ok(result);
         }
 
+        private InboxMessageViewModel MapInboxMessage(InboxMessage inboxMessage, UserProfile sender)
+        {
+            var message = MapGeneralMessagePart(inboxMessage, sender);
+
+            if (inboxMessage.MessageType == MessageType.WatchGroupInvite)
+            {
+                var appendix = MapInviteAppendix(inboxMessage);
+
+                message.Appendix = appendix;
+            }
+            
+            return message;
+        }
+
+        private InboxMessageViewModel MapGeneralMessagePart(InboxMessage inboxMessage, UserProfile sender)
+        {
+            return new InboxMessageViewModel
+            {
+                MessageId = inboxMessage.Id,
+                MessageType = inboxMessage.MessageType,
+                Title = inboxMessage.Title,
+                Description = inboxMessage.Description,
+                Sender = new UserProfileViewModel
+                {
+                    UserName = sender.UserName,
+                    Id = sender.Id,
+                    AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + sender.Id,
+                },
+                DateSend = inboxMessage.DateSend,
+            };
+        }
+
+        private WatchGroupInviteViewModel MapInviteAppendix(InboxMessage inboxMessage)
+        {
+            var invite = (WatchGroupInviteMessage) inboxMessage;
+            var appendix = new WatchGroupInviteViewModel
+            {
+                GroupId = invite.GroupId,
+                GroupTitle = invite.GroupTitle,
+            };
+            return appendix;
+        }
+        
         [HttpDelete("inbox")]
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
         public async Task<IActionResult> DeleteMessage([FromQuery] int id)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            var message = await _ctx.InboxMessages.FindAsync(id);
+            var message = _ctx.InboxMessages.FirstOrDefault(x => x.Id == id);
 
             if (message == null)
             {

@@ -20,6 +20,8 @@ namespace NetflixMoviesRecommender.api.Controllers
         private readonly AppDbContext _ctx;
         private readonly IFileHandlerService _fileHandlerService;
 
+        private const int MAX_WATCHLIST_SIZE = 500_000;
+
         public WatchlistController(IWebHostEnvironment env, 
             AppDbContext ctx,
             IFileHandlerService fileHandlerService)
@@ -34,11 +36,9 @@ namespace NetflixMoviesRecommender.api.Controllers
         {
             if (watchLists.Count == 0)
             {
-                return StatusCode(403);
+                return BadRequest();
             }
             
-            
-            // uploads all the watchlists
             List<string> savePaths = new List<string>();
             string[] allowedFileExtensions = new string[] {".csv"};
             
@@ -46,15 +46,18 @@ namespace NetflixMoviesRecommender.api.Controllers
             {
                 var watchList = watchLists[i];
 
-                var savePath = await _fileHandlerService
-                    .SaveFile(watchList, new[] {".scv"}, 500_000);
-
-                if (savePath == null)
+                if (watchList.Length < MAX_WATCHLIST_SIZE)
                 {
-                    return BadRequest();
-                }
+                    var savePath = await _fileHandlerService
+                        .SaveFile(watchList, new[] {".scv"});
+
+                    if (savePath == null)
+                    {
+                        return BadRequest();
+                    }
                 
-                savePaths.Add(savePath);
+                    savePaths.Add(savePath);
+                }
             }
             
             List<string> refinedTitles = new List<string>();

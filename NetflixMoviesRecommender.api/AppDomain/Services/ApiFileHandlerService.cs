@@ -11,20 +11,14 @@ namespace NetflixMoviesRecommender.api.Domain
     public class ApiFileHandlerService : IFileHandlerService
     {
         private readonly IWebHostEnvironment _env;
-        private const int DEFAULT_MAX_FILE_SIZE = 100_000_000;
 
         public ApiFileHandlerService(IWebHostEnvironment env)
         {
             _env = env;
         }
         
-        public async Task<string> SaveFile(IFormFile file, int max_size=DEFAULT_MAX_FILE_SIZE)
+        public async Task<string> SaveFile(IFormFile file)
         {
-            if (file.Length > max_size)
-            {
-                return null;
-            }
-            
             var mime = file.FileName.Split('.').Last();
             var fileName = string.Concat(Path.GetRandomFileName(), ".", mime);
             var savePath = Path.Combine(_env.WebRootPath, fileName);
@@ -36,7 +30,7 @@ namespace NetflixMoviesRecommender.api.Domain
         }
         
         
-        public async Task<string> SaveFile(IFormFile file, string[] allowedFileExtensions, int maxSize=DEFAULT_MAX_FILE_SIZE)
+        public async Task<string> SaveFile(IFormFile file, string[] allowedFileExtensions)
         {
             var extension = Path.GetExtension(file.FileName);
             if (allowedFileExtensions.Contains(extension.ToLower()) == false)
@@ -44,7 +38,7 @@ namespace NetflixMoviesRecommender.api.Domain
                 return null;
             }
             
-            var savePath = await SaveFile(file, maxSize);
+            var savePath = await SaveFile(file);
 
             return savePath;
         }
