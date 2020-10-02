@@ -8,12 +8,12 @@ using NetflixMoviesRecommender.api.Services;
 
 namespace NetflixMoviesRecommender.api.Domain
 {
-    public class FileHandlerService : IFileHandlerService
+    public class ApiFileHandlerService : IFileHandlerService
     {
         private readonly IWebHostEnvironment _env;
         private const int DEFAULT_MAX_FILE_SIZE = 100_000_000;
 
-        public FileHandlerService(IWebHostEnvironment env)
+        public ApiFileHandlerService(IWebHostEnvironment env)
         {
             _env = env;
         }

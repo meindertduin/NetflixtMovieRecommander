@@ -18,17 +18,11 @@ namespace NetflixMoviesRecommender.api.Controllers
     [Route("/api/recommendation")]
     public class RecommandationController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
         private readonly AppDbContext _ctx;
-        private readonly IRecommendedDatabaseParser _recommendedDatabaseParser;
-        private readonly HttpClient _client;
 
-        public RecommandationController(IConfiguration configuration, IHttpClientFactory clientFactory, AppDbContext ctx, IRecommendedDatabaseParser recommendedDatabaseParser)
+        public RecommandationController(AppDbContext ctx)
         {
-            _configuration = configuration;
             _ctx = ctx;
-            _recommendedDatabaseParser = recommendedDatabaseParser;
-            _client = clientFactory.CreateClient();
         }
         
 

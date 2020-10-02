@@ -18,7 +18,6 @@ namespace NetflixMoviesRecommender.api.Pages.Admin
     public class Recommendation : PageModel
     {
         private readonly IConfiguration _configuration;
-        private readonly IRecommendedDatabaseParser _recommendedDatabaseParser;
         private readonly AppDbContext _ctx;
         [BindProperty] public string Title { get; set; }
         [BindProperty] public List<NetflixRecommended> Recommendations { get; set; }
@@ -27,10 +26,9 @@ namespace NetflixMoviesRecommender.api.Pages.Admin
         [BindProperty(SupportsGet = true)] public int DisplayPerPage { get; set; } = 50;
         [BindProperty(SupportsGet = true)] public double PagesCount { get; set; }
 
-        public Recommendation(IConfiguration configuration, IRecommendedDatabaseParser recommendedDatabaseParser, AppDbContext ctx)
+        public Recommendation(IConfiguration configuration, AppDbContext ctx)
         {
             _configuration = configuration;
-            _recommendedDatabaseParser = recommendedDatabaseParser;
             _ctx = ctx;
         }
         
@@ -85,9 +83,26 @@ namespace NetflixMoviesRecommender.api.Pages.Admin
 
             try
             {
-                await _recommendedDatabaseParser.StoreRecommendedToDatabase(recommended);
+                var existingEntity = _ctx.NetflixRecommendations
+                    .FirstOrDefault(x => x.Title == recommended.Title);
+
+                if (existingEntity == null)
+                {
+                    NetflixRecommended netflixRecommended = new NetflixRecommended
+                    {
+                        Title = recommended.Title.Split(':')[0],
+                        Plot = recommended.Plot,
+                        Poster = recommended.Poster,
+                        Type = recommended.Type,
+                        Genres = recommended.Genre,
+                    };
+                
+                    await _ctx.NetflixRecommendations.AddRangeAsync(netflixRecommended);
+                    await _ctx.SaveChangesAsync();
+                }
                 return RedirectToPage();
             }
+            
             catch (Exception e)
             {
                 // ignored

@@ -122,8 +122,8 @@ namespace NetflixMoviesRecommender.api.Controllers
             {
                 return BadRequest();
             }
-            
-            processingTask.Wait();
+
+            await processingTask;
             
             using (var reader = new BinaryReader(System.IO.File.OpenRead(outputPath)))
             {

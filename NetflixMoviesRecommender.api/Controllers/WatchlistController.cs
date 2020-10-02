@@ -62,7 +62,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             foreach (var savePath in savePaths)
             {
                 var fileReader = new CsvReader();
-                var pairs = fileReader.ReadCsvAsKeyValues(savePath);
+                var pairs = fileReader.ReadKeyValues(savePath);
                 var titles = pairs.Item1;
                 
                 for (int i = 0; i < titles.Count; i++)

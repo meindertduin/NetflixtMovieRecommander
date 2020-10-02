@@ -40,8 +40,7 @@ namespace NetflixMoviesRecommender.api
 
 
 
-            services.AddTransient<IRecommendedDatabaseParser, RecommendedDatabaseParser>();
-            services.AddTransient<IFileHandlerService, FileHandlerService>();
+            services.AddTransient<IFileHandlerService, ApiFileHandlerService>();
             services.AddTransient<IImageProcessingService, ImageProcessingService>();
 
             services.AddHttpClient();

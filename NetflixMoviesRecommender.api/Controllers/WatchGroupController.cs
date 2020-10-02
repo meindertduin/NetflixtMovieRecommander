@@ -135,7 +135,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             }
             
             var fileReader = new CsvReader();
-            var pairs = fileReader.ReadCsvAsKeyValues(savePath);
+            var pairs = fileReader.ReadKeyValues(savePath);
             
             // processes the pairs and ads them to the watchgroup.watchitems
             var titles = pairs.Item1;
