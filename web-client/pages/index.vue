@@ -17,7 +17,7 @@
     <v-row justify="center">
       <v-col cols="10">
         <v-row>
-          <v-col cols="6">
+          <v-col cols="12" sm="6">
             <v-card class="mx-auto mt-12 banner-card" shaped>
               <div class="banner-container">
                 <v-img class="banner-img" src="/movie-camera.jpg">
@@ -36,7 +36,7 @@
               </v-card-actions>
             </v-card>
           </v-col>
-          <v-col cols="6">
+          <v-col cols="12" sm="6">
             <v-card class="mx-auto mt-12 banner-card">
               <div class="banner-container">
                 <v-img class="banner-img popcorn-banner" src="/popcorn-bg.jpg">
@@ -117,7 +117,7 @@ export default class index extends Vue{
   }
 
   .watchroup-banner-title{
-    top: 10%;
+    top: 15%;
     width: 100%;
     left: 50%;
   }
