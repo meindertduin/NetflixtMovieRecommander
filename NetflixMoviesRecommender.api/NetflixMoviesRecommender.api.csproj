@@ -5,7 +5,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="AppDomain\Interfaces" />
       <Folder Include="wwwroot\Assets\ProfilePics" />
     </ItemGroup>
 

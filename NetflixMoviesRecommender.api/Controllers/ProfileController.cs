@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMovieRecommander.Models.Enums;
+using NetflixMoviesRecommender.api.AppDomain.Interfaces;
 using NetflixMoviesRecommender.api.Domain;
 using NetflixMoviesRecommender.api.Domain.Extensions;
 using NetflixMoviesRecommender.api.Services;
@@ -225,7 +226,10 @@ namespace NetflixMoviesRecommender.api.Controllers
                 if (sender != null)
                 {
                     var message = MapInboxMessage(inboxMessage, sender);
-                    result.Add(message);
+                    if (message != null)
+                    {
+                        result.Add(message);
+                    }
                 }
             }
             return Ok(result);
@@ -233,36 +237,23 @@ namespace NetflixMoviesRecommender.api.Controllers
 
         private InboxMessageViewModel MapInboxMessage(InboxMessage inboxMessage, UserProfile sender)
         {
-            var message = MapGeneralMessagePart(inboxMessage, sender);
-
-            if (inboxMessage.MessageType == MessageType.WatchGroupInvite)
-            {
-                var appendix = MapInviteAppendix(inboxMessage);
-
-                message.Appendix = appendix;
-            }
+            IMessageViewModelFactory factory;
             
-            return message;
-        }
-
-        private InboxMessageViewModel MapGeneralMessagePart(InboxMessage inboxMessage, UserProfile sender)
-        {
-            return new InboxMessageViewModel
+            switch (inboxMessage.MessageType)
             {
-                MessageId = inboxMessage.Id,
-                MessageType = inboxMessage.MessageType,
-                Title = inboxMessage.Title,
-                Description = inboxMessage.Description,
-                Sender = new UserProfileViewModel
-                {
-                    UserName = sender.UserName,
-                    Id = sender.Id,
-                    AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + sender.Id,
-                },
-                DateSend = inboxMessage.DateSend,
-            };
-        }
+                case MessageType.General:
+                    factory = new GeneralMessageViewModelFactory();
+                    break;
+                case MessageType.WatchGroupInvite:
+                    factory = new InviteMessageViewModelFactory();
+                    break;
+                default:
+                    return null;
+            }
 
+            return factory.CreateModel(inboxMessage, sender);
+        }
+        
         private WatchGroupInviteViewModel MapInviteAppendix(InboxMessage inboxMessage)
         {
             var invite = (WatchGroupInviteMessage) inboxMessage;
