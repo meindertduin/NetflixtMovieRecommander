@@ -6,10 +6,8 @@
         <v-img class="justify-center" max-width="300" contain :src="recommendation.poster"></v-img>
       </v-row>
       <div class="display-card-body">
-        <v-card-subtitle class="pb-0"><h4>{{recommendation.type}}</h4></v-card-subtitle>
-        <v-card-subtitle class="pb-0">
-          <h4>{{recommendation.genresString}}</h4>
-        </v-card-subtitle>
+        <div class="subtitle-2 orange--text mx-2">{{recommendation.type}}</div>
+        <div class="subtitle-2 orange--text mx-2">{{genresString}}</div>
         <v-card-text class="display-card-text">
           <div>
           {{recommendation.plot}}
@@ -66,7 +64,7 @@
     height: 800px;
   }
   .display-card-text{
-    height: 100px;
+    height: 125px;
     overflow: auto;
     padding: 10px;
   }
