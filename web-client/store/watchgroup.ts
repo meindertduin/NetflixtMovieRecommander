@@ -8,6 +8,7 @@
 ﻿import {ActionTree, GetterTree, MutationTree} from 'vuex';
 import { RootState } from "~/store";
 import WatchGroup from "~/components/Account/watch-group.vue";
+import {recommendation} from "~/store/recommendation";
 
 
 const initState = () => ({
@@ -55,6 +56,11 @@ export const mutations: MutationTree<watchgroup> = {
       state.watchGroupRecommendations.push(x)
       state.alreadyLoadedRecommendations.push(x.id);
     });
+  },
+  REMOVE_RECOMMENDATION_FROM_DISPLAY: (state, recommendation:Recommendation) =>{
+    console.log(recommendation.id);
+    state.watchGroupRecommendations =  state.watchGroupRecommendations.filter((x:Recommendation) => x.id !== recommendation.id);
+    console.log(state.watchGroupRecommendations);
   },
 
   SET_RECOMMENDATIONS_INDEX: (state, index:number) => state.recommendationsIndex = index,
@@ -109,7 +115,6 @@ export const actions: ActionTree<watchgroup, RootState> = {
       type: state.selectedType,
       alreadyLoaded: state.alreadyLoadedRecommendations,
     }
-
     return this.$axios.post(`api/watchgroup/${route}`, payload)
       .then(({data}) =>{
         if(reset === true){
@@ -124,8 +129,8 @@ export const actions: ActionTree<watchgroup, RootState> = {
         console.log(error);
       });
   },
-  async addAlreadyWatchedItem({commit}, {groupId, title}): Promise<void> {
-    await this.$axios.post('api/watchgroup/watch-item', {
+  addAlreadyWatchedItem({commit}, {groupId, title}): Promise<void> {
+    return this.$axios.post('api/watchgroup/watch-item', {
       groupId: groupId,
       watchItemTitle: title,
     });

@@ -43,12 +43,14 @@
       }
     }
 
-    private async addAlreadyWatched(): Promise<void> {
+    private addAlreadyWatched(): void {
       const groupId = this.$route.params.id;
-      await this.$store.dispatch('watchgroup/addAlreadyWatchedItem', {
+      this.$store.dispatch('watchgroup/addAlreadyWatchedItem', {
         groupId: groupId,
         title: this.recommendation.title,
       })
+        .then(() => this.$store.commit('watchgroup/REMOVE_RECOMMENDATION_FROM_DISPLAY', this.recommendation))
+        .catch(err => console.log(err));
     }
   }
 </script>
