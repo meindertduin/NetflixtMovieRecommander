@@ -49,23 +49,23 @@ namespace NetflixMoviesRecommender.api.Controllers
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
             var userProfile = _ctx.UserProfiles
+                .AsNoTracking()
                 .Where(x => x.Id == user.Id)
-                .Include(x => x.ProfileFiles)
+                .Select(u => new UserProfileViewModel
+                {
+                    UserName = u.UserName,
+                    Id = u.Id,
+                    AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + u.Id,
+                    
+                })
                 .FirstOrDefault();
 
             if (userProfile == null)
             {
                 return Forbid();
             }
-
-            var result = new UserProfileViewModel
-            {
-                UserName = userProfile.UserName,
-                Id = userProfile.Id,
-                AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + userProfile.Id,
-            };
-
-            return Ok(result);
+            
+            return Ok(userProfile);
         }
 
         [HttpGet("{id}")]
@@ -73,23 +73,22 @@ namespace NetflixMoviesRecommender.api.Controllers
         public IActionResult Get(string id)
         {
             var profile = _ctx.UserProfiles
+                .AsNoTracking()
                 .Where(x => x.Id == id)
-                .Include(x => x.ProfileFiles)
+                .Select(u => new UserProfileViewModel
+                {
+                    UserName = u.UserName,
+                    Id = u.Id,
+                    AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + u.Id,
+                })
                 .FirstOrDefault();
 
             if (profile == null)
             {
                 return NotFound();
             }
-
-            var result = new UserProfileViewModel
-            {
-                UserName = profile.UserName,
-                Id = profile.Id,
-                AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + profile.Id,
-            };
-
-            return Ok(result);
+            
+            return Ok(profile);
         }
 
         [HttpPost("picture")]
@@ -172,11 +171,12 @@ namespace NetflixMoviesRecommender.api.Controllers
         public IActionResult GetPicture(string id)
         {
             var avatar = _ctx.ProfileFiles
-                .Where(x => x.UserProfileId == id).FirstOrDefault(x => x.FileType == FileType.Avatar);
+                .AsNoTracking()
+                .Where(x => x.UserProfileId == id)
+                .FirstOrDefault(x => x.FileType == FileType.Avatar);
 
             if (avatar == null)
             {
-                // return static image
                 return NotFound();
             }
 
@@ -186,22 +186,18 @@ namespace NetflixMoviesRecommender.api.Controllers
         [HttpGet("find")]
         public IActionResult FindUsers(string searchTerm)
         {
-            var profiles = _ctx.UserProfiles
+            var result = _ctx.UserProfiles
                 .Where(x => x.UserName.Contains(searchTerm))
-                .OrderBy(x => x.UserName.Length)
-                .Take(5);
-
-            List<UserProfileViewModel> result = new List<UserProfileViewModel>();
-
-            foreach (var userProfile in profiles)
-            {
-                result.Add(new UserProfileViewModel
+                .Select(u => new UserProfileViewModel
                 {
-                    UserName = userProfile.UserName,
-                    Id = userProfile.Id,
-                    AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + userProfile.Id,
-                });
-            }
+                    UserName = u.UserName,
+                    Id = u.Id,
+                    AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + u.Id,
+                })
+                .OrderBy(x => x.UserName.Length)
+                .Take(5)
+                .ToList();
+            
 
             return Ok(result);
         }
@@ -213,6 +209,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             var user = await _userManager.GetUserAsync(HttpContext.User);
             
             var inboxMessages = _ctx.InboxMessages
+                .AsNoTracking()
                 .Where(x => x.ReceiverId == user.Id)
                 .Include(x => x.Sender)
                 .ToList();
@@ -221,11 +218,9 @@ namespace NetflixMoviesRecommender.api.Controllers
 
             foreach (var inboxMessage in inboxMessages)
             {
-                var sender = inboxMessage.Sender;
-                
-                if (sender != null)
+                if (inboxMessage.Sender != null)
                 {
-                    var message = MapInboxMessage(inboxMessage, sender);
+                    var message = MapInboxMessage(inboxMessage, inboxMessage.Sender);
                     if (message != null)
                     {
                         result.Add(message);
@@ -253,18 +248,7 @@ namespace NetflixMoviesRecommender.api.Controllers
 
             return factory.CreateModel(inboxMessage, sender);
         }
-        
-        private WatchGroupInviteViewModel MapInviteAppendix(InboxMessage inboxMessage)
-        {
-            var invite = (WatchGroupInviteMessage) inboxMessage;
-            var appendix = new WatchGroupInviteViewModel
-            {
-                GroupId = invite.GroupId,
-                GroupTitle = invite.GroupTitle,
-            };
-            return appendix;
-        }
-        
+
         [HttpDelete("inbox")]
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
         public async Task<IActionResult> DeleteMessage([FromQuery] int id)
