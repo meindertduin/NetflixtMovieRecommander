@@ -60,10 +60,6 @@
       {tab: "Watch Groups Display", content: WatchGroupDisplay},
     ]
 
-    private nonListedTabItems = [
-      {tab: "...", content: WatchGroupDisplay}
-    ]
-
     async created() {
       await this.$store.getters['getInitPromise'];
       await this.$store.dispatch('watchgroup/getUserWatchGroups');

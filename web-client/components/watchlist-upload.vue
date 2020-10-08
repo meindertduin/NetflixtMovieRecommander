@@ -61,10 +61,11 @@
           count++;
         }
         this.$store.dispatch('watchlist/uploadWatchLists', {form, count})
-        .then((response) => {
+        .then(() => {
           this.statusMessage = "Upload Succeeded";
         })
         .catch(err => {
+          console.log(err);
           this.statusMessage = "something went wrong while processing your watchlist, did you upload the right file?";
           this.watchLists = {};
         });

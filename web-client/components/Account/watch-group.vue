@@ -60,7 +60,7 @@
 
 <script lang="ts">
   import {Component, Prop, Vue} from "nuxt-property-decorator";
-  import {Profile, UserProfile, WatchGroupModel} from "~/assets/interface-models";
+  import {WatchGroupModel} from "~/assets/interface-models";
   import {auth} from "~/store/auth";
 
     @Component({})

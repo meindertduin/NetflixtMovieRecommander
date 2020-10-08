@@ -95,10 +95,12 @@ interface editAddedNamesModel{
 
 
 export const actions: ActionTree<watchgroup, RootState> = {
-  async editGroup({dispatch}, payload:UpdateWatchGroupModel){
-    this.$axios.put('/api/watchgroup/edit', payload).then(() =>{
-      dispatch('getUserWatchGroups');
-    });
+  editGroup({dispatch}, payload:UpdateWatchGroupModel){
+    return this.$axios.put('/api/watchgroup/edit', payload)
+      .then(() =>{
+        dispatch('getUserWatchGroups');
+    })
+      .catch(err => console.log(err));
   },
   createGroup({commit, dispatch}, {groupForm}):Promise<any>{
       return this.$axios.post('/api/watchgroup/create', groupForm)
@@ -135,14 +137,15 @@ export const actions: ActionTree<watchgroup, RootState> = {
       watchItemTitle: title,
     });
   },
-  getUserWatchGroups({commit}):void{
-    this.$axios.get('api/watchgroup').then(({data}) => {
+  getUserWatchGroups({commit}):Promise<void>{
+    return this.$axios.get('api/watchgroup')
+      .then(({data}) => {
       commit('SET_USER_WATCH_GROUPS', data)
     }).catch(err => {
       console.log(err);
     })
   },
-  deleteWatchGroup({commit}, watchGroupId:string){
+  deleteWatchGroup({commit}, watchGroupId:string):Promise<void>{
     return this.$axios.delete('api/watchgroup', {
       params: {
         id: watchGroupId,

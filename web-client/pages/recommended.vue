@@ -44,7 +44,6 @@
       }
 
       get uploadGuideActive(){
-        //return true;
         return (this.$store.state.watchlist as watchlist).showGuide;
       }
 

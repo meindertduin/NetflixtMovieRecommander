@@ -1,6 +1,4 @@
-﻿import {watchlist} from "~/store/watchlist";
-
-﻿import {ActionTree, GetterTree, MutationTree} from 'vuex';
+﻿﻿import {ActionTree, GetterTree, MutationTree} from 'vuex';
 import { RootState } from "~/store";
 import {Recommendation} from "~/assets/interface-models";
 

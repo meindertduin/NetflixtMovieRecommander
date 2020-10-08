@@ -1,10 +1,6 @@
-﻿import get = Reflect.get;
-
-﻿import { ActionTree, MutationTree, GetterTree } from 'vuex'
+﻿﻿import { ActionTree, MutationTree, GetterTree } from 'vuex'
 import { RootState } from "~/store";
 import {User} from "oidc-client";
-import {recommendation} from "~/store/recommendation";
-import {Getter} from "nuxt-property-decorator";
 import {Profile} from "~/assets/interface-models";
 
 const ROLES = {
@@ -37,10 +33,7 @@ export const mutations: MutationTree<auth> = {
 }
 
 export const actions: ActionTree<auth, RootState> = {
-  async setBearer({commit}, access_token){
-    this.$axios.setToken(access_token);
-  },
-  async initialize({commit}){
+  initialize({commit}){
     return this.$auth.getUser().then(user => {
       if(user){
         this.$axios.setToken(`Bearer ${user.access_token}`);

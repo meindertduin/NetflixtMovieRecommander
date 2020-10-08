@@ -30,18 +30,17 @@
       },
     })
     export default class WatchGroupDisplay extends Vue{
-      private userWatchGroups:Array<WatchGroup> = [];
       private displayedWatchGroups: Array<WatchGroupModel> = [];
       private searchTerm:string = "";
 
       @Watch("searchTerm")
       onPropertyChanged(value: string, oldValue: string) {
-        this.displayedWatchGroups = this.loadedUserWatchGroups.filter((value:WatchGroup) => {
+        this.displayedWatchGroups = this.loadedUserWatchGroups.filter((value:WatchGroupModel) => {
           return value.title.includes(this.searchTerm);
         })
       }
 
-      get loadedUserWatchGroups():Array<WatchGroup>{
+      get loadedUserWatchGroups():Array<WatchGroupModel>{
         return (this.$store.state.watchgroup as watchgroup).watchGroups;
       }
 
@@ -51,7 +50,7 @@
         this.displayedWatchGroups = value;
       }
 
-      mounted(){
+      created(){
         this.displayedWatchGroups = this.loadedUserWatchGroups;
       }
 

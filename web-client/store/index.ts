@@ -21,7 +21,7 @@ export const actions: ActionTree<RootState, RootState> = {
   async nuxtServerInit ({ commit, dispatch}) {
 
   },
-  async clientInit({dispatch, commit}, context){
+  clientInit({dispatch, commit}, context){
     const initPromise = dispatch('auth/initialize');
     commit('SET_INIT_PROMISE', initPromise);
     return initPromise;

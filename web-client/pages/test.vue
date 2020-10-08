@@ -10,8 +10,6 @@
 
 <script lang="ts">
   import {Component, Vue} from "nuxt-property-decorator";
-  import {auth} from "~/store/auth";
-  import {UserManager, WebStorageStateStore} from "oidc-client";
 
     @Component({})
     export default class Test extends Vue{

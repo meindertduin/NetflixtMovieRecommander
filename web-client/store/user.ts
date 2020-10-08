@@ -20,10 +20,12 @@ export const mutations: MutationTree<user> = {
 }
 
 export const actions: ActionTree<RootState, user> = {
-  async getUserProfile({commit}){
-    this.$axios.get('api/profile').then(({data}) => {
-      commit('SET_USER_PROFILE', data);
-      return data;
+  getUserProfile({commit}){
+    return this.$axios.get('api/profile')
+      .then(({data}) => {
+        commit('SET_USER_PROFILE', data);
+        return data;
     })
+      .catch(err => console.log(err));
   }
 }
