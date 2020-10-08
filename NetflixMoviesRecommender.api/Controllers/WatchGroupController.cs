@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMovieRecommander.Models.Enums;
@@ -347,15 +345,10 @@ namespace NetflixMoviesRecommender.api.Controllers
         public async Task<IActionResult> Accept([FromBody] WatchGroupInviteResponseForm responseForm)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            var profile = await _ctx.UserProfiles.FindAsync(user.Id);
-            if (profile == null)
-            {
-                return Forbid();
-            }
-            
+
             var message = await _ctx.InboxMessages.FindAsync(responseForm.MessageId) as WatchGroupInviteMessage;
             
-            if (message == null || responseForm.InviterId != message.SenderId || profile.Id != message.ReceiverId)
+            if (message == null || responseForm.InviterId != message.SenderId || user.Id != message.ReceiverId)
             {
                 return BadRequest();
             }
@@ -364,7 +357,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             {
                 MessageType = MessageType.General,
                 Title = $"Message from {user.UserName}",
-                Sender = profile,
+                SenderId = user.Id,
                 DateSend = DateTime.Now,
                 ReceiverId = message.SenderId,
             };
@@ -384,7 +377,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                 watchGroup.Members.Add(new WatchGroupUserProfile
                 {
                     WatchGroupId = watchGroup.Id,
-                    UserProfileId = profile.Id,
+                    UserProfileId = user.Id,
                 });
 
                 response.Description = $"{user.UserName} has accepted your invite";
