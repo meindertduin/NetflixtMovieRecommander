@@ -49,6 +49,7 @@ namespace NetflixMoviesRecommender.api.Controllers
             var user = await _userManager.GetUserAsync(HttpContext.User);
 
             var userWatchGroupsIdList = _ctx.UserProfiles
+                .AsNoTracking()
                 .Where(u => u.Id == user.Id)
                 .Select(u => new WatchGroupIdsResult
                 {
@@ -58,10 +59,11 @@ namespace NetflixMoviesRecommender.api.Controllers
                 .FirstOrDefault();
 
 
-            var watchGroupResults = _ctx.WatchGroups.Where(w =>
-                w.Deleted == false &&
-                userWatchGroupsIdList.OnwGroupIds.Contains(w.Id) || userWatchGroupsIdList.MemberGroupsIds.Contains(w.Id)
-                ).Select(w => new WatchGroupViewModel
+            var watchGroupResults = _ctx.WatchGroups
+                .AsNoTracking()
+                .Where(w => w.Deleted == false &&
+                    userWatchGroupsIdList.OnwGroupIds.Contains(w.Id) || userWatchGroupsIdList.MemberGroupsIds.Contains(w.Id))
+                .Select(w => new WatchGroupViewModel
                 {
                     Id = w.Id,
                     Title = w.Title,
@@ -79,7 +81,8 @@ namespace NetflixMoviesRecommender.api.Controllers
                        AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + x.UserProfile.Id,
                     }).ToList(),
                     AddedNames = w.AddedNames,
-                }).ToList();
+                })
+                .ToList();
 
             return Ok(watchGroupResults);
         }
@@ -273,33 +276,25 @@ namespace NetflixMoviesRecommender.api.Controllers
         public async Task<IActionResult> GetRecommendations([FromRoute] string id, [FromBody] WatchGroupRecommendationForm recommendationForm)
         {
             int recommendationsReturnAmount = 25;
-            
-            var watchGroup = await _ctx.WatchGroups
+
+            var watchTitles = _ctx.WatchGroups
+                .AsNoTracking()
                 .Where(x => x.Id == id)
-                .Include(x => x.WatchItems)
-                .FirstOrDefaultAsync();
+                .Select(w => w.Title)
+                .ToArray();
             
-            var watchedItems = watchGroup.WatchItems.ToList();
-            var watchTitles = new List<string>();
-            foreach (var watchedItem in watchedItems)
-            {
-                watchTitles.Add(watchedItem.Title);   
-            }
-            
-            IQueryable<NetflixRecommended> randomRecommendations;
-            
-            randomRecommendations = _ctx.NetflixRecommendations
-                .Where(x => recommendationForm.Type == "both" || x.Type == recommendationForm.Type)
-                .Where(x => watchTitles.All(p => x.Title != p))
-                .Where(x => recommendationForm.AlreadyLoaded.All(p => x.Id != p))
-                .Where(x => x.Deleted == false)
+            var randomRecommendations = _ctx.NetflixRecommendations
+                .AsNoTracking()
+                .Where(x => 
+                    recommendationForm.Type == "both" || x.Type == recommendationForm.Type &&
+                    watchTitles.All(p => x.Title != p) &&
+                    recommendationForm.AlreadyLoaded.All(p => x.Id != p) && 
+                    x.Deleted == false)
                 .Search(x => x.Genres).Containing(recommendationForm.Genres)
-                .OrderBy(x => Guid.NewGuid()).Take(recommendationsReturnAmount);
+                .OrderBy(x => Guid.NewGuid()).Take(recommendationsReturnAmount)
+                .ToList();
             
-            var recommendations = new List<NetflixRecommended>();
-            recommendations.AddRange(randomRecommendations);
-            
-            return Ok(recommendations);
+            return Ok(randomRecommendations);
         }
 
         [HttpPost("invite")]
@@ -307,38 +302,35 @@ namespace NetflixMoviesRecommender.api.Controllers
         public async Task<IActionResult> Invite([FromBody] WatchGroupInviteForm groupInvite)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            var profile = await _ctx.UserProfiles.FindAsync(user.Id);
-            var subject = _ctx.UserProfiles
-                .Include(x => x.InboxMessages)
-                .FirstOrDefault(x => x.Id == groupInvite.SubjectId);
-            
-            var watchGroup = await _ctx.WatchGroups.FindAsync(groupInvite.GroupId);
-            
-            if (profile == null)
-            {
-                return Forbid();
-            }
 
-            if (watchGroup == null || subject == null)
-            {
-                return NotFound();
-            }
+            var alreadySend = _ctx.UserProfiles
+                .Select(x => new UserProfile
+                {
+                    SendMessages = x.SendMessages,
+                })
+                .FirstOrDefault(u => u.SendMessages.Any(i =>
+                    i.ReceiverId == user.Id && i.MessageType == MessageType.WatchGroupInvite));
 
-
-            if (AlreadySend(subject.InboxMessages, user.Id))
+            if (alreadySend == null)
             {
                 return Ok();
             }
             
+            var watchGroup = await _ctx.WatchGroups.FindAsync(groupInvite.GroupId);
+            
+            if (watchGroup == null)
+            {
+                return NotFound();
+            }
             
             var invite = new WatchGroupInviteMessage
             {
                 MessageType = MessageType.WatchGroupInvite,
                 Title = $"Invite from {user.UserName}",
                 Description = $"{user.UserName} invited you to join watch group: {watchGroup.Title}",
-                Sender = profile,
+                SenderId = user.Id,
                 DateSend = DateTime.Now,
-                Receiver = subject,
+                ReceiverId = groupInvite.SubjectId,
                 GroupId = watchGroup.Id,
                 GroupTitle = watchGroup.Title,
             };
@@ -348,19 +340,7 @@ namespace NetflixMoviesRecommender.api.Controllers
 
             return Ok();
         }
-
-        private bool AlreadySend(ICollection<InboxMessage> inboxMessages, string userId)
-        {
-            foreach (var message in inboxMessages)
-            {
-                if (message.MessageType == MessageType.WatchGroupInvite && message.SenderId == userId)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        
 
         [HttpPut("invite/response")]
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
