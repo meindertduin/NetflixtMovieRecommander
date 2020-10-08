@@ -21,6 +21,7 @@ namespace NetflixMoviesRecommender.api.Controllers
         private readonly IFileHandlerService _fileHandlerService;
 
         private const int MAX_WATCHLIST_SIZE = 500_000;
+        private const int MAX_RETURN_ITEMS = 1000;
 
         public WatchlistController(IWebHostEnvironment env, 
             AppDbContext ctx,
@@ -75,7 +76,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                         refinedTitles.Add(shortTitle[0]);
                     }
 
-                    if (refinedTitles.Count > 1000)
+                    if (refinedTitles.Count > MAX_RETURN_ITEMS)
                     {
                         break;
                     }

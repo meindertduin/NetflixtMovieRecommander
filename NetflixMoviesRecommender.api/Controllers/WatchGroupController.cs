@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,9 +8,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMovieRecommander.Models.Enums;
+using NetflixMoviesRecommender.api.AppDomain.QueryResults;
+using NetflixMoviesRecommender.api.Domain;
 using NetflixMoviesRecommender.api.Forms;
 using NetflixMoviesRecommender.api.Services;
 using NinjaNye.SearchExtensions;
@@ -43,81 +47,43 @@ namespace NetflixMoviesRecommender.api.Controllers
         public async Task<IActionResult> GetUserWatchGroups()
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            var profile = _ctx.UserProfiles
-                .Where(x => x.Id == user.Id)
-                .Include(x => x.OwnedWatchGroups)
-                .ThenInclude(x => x.Members)
-                .Include(x => x.MemberWatchGroups)
+
+            var userWatchGroupsIdList = _ctx.UserProfiles
+                .Where(u => u.Id == user.Id)
+                .Select(u => new WatchGroupIdsResult
+                {
+                    OnwGroupIds = u.OwnedWatchGroups.Select(o => o.Id).ToList(),
+                    MemberGroupsIds = u.MemberWatchGroups.Select(m => m.WatchGroupId).ToList(),
+                })
                 .FirstOrDefault();
-            
-            if (profile == null)
-            {
-                return Forbid();
-            }
 
-            var watchGroups = profile.OwnedWatchGroups
-                .Where(x => x.Deleted ==false)
-                .ToList();
 
-            var memberGroupIds = profile.MemberWatchGroups
-                .Select(x => x.WatchGroupId)
-                .ToArray();
-            
-            var memberWatchGroups = _ctx.WatchGroups
-                .Where(x => x.Deleted == false)
-                .Where(x => memberGroupIds.Contains(x.Id))
-                .Include(x => x.Owner)
-                .Include(x => x.Members)
-                .ToList();
-            
-            watchGroups.AddRange(memberWatchGroups);
-            
-            var result = await MapWatchGroups(watchGroups);
-
-            return Ok(result);
-
-        }
-
-        private async Task<List<WatchGroupViewModel>> MapWatchGroups(List<WatchGroup> watchGroups)
-        {
-            var result = new List<WatchGroupViewModel>();
-
-            foreach (var watchGroup in watchGroups)
-            {
-                var members = new List<UserProfileViewModel>();
-                var owner = new UserProfileViewModel
+            var watchGroupResults = _ctx.WatchGroups.Where(w =>
+                w.Deleted == false &&
+                userWatchGroupsIdList.OnwGroupIds.Contains(w.Id) || userWatchGroupsIdList.MemberGroupsIds.Contains(w.Id)
+                ).Select(w => new WatchGroupViewModel
                 {
-                    Id = watchGroup.Owner.Id,
-                    UserName = watchGroup.Owner.UserName,
-                    AvatarUrl = "https://localhost:5001/api/profile/picture/" + watchGroup.Owner.Id,
-                };
-                foreach (var member in watchGroup.Members)
-                {
-                    var memberProfile = await _userManager.FindByIdAsync(member.UserProfileId);
-                    if (memberProfile.UserName != null)
+                    Id = w.Id,
+                    Title = w.Title,
+                    Description = w.Description,
+                    Owner = new UserProfileViewModel
                     {
-                        members.Add(new UserProfileViewModel
-                        {
-                            Id = member.UserProfileId,
-                            UserName = memberProfile.UserName,
-                            AvatarUrl = "https://localhost:5001/api/profile/picture/" + member.UserProfileId,
-                        });
-                    }
-                }
+                        Id = w.Owner.Id,
+                        UserName = w.Owner.UserName,
+                        AvatarUrl = "https://localhost:5001/api/profile/picture/" + w.Owner.Id,
+                    },
+                    Members = w.Members.Select(x => new UserProfileViewModel
+                    {
+                       Id = x.UserProfile.Id,
+                       UserName = x.UserProfile.UserName,
+                       AvatarUrl = AppHttpContext.AppBaseUrl + "/api/profile/picture/" + x.UserProfile.Id,
+                    }).ToList(),
+                    AddedNames = w.AddedNames,
+                }).ToList();
 
-                result.Add(new WatchGroupViewModel
-                {
-                    Id = watchGroup.Id,
-                    Title = watchGroup.Title,
-                    Description = watchGroup.Description,
-                    Owner = owner,
-                    Members = members,
-                    AddedNames = watchGroup.AddedNames,
-                });
-            }
-
-            return result;
+            return Ok(watchGroupResults);
         }
+        
 
         [HttpPost("watchlist-upload")]
         [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]

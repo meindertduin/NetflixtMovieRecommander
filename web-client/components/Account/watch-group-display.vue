@@ -46,7 +46,6 @@
 
       @Watch("loadedUserWatchGroups")
       onUserWatchGroupsChange(value: Array<WatchGroupModel>, oldValue:Array<WatchGroupModel>){
-        console.log(value);
         this.displayedWatchGroups = value;
       }
 
