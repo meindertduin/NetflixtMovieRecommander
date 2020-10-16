@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using NetflixMovieRecommander.Data;
 using NetflixMovieRecommander.Models;
 using NetflixMovieRecommander.Models.Enums;
@@ -301,6 +302,21 @@ namespace NetflixMoviesRecommender.api.Controllers
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
 
+            var watchGroup = _ctx.WatchGroups
+                .Select(g => new
+                {
+                    Id = g.Id,
+                    Title = g.Title,
+                    Members = g.Members.Select(x => x.UserProfileId),
+                })
+                .FirstOrDefault(g => g.Id ==groupInvite.GroupId);
+            
+            if (watchGroup == null)
+            {
+                return NotFound();
+            }
+            
+
             var alreadySend = _ctx.UserProfiles
                 .Select(x => new UserProfile
                 {
@@ -308,17 +324,10 @@ namespace NetflixMoviesRecommender.api.Controllers
                 })
                 .FirstOrDefault(u => u.SendMessages.Any(i =>
                     i.ReceiverId == user.Id && i.MessageType == MessageType.WatchGroupInvite));
-
-            if (alreadySend != null)
+            
+            if (alreadySend != null || watchGroup.Members.Any(m => m == groupInvite.SubjectId))
             {
                 return Ok();
-            }
-            
-            var watchGroup = await _ctx.WatchGroups.FindAsync(groupInvite.GroupId);
-            
-            if (watchGroup == null)
-            {
-                return NotFound();
             }
             
             var invite = new WatchGroupInviteMessage
