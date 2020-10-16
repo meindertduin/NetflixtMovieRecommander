@@ -275,20 +275,14 @@ namespace NetflixMoviesRecommender.api.Controllers
         public async Task<IActionResult> GetRecommendations([FromRoute] string id, [FromBody] WatchGroupRecommendationForm recommendationForm)
         {
             int recommendationsReturnAmount = 25;
-
-            var watchTitles = _ctx.WatchGroups
-                .AsNoTracking()
-                .Where(x => x.Id == id)
-                .Select(w => w.Title)
-                .ToArray();
             
             var randomRecommendations = _ctx.NetflixRecommendations
                 .AsNoTracking()
-                .Where(x => 
-                    recommendationForm.Type == "both" || x.Type == recommendationForm.Type &&
-                    watchTitles.All(p => x.Title != p) &&
-                    recommendationForm.AlreadyLoaded.All(p => x.Id != p) && 
-                    x.Deleted == false)
+                .Where(x =>
+                    recommendationForm.Type == "both" || x.Type == recommendationForm.Type)
+                .Where(x => _ctx.WatchItems.Where(w => w.WatchGroupId == id).Select(w => w.Title).Contains(x.Title) == false)
+                .Where(x => x.Deleted == false)
+                .Where(x => recommendationForm.AlreadyLoaded.All(a => a != x.Id))
                 .Search(x => x.Genres).Containing(recommendationForm.Genres)
                 .OrderBy(x => Guid.NewGuid()).Take(recommendationsReturnAmount)
                 .ToList();
