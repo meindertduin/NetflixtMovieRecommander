@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetflixMoviesRecommender.api", "NetflixMoviesRecommender.api\NetflixMoviesRecommender.api.csproj", "{73B57EB8-B72F-456E-961C-748C3F4C638E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.api", "Application.api\Application.api.csproj", "{73B57EB8-B72F-456E-961C-748C3F4C638E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApplicationCore", "ApplicationCore\ApplicationCore.csproj", "{FE961783-5DA8-45FD-8CD2-ACDFA762C7C0}"
 EndProject

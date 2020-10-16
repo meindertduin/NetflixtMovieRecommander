@@ -309,7 +309,7 @@ namespace NetflixMoviesRecommender.api.Controllers
                 .FirstOrDefault(u => u.SendMessages.Any(i =>
                     i.ReceiverId == user.Id && i.MessageType == MessageType.WatchGroupInvite));
 
-            if (alreadySend == null)
+            if (alreadySend != null)
             {
                 return Ok();
             }

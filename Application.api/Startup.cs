@@ -36,7 +36,7 @@ namespace NetflixMoviesRecommender.api
             AddIdentity(services);
             
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(_configuration.GetConnectionString("AppDbContext"), b => b.MigrationsAssembly("NetflixMoviesRecommender.api")));
+                options.UseSqlServer(_configuration.GetConnectionString("AppDbContext"), b => b.MigrationsAssembly("Application.api")));
 
 
 
